@@ -3,6 +3,7 @@
  */
 
 import EventEmitter from 'eventemitter3';
+import { z } from 'zod';
 import type {
   AgentConfig,
   AgentResult,
@@ -16,9 +17,12 @@ import type {
   AgentEventListener,
   AppState,
   DOMState,
+  AgentAction,
 } from './types';
+import { toolSchemas } from './types';
 import { LLMClient } from './llm/client';
 import { DOMProcessor, DOMActions } from './dom';
+import { StateManager } from '@app-agent/state-manager';
 
 /**
  * Core Agent Class
@@ -36,6 +40,12 @@ export class AppAgentCore extends EventEmitter {
   private tools: Map<string, import('./types').Tool> = new Map();
   private domProcessor: DOMProcessor;
   private domActions: DOMActions;
+  private stateManager?: StateManager;
+  private domCache: {
+    tree: ReturnType<DOMProcessor['getFlatTree']>;
+    timestamp: number;
+    checksum: string;
+  } | null = null;
 
   // Persistent state
   public task = '';
@@ -68,6 +78,19 @@ export class AppAgentCore extends EventEmitter {
 
     // Initialize built-in tools
     this.initializeTools();
+
+    // Initialize state manager if state tracking is desired
+    if (config.trackState) {
+      this.stateManager = new StateManager({
+        getAppState: config.getAppState,
+        stateChangeThreshold: 1000,
+        historyLimit: 100,
+        onStateChange: (diff, newState, oldState) => {
+          this.emit('statechange', { type: 'statechange', diff, newState, oldState });
+        },
+      });
+      this.stateManager.startTracking(1000);
+    }
   }
 
   /**
@@ -97,6 +120,9 @@ export class AppAgentCore extends EventEmitter {
       lastURL: '',
       browserState: null,
     };
+
+    // Clear DOM cache for new task
+    this.domCache = null;
 
     this.setStatus('running');
 
@@ -184,12 +210,24 @@ export class AppAgentCore extends EventEmitter {
       };
     } catch (error) {
       this.setStatus('error');
+
+      // Proper error handling with logging
+      const agentError = error instanceof Error ? error : new Error(String(error));
+
+      // Log error for debugging
+      console.error('[AppAgent] Task execution failed:', {
+        task: this.task,
+        error: agentError,
+        steps: this.history.length,
+        history: this.history.slice(-5),
+      });
+
       return {
         success: false,
-        result: 'Task execution failed',
+        result: this.getErrorMessage(error),
         steps: this.history.length,
         history: this.history,
-        error: error as Error,
+        error: agentError,
       };
     }
   }
@@ -203,8 +241,21 @@ export class AppAgentCore extends EventEmitter {
     // Get app state
     const appState = await this.config.getAppState();
 
-    // Get DOM state
-    const domTree = this.domProcessor.getFlatTree();
+    // Track state changes if manager exists
+    if (this.stateManager) {
+      await this.stateManager.checkStateChanges();
+    }
+
+    // Rebuild DOM tree only if needed
+    if (this.shouldRebuildDOM()) {
+      this.domCache = {
+        tree: this.domProcessor.getFlatTree(),
+        timestamp: Date.now(),
+        checksum: this.getDOMChecksum(),
+      };
+    }
+
+    const domTree = this.domCache.tree;
     const scrollPos = this.domActions.getScrollPosition();
 
     const domState: DOMState = {
@@ -277,23 +328,43 @@ export class AppAgentCore extends EventEmitter {
     }
 
     try {
+      // Validate parameters against Zod schema
+      const schema = toolSchemas[actionName as keyof typeof toolSchemas];
+      if (!schema) {
+        return {
+          success: false,
+          result: `No schema defined for action: ${actionName}`,
+          error: new Error(`Schema not found for action: ${actionName}`),
+        };
+      }
+
+      const validatedParams = schema.parse(actionParams);
+
       const context: ToolContext = {
         appState: await this.config.getAppState(),
         agent: this,
         signal: this.abortController.signal,
       };
 
-      const result = await tool.execute(actionParams, context);
+      const result = await tool.execute(validatedParams, context);
 
       return {
         success: true,
         result,
       };
     } catch (error) {
+      if (error instanceof z.ZodError) {
+        return {
+          success: false,
+          result: `Invalid parameters for ${actionName}: ${error.errors.map(e => `${e.path.join('.')}: ${e.message}`).join(', ')}`,
+          error,
+        };
+      }
+
       return {
         success: false,
-        result: `Action failed: ${(error as Error).message}`,
-        error: error as Error,
+        result: `Action failed: ${this.getErrorMessage(error)}`,
+        error: error instanceof Error ? error : new Error(String(error)),
       };
     }
   }
@@ -394,7 +465,7 @@ ${this.history.length > 0 ? `History:\n${this.formatHistory()}\n` : ''}
     this.tools.set('done', {
       name: 'done',
       description: 'Mark the task as complete',
-      inputSchema: {} as any,
+      inputSchema: toolSchemas.done,
       execute: async () => 'Task completed',
     });
 
@@ -402,9 +473,9 @@ ${this.history.length > 0 ? `History:\n${this.formatHistory()}\n` : ''}
     this.tools.set('wait', {
       name: 'wait',
       description: 'Wait for a specified amount of time',
-      inputSchema: {} as any,
-      execute: async (params: any) => {
-        const duration = params.duration || 1000;
+      inputSchema: toolSchemas.wait,
+      execute: async (params: z.infer<typeof toolSchemas.wait>) => {
+        const duration = params.duration;
         await this.delay(duration);
         this._states.totalWaitTime += duration;
         return `Waited ${duration}ms`;
@@ -415,13 +486,9 @@ ${this.history.length > 0 ? `History:\n${this.formatHistory()}\n` : ''}
     this.tools.set('click', {
       name: 'click',
       description: 'Click an interactive element by its index',
-      inputSchema: {} as any,
-      execute: async (params: any, context: ToolContext) => {
-        const index = params.index;
-        if (typeof index !== 'number') {
-          throw new Error('Invalid index parameter');
-        }
-
+      inputSchema: toolSchemas.click,
+      execute: async (params: z.infer<typeof toolSchemas.click>, context: ToolContext) => {
+        const { index } = params;
         const domTree = this.domProcessor.getFlatTree();
         const elementInfo = domTree.interactiveElements.get(index);
         if (!elementInfo) {
@@ -442,13 +509,9 @@ ${this.history.length > 0 ? `History:\n${this.formatHistory()}\n` : ''}
     this.tools.set('input', {
       name: 'input',
       description: 'Enter text into an input field',
-      inputSchema: {} as any,
-      execute: async (params: any, context: ToolContext) => {
+      inputSchema: toolSchemas.input,
+      execute: async (params: z.infer<typeof toolSchemas.input>, context: ToolContext) => {
         const { index, text } = params;
-        if (typeof index !== 'number' || typeof text !== 'string') {
-          throw new Error('Invalid parameters');
-        }
-
         const domTree = this.domProcessor.getFlatTree();
         const element = this.domProcessor.getElementByIndex(index, domTree);
         if (!element) {
@@ -464,13 +527,9 @@ ${this.history.length > 0 ? `History:\n${this.formatHistory()}\n` : ''}
     this.tools.set('select', {
       name: 'select',
       description: 'Select an option from a dropdown',
-      inputSchema: {} as any,
-      execute: async (params: any, context: ToolContext) => {
+      inputSchema: toolSchemas.select,
+      execute: async (params: z.infer<typeof toolSchemas.select>, context: ToolContext) => {
         const { index, value } = params;
-        if (typeof index !== 'number' || typeof value !== 'string') {
-          throw new Error('Invalid parameters');
-        }
-
         const domTree = this.domProcessor.getFlatTree();
         const element = this.domProcessor.getElementByIndex(index, domTree);
         if (!element) {
@@ -486,9 +545,9 @@ ${this.history.length > 0 ? `History:\n${this.formatHistory()}\n` : ''}
     this.tools.set('scroll', {
       name: 'scroll',
       description: 'Scroll the page in a direction',
-      inputSchema: {} as any,
-      execute: async (params: any, context: ToolContext) => {
-        const { direction = 'down', amount = 100 } = params;
+      inputSchema: toolSchemas.scroll,
+      execute: async (params: z.infer<typeof toolSchemas.scroll>, context: ToolContext) => {
+        const { direction, amount } = params;
         const result = await this.domActions.scroll(direction, amount);
         return result.result;
       },
@@ -525,9 +584,50 @@ ${this.history.length > 0 ? `History:\n${this.formatHistory()}\n` : ''}
   }
 
   /**
+   * Get error message from unknown error
+   */
+  private getErrorMessage(error: unknown): string {
+    if (error instanceof Error) {
+      return error.message;
+    }
+    return String(error);
+  }
+
+  /**
+   * Check if DOM tree needs to be rebuilt
+   */
+  private shouldRebuildDOM(): boolean {
+    if (!this.domCache) return true;
+
+    // Rebuild if URL changed
+    if (this.domCache.timestamp < Date.now() - 5000) return true;
+
+    // Check if DOM structure changed (simple checksum)
+    const currentChecksum = this.getDOMChecksum();
+    return currentChecksum !== this.domCache.checksum;
+  }
+
+  /**
+   * Get simple checksum of DOM structure
+   */
+  private getDOMChecksum(): string {
+    // Simple checksum based on interactive element count
+    const elements = document.querySelectorAll('button, input, a, select, textarea');
+    return `${elements.length}-${document.documentElement.innerHTML.length}`;
+  }
+
+  /**
    * Dispose of agent resources
    */
   dispose(): void {
+    // Clean up state manager
+    if (this.stateManager) {
+      this.stateManager.dispose();
+    }
+
+    // Clear DOM cache
+    this.domCache = null;
+
     this.abortController.abort();
     this.setStatus('disposed');
     this.removeAllListeners();

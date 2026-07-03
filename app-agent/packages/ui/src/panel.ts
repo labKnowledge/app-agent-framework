@@ -15,6 +15,8 @@ export class AppAgentPanel {
   private element: HTMLElement | null = null;
   private state: PanelState;
   private onTaskSubmit?: (task: string) => void;
+  private eventCleanupCallbacks: Array<() => void> = [];
+  private isDisposed = false;
 
   constructor(config: PanelConfig = {}) {
     this.config = {
@@ -187,7 +189,7 @@ export class AppAgentPanel {
           <input
             type="text"
             placeholder="What do you want to do?"
-            value="${this.state.task}"
+            value="${this.escapeHtml(this.state.task)}"
             class="app-agent-input"
           />
           <button class="app-agent-submit" disabled>${this.state.status === 'running' ? 'Running...' : 'Submit'}</button>
@@ -197,8 +199,8 @@ export class AppAgentPanel {
           <div class="app-agent-history">
             <div class="app-agent-history-header">History</div>
             ${this.state.history.slice(-10).map((item, i) => `
-              <div class="app-agent-history-item app-agent-history-${item.type}">
-                <span class="app-agent-history-type">${item.type.toUpperCase()}</span>
+              <div class="app-agent-history-item app-agent-history-${this.escapeHtml(item.type)}">
+                <span class="app-agent-history-type">${this.escapeHtml(item.type.toUpperCase())}</span>
                 <span class="app-agent-history-data">${this.formatHistoryData(item.data)}</span>
               </div>
             `).join('')}
@@ -213,26 +215,41 @@ export class AppAgentPanel {
    */
   private formatHistoryData(data: unknown): string {
     if (typeof data === 'string') {
-      return data;
+      return this.escapeHtml(data);
     }
     if (typeof data === 'object' && data !== null) {
-      return JSON.stringify(data).substring(0, 100);
+      return this.escapeHtml(JSON.stringify(data).substring(0, 100));
     }
-    return String(data);
+    return this.escapeHtml(String(data));
+  }
+
+  /**
+   * Escape HTML to prevent XSS attacks
+   */
+  private escapeHtml(text: string): string {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
   }
 
   /**
    * Attach event listeners
    */
   private attachEventListeners(): void {
-    if (!this.element) {
+    if (!this.element || this.isDisposed) {
       return;
     }
 
+    // Clear previous listeners to prevent memory leaks
+    this.eventCleanupCallbacks.forEach(cleanup => cleanup());
+    this.eventCleanupCallbacks = [];
+
     // Toggle event
-    this.element.addEventListener('toggle', () => {
-      this.toggle();
-    });
+    const toggleHandler = () => this.toggle();
+    this.element.addEventListener('toggle', toggleHandler);
+    this.eventCleanupCallbacks.push(() =>
+      this.element?.removeEventListener('toggle', toggleHandler)
+    );
 
     // Submit button
     const submitBtn = this.element.querySelector('.app-agent-submit');
@@ -240,21 +257,30 @@ export class AppAgentPanel {
 
     if (submitBtn && input && this.state.status !== 'running') {
       submitBtn.removeAttribute('disabled');
-      submitBtn.addEventListener('click', () => {
+
+      const submitHandler = () => {
         const task = input.value.trim();
-        if (task && this.onTaskSubmit) {
+        if (task && this.onTaskSubmit && !this.isDisposed) {
           this.onTaskSubmit(task);
         }
-      });
+      };
+      submitBtn.addEventListener('click', submitHandler);
+      this.eventCleanupCallbacks.push(() =>
+        submitBtn.removeEventListener('click', submitHandler)
+      );
 
-      input.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter' && input.value.trim()) {
+      const keypressHandler = (e: KeyboardEvent) => {
+        if (e.key === 'Enter' && input.value.trim() && !this.isDisposed) {
           const task = input.value.trim();
           if (this.onTaskSubmit) {
             this.onTaskSubmit(task);
           }
         }
-      });
+      };
+      input.addEventListener('keypress', keypressHandler);
+      this.eventCleanupCallbacks.push(() =>
+        input.removeEventListener('keypress', keypressHandler)
+      );
     }
   }
 
@@ -453,9 +479,38 @@ export class AppAgentPanel {
    * Dispose of panel
    */
   dispose(): void {
-    if (this.element) {
-      document.body.removeChild(this.element);
-      this.element = null;
+    if (this.isDisposed) {
+      return;
     }
+
+    this.isDisposed = true;
+
+    // Clean up all event listeners first to prevent memory leaks
+    this.eventCleanupCallbacks.forEach(cleanup => {
+      try {
+        cleanup();
+      } catch (error) {
+        console.warn('[AppAgentPanel] Error during event listener cleanup:', error);
+      }
+    });
+    this.eventCleanupCallbacks = [];
+
+    // Clean up injected styles
+    const styles = document.getElementById('app-agent-styles');
+    if (styles && styles.parentNode) {
+      styles.parentNode.removeChild(styles);
+    }
+
+    // Remove element from DOM
+    if (this.element && this.element.parentNode) {
+      this.element.parentNode.removeChild(this.element);
+    }
+    this.element = null;
+
+    // Clear callback reference
+    this.onTaskSubmit = undefined;
+
+    // Clear state
+    this.state.history = [];
   }
 }

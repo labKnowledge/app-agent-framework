@@ -2,7 +2,7 @@
  * Core types for App-Agent
  */
 
-import type { z } from 'zod';
+import { z } from 'zod';
 
 /**
  * Application state provided by the developer
@@ -55,6 +55,8 @@ export interface AgentConfig {
   stepDelay?: number;
   /** Language for agent responses */
   language?: string;
+  /** Whether to track state changes (default: false) */
+  trackState?: boolean;
 
   // Extensibility
   /** Custom tools to register */
@@ -171,7 +173,7 @@ export interface AgentReasoning {
   /** Next goal to achieve */
   nextGoal: string;
   /** Action to execute */
-  action: Record<string, unknown>;
+  action: AgentAction;
 }
 
 /**
@@ -259,6 +261,7 @@ export type AgentEventType =
   | 'statuschange' // Agent status changed
   | 'historychange' // History updated
   | 'activity' // Transient activity (thinking, acting, etc.)
+  | 'statechange' // Application state changed
   | 'dispose'; // Agent disposed
 
 /**
@@ -268,9 +271,56 @@ export type AgentEventPayload =
   | { type: 'statuschange'; status: AgentStatus }
   | { type: 'historychange'; history: HistoricalEvent[] }
   | { type: 'activity'; activity: string }
+  | { type: 'statechange'; diff: import('@app-agent/state-manager').StateDiff; newState: AppState; oldState: AppState }
   | { type: 'dispose' };
 
 /**
  * Event listener
  */
 export type AgentEventListener = (payload: AgentEventPayload) => void;
+
+/**
+ * Tool parameter schemas
+ */
+export const toolSchemas = {
+  done: z.object({}),
+  wait: z.object({
+    duration: z.number().min(0).default(1000),
+  }),
+  click: z.object({
+    index: z.number().int().nonnegative(),
+  }),
+  input: z.object({
+    index: z.number().int().nonnegative(),
+    text: z.string(),
+  }),
+  select: z.object({
+    index: z.number().int().nonnegative(),
+    value: z.string(),
+  }),
+  scroll: z.object({
+    direction: z.enum(['up', 'down', 'left', 'right']).default('down'),
+    amount: z.number().min(0).default(100),
+  }),
+} as const;
+
+/**
+ * Specific action types
+ */
+export type DoneAction = { done: true };
+export type WaitAction = { wait: { duration: number } };
+export type ClickAction = { click: { index: number } };
+export type InputAction = { input: { index: number; text: string } };
+export type SelectAction = { select: { index: number; value: string } };
+export type ScrollAction = { scroll: { direction?: 'up' | 'down' | 'left' | 'right'; amount?: number } };
+
+/**
+ * Agent action union type
+ */
+export type AgentAction =
+  | DoneAction
+  | WaitAction
+  | ClickAction
+  | InputAction
+  | SelectAction
+  | ScrollAction;

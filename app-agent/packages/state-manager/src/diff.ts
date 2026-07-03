@@ -31,7 +31,15 @@ function compareFields(
   newObj: Record<string, unknown>,
   path: string,
   changes: FieldChange[],
+  visited = new WeakSet(),
 ): void {
+  // Circular reference detection
+  if (visited.has(oldObj) || visited.has(newObj)) {
+    return;
+  }
+  visited.add(oldObj);
+  visited.add(newObj);
+
   const allKeys = new Set([...Object.keys(oldObj), ...Object.keys(newObj)]);
 
   for (const key of allKeys) {
@@ -39,36 +47,48 @@ function compareFields(
     const oldValue = oldObj[key];
     const newValue = newObj[key];
 
+    // Handle null/undefined
     if (oldValue === newValue) {
       continue;
     }
 
-    if (oldValue === undefined) {
-      changes.push({
-        path: fieldPath,
-        oldValue,
-        newValue,
-        type: 'added',
-      });
-    } else if (newValue === undefined) {
-      changes.push({
-        path: fieldPath,
-        oldValue,
-        newValue,
-        type: 'removed',
-      });
-    } else if (typeof oldValue === 'object' && typeof newValue === 'object' && oldValue !== null && newValue !== null) {
-      // Recurse into nested objects
-      compareFields(oldValue as Record<string, unknown>, newValue as Record<string, unknown>, fieldPath, changes);
-    } else {
-      changes.push({
-        path: fieldPath,
-        oldValue,
-        newValue,
-        type: 'updated',
-      });
+    // Handle arrays
+    if (Array.isArray(oldValue) && Array.isArray(newValue)) {
+      if (!arraysEqual(oldValue, newValue)) {
+        changes.push({
+          path: fieldPath,
+          oldValue,
+          newValue,
+          type: 'updated',
+        });
+      }
+      continue;
     }
+
+    // Handle nested objects
+    if (typeof oldValue === 'object' && typeof newValue === 'object' &&
+        oldValue !== null && newValue !== null && !Array.isArray(oldValue) && !Array.isArray(newValue)) {
+      compareFields(oldValue as Record<string, unknown>, newValue as Record<string, unknown>,
+                   fieldPath, changes, visited);
+      continue;
+    }
+
+    // Primitive values
+    changes.push({
+      path: fieldPath,
+      oldValue,
+      newValue,
+      type: oldValue === undefined ? 'added' : newValue === undefined ? 'removed' : 'updated',
+    });
   }
+}
+
+/**
+ * Check if two arrays are equal
+ */
+function arraysEqual(arr1: unknown[], arr2: unknown[]): boolean {
+  if (arr1.length !== arr2.length) return false;
+  return arr1.every((val, i) => val === arr2[i]);
 }
 
 /**

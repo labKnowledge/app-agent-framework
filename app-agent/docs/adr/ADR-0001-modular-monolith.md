@@ -23,13 +23,13 @@ Accepted
 
 ### Layer Model
 
-| Layer | Packages |
-|-------|----------|
-| Domain | `@app-agent/entities` |
+| Layer          | Packages                                                                              |
+| -------------- | ------------------------------------------------------------------------------------- |
+| Domain         | `@app-agent/entities`                                                                 |
 | Infrastructure | `state-manager`, `memory`, `llm`, `tools`, `planner`, `workflow`, `semantic-registry` |
-| Orchestration | `@app-agent/core` |
-| Presentation | `@app-agent/ui` |
-| Public API | `@app-agent/app-agent` |
+| Orchestration  | `@app-agent/core`                                                                     |
+| Presentation   | `@app-agent/ui`                                                                       |
+| Public API     | `@app-agent/app-agent`                                                                |
 
 ### Positive Consequences
 

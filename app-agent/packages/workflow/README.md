@@ -324,11 +324,13 @@ const workflow = engine.createFromTemplate(checkoutTemplate, {
 ### WorkflowEngine
 
 #### Constructor
+
 ```typescript
 new WorkflowEngine(config?: WorkflowEngineConfig)
 ```
 
 #### Methods
+
 - `registerWorkflow(workflow)` - Register workflow definition
 - `getWorkflow(id)` - Get workflow by ID
 - `createFromTemplate(template, parameters)` - Create workflow from template
@@ -341,6 +343,7 @@ new WorkflowEngine(config?: WorkflowEngineConfig)
 - `dispose()` - Dispose of engine
 
 #### Events
+
 - `workflow_event` - All workflow events
   - `started` - Workflow started
   - `completed` - Workflow completed
@@ -359,61 +362,75 @@ new WorkflowEngine(config?: WorkflowEngineConfig)
 
 ```typescript
 interface WorkflowEngineConfig {
-  maxConcurrentWorkflows?: number;    // Max concurrent executions (default: 5)
-  defaultTimeout?: number;             // Default timeout in ms (default: 300000)
-  enablePersistence?: boolean;         // Enable localStorage persistence (default: false)
-  persistenceKey?: string;             // Persistence key (default: 'workflow-engine')
-  checkpointInterval?: number;         // Checkpoint interval in ms (default: 10000)
-  enableMetrics?: boolean;             // Enable metrics collection (default: true)
+  maxConcurrentWorkflows?: number; // Max concurrent executions (default: 5)
+  defaultTimeout?: number; // Default timeout in ms (default: 300000)
+  enablePersistence?: boolean; // Enable localStorage persistence (default: false)
+  persistenceKey?: string; // Persistence key (default: 'workflow-engine')
+  checkpointInterval?: number; // Checkpoint interval in ms (default: 10000)
+  enableMetrics?: boolean; // Enable metrics collection (default: true)
 }
 ```
 
 ## Step Types
 
 ### Action Step
+
 Execute single tool or action
 
 ### Sequence Step
+
 Execute steps in order
 
 ### Parallel Step
+
 Execute steps concurrently
 
 ### Branch Step
+
 Conditional execution based on conditions
 
 ### Loop Step
+
 Iterative execution with condition or count
 
 ### Wait Step
+
 Wait for duration or condition
 
 ### Trigger Step
+
 Emit event or callback
 
 ### Subtask Step
+
 Execute nested workflow
 
 ### Compensation Step
+
 Undo previous actions (transactional compensation)
 
 ## Error Strategies
 
 ### Stop
+
 Halt workflow on first error
 
 ### Continue
+
 Skip failed step and continue
 
 ### Retry
+
 Retry failed step with backoff
 
 ### Compensate
+
 Run compensation transactions
 
 ## Use Cases
 
 ### E-commerce Checkout
+
 - Add items to cart
 - Verify inventory
 - Calculate totals
@@ -421,6 +438,7 @@ Run compensation transactions
 - Confirm order
 
 ### Form Automation
+
 - Navigate to form
 - Fill fields
 - Validate input
@@ -428,6 +446,7 @@ Run compensation transactions
 - Verify submission
 
 ### Data Processing
+
 - Extract data
 - Transform data
 - Validate data
@@ -435,6 +454,7 @@ Run compensation transactions
 - Generate report
 
 ### Multi-Page Workflows
+
 - Navigate through pages
 - Extract information
 - Make decisions

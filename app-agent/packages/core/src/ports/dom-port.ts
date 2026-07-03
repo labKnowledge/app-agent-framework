@@ -17,7 +17,7 @@ export interface DOMProcessorPort {
   dehydrateTree(tree: ReturnType<DOMProcessorPort['getFlatTree']>): string;
   getElementByIndex(
     index: number,
-    tree: ReturnType<DOMProcessorPort['getFlatTree']>,
+    tree: ReturnType<DOMProcessorPort['getFlatTree']>
   ): Element | null;
 }
 
@@ -26,10 +26,7 @@ export interface DOMActionsPort {
   clickElement(element: Element): Promise<{ result: string }>;
   inputText(element: Element, text: string): Promise<{ result: string }>;
   selectDropdown(element: Element, value: string): Promise<{ result: string }>;
-  scroll(
-    direction: 'up' | 'down' | 'left' | 'right',
-    amount: number,
-  ): Promise<{ result: string }>;
+  scroll(direction: 'up' | 'down' | 'left' | 'right', amount: number): Promise<{ result: string }>;
 }
 
 export interface DOMEnvironment {
@@ -40,7 +37,7 @@ export interface DOMEnvironment {
 
 export function buildDOMState(
   env: DOMEnvironment,
-  domTree: ReturnType<DOMProcessorPort['getFlatTree']>,
+  domTree: ReturnType<DOMProcessorPort['getFlatTree']>
 ): DOMState {
   const scrollPos = env.actions.getScrollPosition();
   return {

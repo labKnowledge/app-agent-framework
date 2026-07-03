@@ -9,15 +9,7 @@ import type {
   HistoricalEvent,
   IAgent,
   AgentTool,
-  AgentToolContext,
   DOMState,
-  AgentObservation,
-  AgentReasoning,
-  AgentActionResult,
-  AgentAction,
-  LLMMessage,
-  CoreLLMResponse,
-  LLMClientConfig,
 } from '@app-agent/entities';
 
 export type {
@@ -50,9 +42,9 @@ export { toolSchemas } from '@app-agent/entities';
 export type Tool<TParams = unknown> = AgentTool<TParams>;
 
 /** @deprecated Use AgentToolContext from @app-agent/entities */
-export type ToolContext = AgentToolContext;
+export type ToolContext = import('@app-agent/entities').AgentToolContext;
 
-export type LLMResponse = CoreLLMResponse;
+export type LLMResponse = import('@app-agent/entities').CoreLLMResponse;
 
 /**
  * Core agent configuration
@@ -92,11 +84,7 @@ export interface InternalState {
  * Event types emitted by agent
  */
 export type AgentEventType =
-  | 'statuschange'
-  | 'historychange'
-  | 'activity'
-  | 'statechange'
-  | 'dispose';
+  'statuschange' | 'historychange' | 'activity' | 'statechange' | 'dispose';
 
 /**
  * Event payload

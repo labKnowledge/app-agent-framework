@@ -7,23 +7,35 @@ import { AppAgentPanel } from '../panel';
 import type { PanelConfig } from '../types';
 
 // Mock DOM environment
-const mockElement = {
-  addEventListener: vi.fn(),
-  removeEventListener: vi.fn(),
-  dispatchEvent: vi.fn(),
-  appendChild: vi.fn(),
-  removeChild: vi.fn(),
-  querySelector: vi.fn(() => mockElement),
-  classList: {
-    add: vi.fn(),
-    remove: vi.fn(),
-  },
-  style: {},
-  parentNode: null,
-};
+function createMockElement(): Record<string, unknown> {
+  const el: Record<string, unknown> = {
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
+    dispatchEvent: vi.fn(),
+    appendChild: vi.fn(),
+    removeChild: vi.fn(),
+    removeAttribute: vi.fn(),
+    setAttribute: vi.fn(),
+    getAttribute: vi.fn(),
+    querySelector: vi.fn(),
+    querySelectorAll: vi.fn(() => []),
+    classList: {
+      add: vi.fn(),
+      remove: vi.fn(),
+    },
+    style: {},
+    parentNode: null,
+    innerHTML: '',
+    textContent: '',
+  };
+  (el.querySelector as ReturnType<typeof vi.fn>).mockReturnValue(el);
+  return el;
+}
+
+const mockElement = createMockElement();
 
 global.document = {
-  createElement: vi.fn(() => mockElement),
+  createElement: vi.fn(() => createMockElement()),
   createElementNS: vi.fn(() => mockElement),
   getElementById: vi.fn(() => mockElement),
   querySelector: vi.fn(() => mockElement),

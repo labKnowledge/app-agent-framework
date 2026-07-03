@@ -68,9 +68,7 @@ async function main() {
   try {
     console.log('=== App-Agent Example ===\n');
 
-    const result = await agent.execute(
-      'Find the best laptop under $1000 and tell me about it',
-    );
+    const result = await agent.execute('Find the best laptop under $1000 and tell me about it');
 
     console.log('\n=== Result ===');
     console.log('Success:', result.success);

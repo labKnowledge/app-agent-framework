@@ -34,20 +34,22 @@ export interface Tool<TParams = unknown, TResult = unknown> {
 /**
  * Tool executor function
  */
-export type ToolExecutor<TParams = unknown, TResult = unknown> =
-  (params: TParams, context: ToolContext) => Promise<TResult>;
+export type ToolExecutor<TParams = unknown, TResult = unknown> = (
+  params: TParams,
+  context: ToolContext
+) => Promise<TResult>;
 
 /**
  * Tool categories
  */
 export type ToolCategory =
-  | 'navigation'      // Page/view navigation
-  | 'interaction'     // Element interaction
-  | 'extraction'      // Information extraction
-  | 'manipulation'    // Data manipulation
-  | 'verification'    // Result verification
-  | 'utility'        // Helper utilities
-  | 'composite';     // Composed of other tools
+  | 'navigation' // Page/view navigation
+  | 'interaction' // Element interaction
+  | 'extraction' // Information extraction
+  | 'manipulation' // Data manipulation
+  | 'verification' // Result verification
+  | 'utility' // Helper utilities
+  | 'composite'; // Composed of other tools
 
 /**
  * Tool metadata
@@ -221,19 +223,19 @@ export interface ComposedTool {
  * Composition strategy
  */
 export type CompositionStrategy =
-  | 'sequential'     // Execute tools one after another
-  | 'parallel'        // Execute tools simultaneously
-  | 'conditional'    // Execute based on conditions
-  | 'pipeline';       // Pipe output to next input
+  | 'sequential' // Execute tools one after another
+  | 'parallel' // Execute tools simultaneously
+  | 'conditional' // Execute based on conditions
+  | 'pipeline'; // Pipe output to next input
 
 /**
  * Composition error handling
  */
 export type CompositionErrorHandling =
-  | 'stop'           // Stop on first error
-  | 'continue'       // Continue with remaining tools
-  | 'rollback'       // Rollback completed tools
-  | 'retry';         // Retry failed tool
+  | 'stop' // Stop on first error
+  | 'continue' // Continue with remaining tools
+  | 'rollback' // Rollback completed tools
+  | 'retry'; // Retry failed tool
 
 /**
  * Tool discovery query

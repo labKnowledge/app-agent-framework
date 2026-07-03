@@ -44,16 +44,12 @@ console.log(response.message.content);
 ### Streaming Responses
 
 ```typescript
-const response = await client.stream(
-  messages,
-  { temperature: 0.7 },
-  (chunk) => {
-    process.stdout.write(chunk.content);
-    if (chunk.done) {
-      console.log('\n[Stream completed]');
-    }
+const response = await client.stream(messages, { temperature: 0.7 }, (chunk) => {
+  process.stdout.write(chunk.content);
+  if (chunk.done) {
+    console.log('\n[Stream completed]');
   }
-);
+});
 ```
 
 ### Prompt Templates
@@ -153,9 +149,7 @@ Step 1: Understand the problem
 Step 2: Break it down
 Step 3: Solve step by step
 Step 4: Verify the solution`,
-  variables: [
-    { name: 'problem', required: true },
-  ],
+  variables: [{ name: 'problem', required: true }],
 };
 
 client.registerTemplate(cotTemplate);
@@ -194,35 +188,34 @@ Now solve: {{input}}`,
 ```typescript
 let fullContent = '';
 
-const response = await client.stream(
-  messages,
-  {},
-  (chunk) => {
-    fullContent += chunk.content;
-    console.log(`Received: ${chunk.content.length} chars`);
-    console.log(`Progress: ${(chunk.timing?.currentTime || 0)}ms`);
+const response = await client.stream(messages, {}, (chunk) => {
+  fullContent += chunk.content;
+  console.log(`Received: ${chunk.content.length} chars`);
+  console.log(`Progress: ${chunk.timing?.currentTime || 0}ms`);
 
-    if (chunk.done) {
-      console.log('Streaming complete!');
-      console.log(`Total duration: ${chunk.timing?.currentTime}ms`);
-    }
+  if (chunk.done) {
+    console.log('Streaming complete!');
+    console.log(`Total duration: ${chunk.timing?.currentTime}ms`);
   }
-);
+});
 ```
 
 ## Context Management Strategies
 
 ### Truncate (Default)
+
 - Keeps most recent messages within token limit
 - Prioritizes by role priority
 - Simple and fast
 
 ### Compress
+
 - Compresses message content
 - Removes redundant phrases
 - Maintains full history
 
 ### Summarize
+
 - Summarizes older messages
 - Keeps recent messages intact
 - Balances context and cost
@@ -232,11 +225,13 @@ const response = await client.stream(
 ### EnhancedLLMClient
 
 #### Constructor
+
 ```typescript
 new EnhancedLLMClient(config: LLMClientConfig)
 ```
 
 #### Methods
+
 - `complete(messages, options?)` - Send completion request
 - `stream(messages, options?, onChunk?)` - Stream completion request
 - `useTemplate(templateId, variables, options?)` - Use prompt template
@@ -247,61 +242,68 @@ new EnhancedLLMClient(config: LLMClientConfig)
 - `getHistory()` - Get conversation history
 
 #### Events
+
 - Emitted via EventEmitter for extensibility
 
 ## Configuration
 
 ### LLMClientConfig
+
 ```typescript
 interface LLMClientConfig {
-  baseURL: string;              // API base URL
-  model: string;               // Model identifier
-  apiKey?: string;            // API key
-  timeout?: number;            // Request timeout (default: 60000)
-  maxRetries?: number;         // Max retry attempts (default: 3)
-  retryDelay?: number;         // Retry delay in ms (default: 1000)
-  organizationId?: string;    // Organization ID
+  baseURL: string; // API base URL
+  model: string; // Model identifier
+  apiKey?: string; // API key
+  timeout?: number; // Request timeout (default: 60000)
+  maxRetries?: number; // Max retry attempts (default: 3)
+  retryDelay?: number; // Retry delay in ms (default: 1000)
+  organizationId?: string; // Organization ID
 }
 ```
 
 ### PromptOptimization
+
 ```typescript
 interface PromptOptimization {
-  enableCompression?: boolean;    // Enable prompt compression
-  maxTokens?: number;            // Max response tokens
-  temperature?: number;          // Response temperature (0-1)
-  topP?: number;                // Top P sampling (0-1)
-  frequencyPenalty?: number;     // Frequency penalty (-2 to 2)
-  presencePenalty?: number;      // Presence penalty (-2 to 2)
-  stopSequences?: string[];      // Stop sequences
+  enableCompression?: boolean; // Enable prompt compression
+  maxTokens?: number; // Max response tokens
+  temperature?: number; // Response temperature (0-1)
+  topP?: number; // Top P sampling (0-1)
+  frequencyPenalty?: number; // Frequency penalty (-2 to 2)
+  presencePenalty?: number; // Presence penalty (-2 to 2)
+  stopSequences?: string[]; // Stop sequences
 }
 ```
 
 ### ContextManagement
+
 ```typescript
 interface ContextManagement {
-  maxTokens: number;              // Max context tokens (default: 128000)
+  maxTokens: number; // Max context tokens (default: 128000)
   strategy: 'truncate' | 'compress' | 'summarize';
   priorities: Record<string, number>; // Message priority by role
-  summarizeThreshold: number;     // When to summarize (0-1)
+  summarizeThreshold: number; // When to summarize (0-1)
 }
 ```
 
 ## Best Practices
 
 ### Cost Optimization
+
 1. **Enable Compression** - Reduce token usage
 2. **Use Templates** - Reuse prompt structures
 3. **Monitor Costs** - Track spending regularly
 4. **Context Management** - Keep history efficient
 
 ### Performance
+
 1. **Streaming** - For faster response times
 2. **Caching** - Cache template responses
 3. **Batch Requests** - Combine when possible
 4. **Appropriate Timeouts** - Balance reliability and speed
 
 ### Quality
+
 1. **Few-Shot Learning** - Improve accuracy
 2. **Chain-of-Thought** - Better reasoning
 3. **Clear Instructions** - Better responses
@@ -329,22 +331,18 @@ for (const [model, cost] of Object.entries(costs.costByModel)) {
 async function typeResponse(text: string) {
   for (const char of text) {
     process.stdout.write(char);
-    await new Promise(resolve => setTimeout(resolve, 30));
+    await new Promise((resolve) => setTimeout(resolve, 30));
   }
 }
 
-const response = await client.stream(
-  messages,
-  {},
-  async (chunk) => {
-    if (chunk.content) {
-      await typeResponse(chunk.content);
-    }
-    if (chunk.done) {
-      console.log('\n[DONE]');
-    }
+const response = await client.stream(messages, {}, async (chunk) => {
+  if (chunk.content) {
+    await typeResponse(chunk.content);
   }
-);
+  if (chunk.done) {
+    console.log('\n[DONE]');
+  }
+});
 ```
 
 ## License

@@ -71,13 +71,13 @@ export interface PlannedTask {
  * Task types
  */
 export type TaskType =
-  | 'observation'      // Observe environment/state
-  | 'navigation'       // Navigate to location/view
-  | 'interaction'      // Interact with elements
-  | 'extraction'       // Extract information
-  | 'verification'     // Verify results
-  | 'decision'         // Make decision
-  | 'compound';        // Compound task with sub-tasks
+  | 'observation' // Observe environment/state
+  | 'navigation' // Navigate to location/view
+  | 'interaction' // Interact with elements
+  | 'extraction' // Extract information
+  | 'verification' // Verify results
+  | 'decision' // Make decision
+  | 'compound'; // Compound task with sub-tasks
 
 /**
  * Task dependency
@@ -178,12 +178,7 @@ export interface ExecutionState {
 /**
  * Execution phase
  */
-export type ExecutionPhase =
-  | 'planning'
-  | 'execution'
-  | 'verification'
-  | 'recovery'
-  | 'completion';
+export type ExecutionPhase = 'planning' | 'execution' | 'verification' | 'recovery' | 'completion';
 
 /**
  * Planner configuration

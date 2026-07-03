@@ -7,9 +7,7 @@ import { DOMProcessor, DOMActions } from '../dom';
 
 export class BrowserDOMPort implements DOMPort {
   getChecksum(): string {
-    const elements = document.querySelectorAll(
-      'button, input, a, select, textarea',
-    );
+    const elements = document.querySelectorAll('button, input, a, select, textarea');
     return `${elements.length}-${document.documentElement.innerHTML.length}`;
   }
 

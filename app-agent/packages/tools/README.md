@@ -167,38 +167,45 @@ console.log('Navigate tool stats:', {
 ## Tool Categories
 
 ### Navigation
+
 - Page/view navigation
 - URL manipulation
 - Back/forward navigation
 
 ### Interaction
+
 - Element clicking
 - Form filling
 - Text input
 - Dropdown selection
 
 ### Extraction
+
 - Text extraction
 - Data parsing
 - Element information
 - Attribute extraction
 
 ### Manipulation
+
 - DOM modification
 - Data transformation
 - Variable updates
 
 ### Verification
+
 - Result validation
 - Condition checking
 - State verification
 
 ### Utility
+
 - Wait/delay
 - Logging
 - Helper functions
 
 ### Composite
+
 - Multi-step workflows
 - Tool chains
 - Complex operations
@@ -253,6 +260,7 @@ const resilientTool = {
 ### Tool Discovery with Smart Matching
 
 The registry can recommend tools based on:
+
 - Search terms (name, description)
 - Category matching
 - Capability matching
@@ -272,6 +280,7 @@ const formTools = registry.discoverTools({
 ### Batch Execution Modes
 
 #### Sequential Mode
+
 Execute tools one after another:
 
 ```typescript
@@ -283,6 +292,7 @@ const batch = {
 ```
 
 #### Parallel Mode
+
 Execute tools simultaneously:
 
 ```typescript
@@ -298,11 +308,13 @@ const batch = {
 ### ToolRegistry
 
 #### Constructor
+
 ```typescript
 new ToolRegistry(config?: ToolRegistryConfig)
 ```
 
 #### Methods
+
 - `registerTool(tool)` - Register a tool
 - `unregisterTool(toolId)` - Unregister a tool
 - `getTool(toolId)` - Get tool by ID
@@ -318,6 +330,7 @@ new ToolRegistry(config?: ToolRegistryConfig)
 - `dispose()` - Dispose of registry
 
 #### Events
+
 - `tool_registered` - Tool registered
 - `tool_unregistered` - Tool unregistered
 - `tool_executed` - Tool execution completed
@@ -327,10 +340,10 @@ new ToolRegistry(config?: ToolRegistryConfig)
 
 ```typescript
 interface Tool<TParams, TResult> {
-  id: string;                    // Unique identifier
-  name: string;                  // Display name
-  description: string;           // What the tool does
-  category: ToolCategory;        // Tool category
+  id: string; // Unique identifier
+  name: string; // Display name
+  description: string; // What the tool does
+  category: ToolCategory; // Tool category
   inputSchema: z.ZodType<TParams>; // Parameter validation
   outputSchema?: z.ZodType<TResult>; // Result validation
   execute: (params: TParams, context: ToolContext) => Promise<TResult>;
@@ -354,18 +367,19 @@ interface Tool<TParams, TResult> {
 
 ```typescript
 interface ToolRegistryConfig {
-  autoDiscover?: boolean;      // Auto-discover tools (default: true)
-  enableCaching?: boolean;     // Enable result caching (default: true)
-  defaultTimeout?: number;     // Default timeout in ms (default: 30000)
-  enableMetrics?: boolean;     // Enable metrics collection (default: true)
-  maxCacheSize?: number;       // Max cache entries (default: 100)
-  cacheTTL?: number;          // Cache TTL in ms (default: 300000)
+  autoDiscover?: boolean; // Auto-discover tools (default: true)
+  enableCaching?: boolean; // Enable result caching (default: true)
+  defaultTimeout?: number; // Default timeout in ms (default: 30000)
+  enableMetrics?: boolean; // Enable metrics collection (default: true)
+  maxCacheSize?: number; // Max cache entries (default: 100)
+  cacheTTL?: number; // Cache TTL in ms (default: 300000)
 }
 ```
 
 ## Best Practices
 
 ### Tool Design
+
 1. **Clear Descriptions** - Help discovery system match tools
 2. **Proper Categories** - Enable better organization
 3. **Schema Validation** - Use Zod for type safety
@@ -373,12 +387,14 @@ interface ToolRegistryConfig {
 5. **Examples** - Provide usage examples
 
 ### Performance
+
 1. **Enable Caching** - For expensive operations
 2. **Batch Operations** - Combine related calls
 3. **Appropriate Timeouts** - Balance responsiveness and reliability
 4. **Monitor Metrics** - Track performance and optimize
 
 ### Security
+
 1. **Risk Levels** - Mark tools appropriately
 2. **Input Validation** - Strict schema validation
 3. **Rate Limiting** - Prevent abuse

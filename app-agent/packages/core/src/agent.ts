@@ -23,7 +23,6 @@ import type {
   InternalState,
   AgentActionResult,
   AgentTool,
-  DOMState,
 } from './types';
 import { buildMessages } from './prompt-builder';
 import { buildDOMState, createBrowserDOMEnvironment } from './ports';
@@ -145,11 +144,9 @@ export class AppAgentCore extends EventEmitter {
           },
         },
         async (prompt) => {
-          const response = await this.llmClient.invokeReAct([
-            { role: 'user', content: prompt },
-          ]);
+          const response = await this.llmClient.invokeReAct([{ role: 'user', content: prompt }]);
           return response.reasoning.memory;
-        },
+        }
       );
     }
 
@@ -306,7 +303,7 @@ export class AppAgentCore extends EventEmitter {
       observation,
       this.history,
       this.semanticRegistry.getContextSummary(),
-      memoryContext,
+      memoryContext
     );
 
     const response = await this.llmClient.invokeReAct(messages);
@@ -352,11 +349,7 @@ export class AppAgentCore extends EventEmitter {
         signal: this.abortController.signal,
       };
 
-      const result = await this.toolRegistry.executeByName(
-        actionName,
-        validatedParams,
-        context,
-      );
+      const result = await this.toolRegistry.executeByName(actionName, validatedParams, context);
 
       if (this.memoryManager) {
         this.memoryManager.addAction({
@@ -395,11 +388,10 @@ export class AppAgentCore extends EventEmitter {
     const builtins = createBuiltinTools({
       getFlatTree: () => this.domEnv.processor.getFlatTree(),
       getElementByIndex: (index, tree) =>
-        this.domEnv.processor.getElementByIndex(index, tree),
+        this.domEnv.processor.getElementByIndex(index, tree as FlatDOMTree),
       clickElement: (el) => this.domEnv.actions.clickElement(el as HTMLElement),
       inputText: (el, text) => this.domEnv.actions.inputText(el as HTMLElement, text),
-      selectDropdown: (el, value) =>
-        this.domEnv.actions.selectDropdown(el as HTMLElement, value),
+      selectDropdown: (el, value) => this.domEnv.actions.selectDropdown(el as HTMLElement, value),
       scroll: (dir, amount) => this.domEnv.actions.scroll(dir, amount),
       delay: (ms) => this.delay(ms),
       onWait: (duration) => {
@@ -452,7 +444,7 @@ export class AppAgentCore extends EventEmitter {
                       toolName: step.toolName ?? step.action ?? step.name,
                       parameters: step.parameters ?? {},
                     },
-                  },
+                  }
             )
           : [];
 
@@ -525,15 +517,20 @@ export class AppAgentCore extends EventEmitter {
         name: tool.name,
         description: tool.description,
         inputSchema: tool.inputSchema,
-        execute: async (params, context) =>
-          String(
-            await tool.execute(params, {
-              appState: context.appState as unknown as import('@app-agent/entities').AppState,
-              domState: context.domState as unknown as import('@app-agent/entities').DOMState,
-              agent: context.agent as import('@app-agent/entities').IAgent,
-              signal: context.signal,
-            }),
-          ),
+        execute: async (params, context) => {
+          const toolContext: ToolContext = {
+            appState: context.appState as unknown as Record<string, unknown>,
+            domState: context.domState as unknown as Record<string, unknown>,
+            agent: context.agent,
+            execution: {
+              executionId: this.taskId,
+              toolCallId: this.generateId(),
+              timestamp: Date.now(),
+            },
+            signal: context.signal,
+          };
+          return String(await tool.execute(params, toolContext));
+        },
       });
     }
     return map;
@@ -558,7 +555,7 @@ export class AppAgentCore extends EventEmitter {
   addSemanticMemory(
     fact: string,
     confidence: number,
-    source: import('@app-agent/memory').SemanticMemory['source'],
+    source: import('@app-agent/memory').SemanticMemory['source']
   ): void {
     this.memoryManager?.addSemanticMemory(fact, confidence, source);
   }

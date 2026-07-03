@@ -216,7 +216,11 @@ export interface EnhancedLLMClient {
   /** Send completion request */
   complete(messages: LLMMessage[], options?: PromptOptimization): Promise<LLMResponse>;
   /** Stream completion request */
-  stream(messages: LLMMessage[], options?: PromptOptimization, onChunk?: StreamingCallback): Promise<LLMResponse>;
+  stream(
+    messages: LLMMessage[],
+    options?: PromptOptimization,
+    onChunk?: StreamingCallback
+  ): Promise<LLMResponse>;
   /** Use prompt template */
   useTemplate(templateId: string, variables: Record<string, unknown>): Promise<LLMResponse>;
   /** Get cost tracking */

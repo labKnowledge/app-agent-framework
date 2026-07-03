@@ -6,9 +6,7 @@ import type { AgentObservation } from '@app-agent/entities';
 import type { LLMMessage } from '@app-agent/entities';
 
 export function buildSystemPrompt(entityContext?: string): string {
-  const entitySection = entityContext
-    ? `\nRegistered entities:\n${entityContext}\n`
-    : '';
+  const entitySection = entityContext ? `\nRegistered entities:\n${entityContext}\n` : '';
 
   return `You are an intelligent application agent that can understand and navigate web applications.
 
@@ -38,20 +36,16 @@ Available actions will be provided in the user message.`;
 export function buildUserPrompt(
   task: string,
   observation: AgentObservation,
-  history: Array<{ type: string; data: unknown }>,
+  history: Array<{ type: string; data: unknown }>
 ): string {
-  const { appState, domState, observations, stepNumber, totalWaitTime } =
-    observation;
+  const { appState, domState, observations, stepNumber, totalWaitTime } = observation;
 
   const historyText =
     history.length > 0
       ? `History:\n${history
           .slice(-3)
           .map((event) => {
-            const data =
-              typeof event.data === 'string'
-                ? event.data
-                : JSON.stringify(event.data);
+            const data = typeof event.data === 'string' ? event.data : JSON.stringify(event.data);
             return `[${event.type.toUpperCase()}] ${data}`;
           })
           .join('\n')}\n`
@@ -79,7 +73,7 @@ export function buildMessages(
   observation: AgentObservation,
   history: Array<{ type: string; data: unknown }>,
   entityContext?: string,
-  memoryContext?: string,
+  memoryContext?: string
 ): LLMMessage[] {
   let userContent = buildUserPrompt(task, observation, history);
   if (memoryContext) {

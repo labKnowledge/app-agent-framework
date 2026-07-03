@@ -9,13 +9,7 @@
  * Workflow status
  */
 export type WorkflowStatus =
-  | 'pending'
-  | 'running'
-  | 'paused'
-  | 'completed'
-  | 'failed'
-  | 'cancelled'
-  | 'waiting';
+  'pending' | 'running' | 'paused' | 'completed' | 'failed' | 'cancelled' | 'waiting';
 
 /**
  * Workflow definition
@@ -75,26 +69,21 @@ export interface WorkflowStep {
  * Step types
  */
 export type StepType =
-  | 'action'          // Execute single action
-  | 'sequence'        // Execute steps sequentially
-  | 'parallel'        // Execute steps in parallel
-  | 'branch'          // Conditional branching
-  | 'loop'            // Iterative execution
-  | 'wait'            // Wait for condition/time
-  | 'trigger'         // Trigger event/callback
-  | 'subtask'         // Execute sub-workflow
-  | 'compensation';   // Compensation transaction
+  | 'action' // Execute single action
+  | 'sequence' // Execute steps sequentially
+  | 'parallel' // Execute steps in parallel
+  | 'branch' // Conditional branching
+  | 'loop' // Iterative execution
+  | 'wait' // Wait for condition/time
+  | 'trigger' // Trigger event/callback
+  | 'subtask' // Execute sub-workflow
+  | 'compensation'; // Compensation transaction
 
 /**
  * Step action
  */
 export type StepAction =
-  | ToolAction
-  | WorkflowAction
-  | ConditionalAction
-  | LoopAction
-  | WaitAction
-  | TriggerAction;
+  ToolAction | WorkflowAction | ConditionalAction | LoopAction | WaitAction | TriggerAction;
 
 /**
  * Tool action
@@ -190,10 +179,10 @@ export interface WorkflowVariable {
  * Error strategy
  */
 export type ErrorStrategy =
-  | 'stop'            // Stop workflow on error
-  | 'continue'        // Continue to next step
-  | 'retry'           // Retry failed step
-  | 'compensate';     // Run compensation
+  | 'stop' // Stop workflow on error
+  | 'continue' // Continue to next step
+  | 'retry' // Retry failed step
+  | 'compensate'; // Run compensation
 
 /**
  * Error handling
@@ -350,7 +339,16 @@ export interface TemplateParameter {
  * Workflow event
  */
 export interface WorkflowEvent {
-  eventType: 'started' | 'completed' | 'failed' | 'paused' | 'resumed' | 'step_started' | 'step_completed' | 'step_failed' | 'checkpoint';
+  eventType:
+    | 'started'
+    | 'completed'
+    | 'failed'
+    | 'paused'
+    | 'resumed'
+    | 'step_started'
+    | 'step_completed'
+    | 'step_failed'
+    | 'checkpoint';
   executionId: string;
   timestamp: number;
   data?: unknown;

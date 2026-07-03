@@ -59,13 +59,13 @@ flowchart TB
 
 ## 5-Senses Model
 
-| Sense | Package | Capability |
-|-------|---------|------------|
-| Visual | `core/dom` | DOM perception and interaction |
-| App State | `state-manager` | State injection and change tracking |
-| Navigation | `workflow` | Multi-step journey orchestration |
-| Semantic | `semantic-registry` + `entities` | Domain entity understanding |
-| Behavioral | `memory` + `planner` | Pattern memory and task planning |
+| Sense      | Package                          | Capability                          |
+| ---------- | -------------------------------- | ----------------------------------- |
+| Visual     | `core/dom`                       | DOM perception and interaction      |
+| App State  | `state-manager`                  | State injection and change tracking |
+| Navigation | `workflow`                       | Multi-step journey orchestration    |
+| Semantic   | `semantic-registry` + `entities` | Domain entity understanding         |
+| Behavioral | `memory` + `planner`             | Pattern memory and task planning    |
 
 ## Data Flow (ReAct Loop)
 
@@ -119,7 +119,7 @@ import { AppAgent } from '@app-agent/app-agent';
 const agent = new AppAgent({
   baseURL: 'https://api.openai.com/v1',
   model: 'gpt-4',
-  getAppState: async () => ({ /* ... */ }),
+  getAppState: async () => ({/* ... */}),
   entities: { Product: productSchema },
   workflows: { checkout: checkoutWorkflow },
 });

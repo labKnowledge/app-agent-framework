@@ -49,7 +49,7 @@ export class DOMProcessor {
   private processNode(
     node: Node,
     nodes: DOMTreeNode[],
-    interactiveElements: Map<number, InteractiveElement>,
+    interactiveElements: Map<number, InteractiveElement>
   ): void {
     if (!(node instanceof HTMLElement)) {
       return;
@@ -117,7 +117,7 @@ export class DOMProcessor {
       ariaLabel: element.getAttribute('aria-label') || undefined,
       placeholder: (element as HTMLInputElement).placeholder || undefined,
       visible: this.isVisible(element),
-      enabled: !element.disabled,
+      enabled: !('disabled' in element && (element as HTMLInputElement).disabled),
       xpath: this.getXPath(element),
       selector: this.getSelector(element),
       attributes: this.extractAttributes(element),
@@ -298,7 +298,12 @@ export class DOMProcessor {
     // Check if parent is a label
     const parentLabel = element.closest('label');
     if (parentLabel) {
-      return parentLabel.textContent?.trim()?.replace(element.textContent || '', '').trim() || null;
+      return (
+        parentLabel.textContent
+          ?.trim()
+          ?.replace(element.textContent || '', '')
+          .trim() || null
+      );
     }
 
     return null;
@@ -341,7 +346,10 @@ export class DOMProcessor {
     }
 
     if (element.className) {
-      const classes = element.className.split(' ').filter(c => c).map(c => `.${c}`);
+      const classes = element.className
+        .split(' ')
+        .filter((c) => c)
+        .map((c) => `.${c}`);
       if (classes.length > 0) {
         return element.tagName.toLowerCase() + classes.join('');
       }
@@ -367,7 +375,17 @@ export class DOMProcessor {
     }
 
     const attributes: Record<string, string> = {};
-    const importantAttrs = ['id', 'name', 'href', 'src', 'alt', 'title', 'role', 'aria-label', 'type'];
+    const importantAttrs = [
+      'id',
+      'name',
+      'href',
+      'src',
+      'alt',
+      'title',
+      'role',
+      'aria-label',
+      'type',
+    ];
 
     for (const attr of importantAttrs) {
       const value = element.getAttribute(attr);
@@ -404,7 +422,7 @@ export class DOMProcessor {
         lines.push(
           `[${el.index}]${marker}<${el.type} />${el.text ? '\n    ' + el.text : ''}${
             el.placeholder ? '\n    placeholder: ' + el.placeholder : ''
-          }`,
+          }`
         );
       }
     }

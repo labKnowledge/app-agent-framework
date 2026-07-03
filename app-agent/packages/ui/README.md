@@ -59,6 +59,7 @@ new AppAgentPanel(config?: PanelConfig)
 ```
 
 **PanelConfig:**
+
 - `position`: Panel position (default: 'bottom-right')
 - `theme`: Theme - 'light', 'dark', or 'auto' (default: 'auto')
 - `defaultOpen`: Open by default (default: true)
@@ -68,33 +69,43 @@ new AppAgentPanel(config?: PanelConfig)
 #### Methods
 
 **setStatus(status: AgentStatus): void**
+
 - Update agent status
 
 **setActivity(activity: string): void**
+
 - Update current activity text
 
 **addHistoryItem(item: HistoricalEvent): void**
+
 - Add item to history display
 
 **setTask(task: string): void**
+
 - Set current task
 
 **clearHistory(): void**
+
 - Clear all history
 
 **toggle(): void**
+
 - Toggle panel open/close
 
 **open(): void**
+
 - Open panel
 
 **close(): void**
+
 - Close panel
 
 **onSubmit(callback: (task: string) => void): void**
+
 - Set callback for task submission
 
 **dispose(): void**
+
 - Clean up panel resources
 
 ### SimulatorMask
@@ -106,6 +117,7 @@ new SimulatorMask(config?: SimulatorMaskConfig)
 ```
 
 **SimulatorMaskConfig:**
+
 - `color`: Overlay color (default: 'rgba(0, 0, 0, 0.7)')
 - `opacity`: Overlay opacity (default: 0.7)
 - `zIndex`: Custom z-index (default: 999998)
@@ -114,15 +126,19 @@ new SimulatorMask(config?: SimulatorMaskConfig)
 #### Methods
 
 **show(): void**
+
 - Show the overlay
 
 **hide(): void**
+
 - Hide the overlay
 
 **moveCursor(position: CursorPosition): void**
+
 - Move cursor to position
 
 **dispose(): void**
+
 - Clean up mask resources
 
 ## License

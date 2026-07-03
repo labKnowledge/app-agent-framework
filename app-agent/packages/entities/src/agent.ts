@@ -35,13 +35,7 @@ export interface UserInfo {
 /**
  * Agent status throughout lifecycle
  */
-export type AgentStatus =
-  | 'idle'
-  | 'running'
-  | 'waiting'
-  | 'error'
-  | 'completed'
-  | 'disposed';
+export type AgentStatus = 'idle' | 'running' | 'waiting' | 'error' | 'completed' | 'disposed';
 
 /**
  * Historical event in agent execution
@@ -188,9 +182,4 @@ export type ScrollAction = {
 };
 
 export type AgentAction =
-  | DoneAction
-  | WaitAction
-  | ClickAction
-  | InputAction
-  | SelectAction
-  | ScrollAction;
+  DoneAction | WaitAction | ClickAction | InputAction | SelectAction | ScrollAction;

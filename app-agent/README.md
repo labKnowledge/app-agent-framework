@@ -15,6 +15,7 @@ App-Agent is a novel application intelligence framework that enables web applica
 ## 🎯 Vision
 
 App-Agent is like a kernel for your application:
+
 - **Built-in**: Integrated into the app, not external
 - **Aware**: Understands app state and context
 - **Capable**: Can execute complex operations
@@ -39,7 +40,7 @@ pnpm test
 ### Basic Usage
 
 ```typescript
-import { AppAgent } from '@app-agent/app-agent'
+import { AppAgent } from '@app-agent/app-agent';
 
 const agent = new AppAgent({
   getAppState: async () => ({
@@ -54,9 +55,9 @@ const agent = new AppAgent({
   workflows: {
     checkout: checkoutWorkflow,
   },
-})
+});
 
-await agent.execute('Find the best laptop under $1000 and add it to my cart')
+await agent.execute('Find the best laptop under $1000 and add it to my cart');
 ```
 
 ## 📦 Packages

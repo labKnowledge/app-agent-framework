@@ -59,12 +59,9 @@ memory.consolidateEpisode('Navigate to settings', 'success');
 const relevant = memory.getRelevantContext('settings preferences');
 
 // Add semantic memory
-memory.addSemanticMemory(
-  'Settings page contains user preferences',
-  0.9,
-  'observation',
-  ['Found settings page with options']
-);
+memory.addSemanticMemory('Settings page contains user preferences', 0.9, 'observation', [
+  'Found settings page with options',
+]);
 
 // Get statistics
 const stats = memory.getStats();
@@ -98,6 +95,7 @@ const stats = memory.getStats();
 ### Memory Consolidation
 
 Working memories are automatically consolidated to episodic memory when:
+
 - Retention time expires (5 minutes)
 - Importance threshold is met (0.5 default)
 - Task is completed or failed
@@ -105,6 +103,7 @@ Working memories are automatically consolidated to episodic memory when:
 ### Memory Retrieval
 
 Search uses multiple factors for relevance:
+
 - Importance score
 - Recency (decays over 24 hours)
 - Access frequency
@@ -116,11 +115,13 @@ Search uses multiple factors for relevance:
 ### MemoryManager
 
 #### Constructor
+
 ```typescript
 new MemoryManager(config?: MemoryManagerConfig)
 ```
 
 #### Methods
+
 - `addMemory(type, content, options)` - Add memory entry
 - `getMemory(id)` - Get memory by ID
 - `searchMemories(query)` - Search memories

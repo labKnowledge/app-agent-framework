@@ -11,15 +11,12 @@ import type {
   Workflow,
   WorkflowExecution,
   WorkflowStep,
-  WorkflowStatus,
   StepResult,
   FailedStep,
   Checkpoint,
   WorkflowEvent,
   WorkflowEngineConfig,
   StepAction,
-  ErrorHandling,
-  RetryConfig,
   WorkflowTemplate,
 } from './types';
 
@@ -112,7 +109,10 @@ export class WorkflowEngine extends EventEmitter {
   /**
    * Start workflow execution
    */
-  async startExecution(workflowId: string, inputVariables?: Record<string, unknown>): Promise<string> {
+  async startExecution(
+    workflowId: string,
+    inputVariables?: Record<string, unknown>
+  ): Promise<string> {
     const workflow = this.workflows.get(workflowId);
     if (!workflow) {
       throw new Error(`Workflow not found: ${workflowId}`);
@@ -294,7 +294,7 @@ export class WorkflowEngine extends EventEmitter {
         const step = workflow.steps[i];
 
         // Check if execution was cancelled/paused
-        if (execution.status === 'cancelled' || execution.status === 'paused') {
+        if (execution.status !== 'running') {
           break;
         }
 
@@ -374,7 +374,7 @@ export class WorkflowEngine extends EventEmitter {
   private async executeStep(
     execution: WorkflowExecution,
     step: WorkflowStep,
-    stepIndex: number,
+    _stepIndex: number
   ): Promise<void> {
     const startTime = Date.now();
 
@@ -436,10 +436,10 @@ export class WorkflowEngine extends EventEmitter {
   private async executeStepAsync(
     execution: WorkflowExecution,
     step: WorkflowStep,
-    stepIndex: number,
+    _stepIndex: number
   ): Promise<void> {
     // Execute in background without awaiting
-    this.executeStep(execution, step, stepIndex).catch(error => {
+    this.executeStep(execution, step, _stepIndex).catch((error) => {
       console.error(`Async step execution failed: ${step.id}`, error);
     });
   }
@@ -481,7 +481,10 @@ export class WorkflowEngine extends EventEmitter {
     return { executed: true, toolName: action.toolName };
   }
 
-  private async executeConditionalAction(action: any, execution: WorkflowExecution): Promise<unknown> {
+  private async executeConditionalAction(
+    action: any,
+    execution: WorkflowExecution
+  ): Promise<unknown> {
     for (const branch of action.branches) {
       if (this.evaluateCondition(branch.condition, execution.variables)) {
         return await this.executeAction(branch.action, execution);
@@ -497,11 +500,12 @@ export class WorkflowEngine extends EventEmitter {
   }
 
   private async executeLoopAction(action: any, execution: WorkflowExecution): Promise<unknown> {
-    const iterations = typeof action.iterations === 'number'
-      ? action.iterations
-      : action.iterations === 'until' && action.condition
-      ? -1 // Infinite until condition
-      : 1;
+    const iterations =
+      typeof action.iterations === 'number'
+        ? action.iterations
+        : action.iterations === 'until' && action.condition
+          ? -1 // Infinite until condition
+          : 1;
 
     const results: unknown[] = [];
 
@@ -551,14 +555,13 @@ export class WorkflowEngine extends EventEmitter {
       return true;
     }
 
-    return step.dependencies.every(depId =>
-      execution.completedSteps.includes(depId)
-    );
+    return step.dependencies.every((depId) => execution.completedSteps.includes(depId));
   }
 
   private canExecuteParallel(): boolean {
-    const runningCount = Array.from(this.executions.values())
-      .filter(e => e.status === 'running').length;
+    const runningCount = Array.from(this.executions.values()).filter(
+      (e) => e.status === 'running'
+    ).length;
 
     return runningCount < this.config.maxConcurrentWorkflows;
   }
@@ -566,7 +569,7 @@ export class WorkflowEngine extends EventEmitter {
   private async handleStepError(
     execution: WorkflowExecution,
     step: WorkflowStep,
-    failedStep: FailedStep,
+    failedStep: FailedStep
   ): Promise<void> {
     const errorHandling = step.onError;
     if (!errorHandling) {
@@ -588,16 +591,19 @@ export class WorkflowEngine extends EventEmitter {
 
       case 'compensate':
         if (errorHandling.compensationSteps) {
-          for (const compStepId of errorHandling.compensationSteps) {
-            // Find and execute compensation step
-            // Implementation depends on step lookup
+          for (const _compStepId of errorHandling.compensationSteps) {
+            void _compStepId;
+            // Compensation step execution would be implemented here
           }
         }
         break;
     }
   }
 
-  private initializeVariables(workflow: Workflow, inputVariables?: Record<string, unknown>): Record<string, unknown> {
+  private initializeVariables(
+    workflow: Workflow,
+    inputVariables?: Record<string, unknown>
+  ): Record<string, unknown> {
     const variables: Record<string, unknown> = {};
 
     for (const workflowVar of workflow.variables) {
@@ -612,7 +618,10 @@ export class WorkflowEngine extends EventEmitter {
     return variables;
   }
 
-  private mapInputVariables(parameters: Record<string, unknown>, variables: Record<string, unknown>): Record<string, unknown> {
+  private mapInputVariables(
+    parameters: Record<string, unknown>,
+    variables: Record<string, unknown>
+  ): Record<string, unknown> {
     const mapped: Record<string, unknown> = {};
 
     for (const [key, value] of Object.entries(parameters)) {
@@ -627,7 +636,11 @@ export class WorkflowEngine extends EventEmitter {
     return mapped;
   }
 
-  private applyOutputMapping(result: unknown, outputMapping: Record<string, string>, variables: Record<string, unknown>): void {
+  private applyOutputMapping(
+    result: unknown,
+    outputMapping: Record<string, string>,
+    variables: Record<string, unknown>
+  ): void {
     if (typeof result !== 'object' || result === null) {
       return;
     }
@@ -694,7 +707,7 @@ export class WorkflowEngine extends EventEmitter {
   }
 
   private delay(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
   private generateId(): string {
@@ -710,10 +723,7 @@ export class WorkflowEngine extends EventEmitter {
         executions: Array.from(this.executions.entries()),
         timestamp: Date.now(),
       };
-      await this.config.storage.set(
-        this.config.persistenceKey,
-        JSON.stringify(data),
-      );
+      await this.config.storage.set(this.config.persistenceKey, JSON.stringify(data));
     } catch (error) {
       console.error('Failed to save workflows to persistence:', error);
     }
@@ -734,7 +744,7 @@ export class WorkflowEngine extends EventEmitter {
               ...exec,
               stepResults: new Map(Object.entries(exec.stepResults || {})),
             },
-          ]),
+          ])
         );
       }
     } catch (error) {

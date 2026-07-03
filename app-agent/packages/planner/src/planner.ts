@@ -13,6 +13,7 @@ import type {
   ReplanningTrigger,
   TaskType,
   ExecutionPhase,
+  PlanStatus,
 } from './types';
 
 /**
@@ -51,10 +52,8 @@ export class TaskPlanner {
   async createPlan(
     request: string,
     context: TaskPlan['context'],
-    llmFn: (prompt: string) => Promise<string>,
+    llmFn: (prompt: string) => Promise<string>
   ): Promise<PlanningResult> {
-    const startTime = Date.now();
-
     try {
       // Build planning prompt
       const prompt = this.buildPlanningPrompt(request, context);
@@ -101,12 +100,16 @@ export class TaskPlanner {
     // Sort by priority and dependencies
     availableTasks.sort((a, b) => {
       // First prioritize failed tasks that can be retried
-      if (this.executionState.failedTasks.includes(a.id) &&
-          !this.executionState.failedTasks.includes(b.id)) {
+      if (
+        this.executionState.failedTasks.includes(a.id) &&
+        !this.executionState.failedTasks.includes(b.id)
+      ) {
         return -1;
       }
-      if (this.executionState.failedTasks.includes(b.id) &&
-          !this.executionState.failedTasks.includes(a.id)) {
+      if (
+        this.executionState.failedTasks.includes(b.id) &&
+        !this.executionState.failedTasks.includes(a.id)
+      ) {
         return 1;
       }
 
@@ -125,7 +128,7 @@ export class TaskPlanner {
   /**
    * Mark task as completed
    */
-  completeTask(taskId: string, result?: unknown): void {
+  completeTask(taskId: string, _result?: unknown): void {
     if (!this.currentPlan) {
       return;
     }
@@ -158,7 +161,7 @@ export class TaskPlanner {
     if (task) {
       // Check if we should retry
       const retryConfig = task.retryConfig;
-      const attempts = this.executionState.failedTasks.filter(t => t === taskId).length;
+      const attempts = this.executionState.failedTasks.filter((t) => t === taskId).length;
 
       if (retryConfig && attempts < retryConfig.maxAttempts) {
         task.status = 'pending'; // Allow retry
@@ -232,7 +235,7 @@ export class TaskPlanner {
     }
 
     const allTasks = this.getAllTasks(this.currentPlan.tasks);
-    const completedTasks = allTasks.filter(t => t.status === 'completed');
+    const completedTasks = allTasks.filter((t) => t.status === 'completed');
 
     return completedTasks.length === allTasks.length;
   }
@@ -265,7 +268,7 @@ export class TaskPlanner {
 User Request: ${request}
 
 Available Tools: ${context.availableTools.join(', ')}
-Constraints: ${context.constraints.map(c => c.description).join(', ')}
+Constraints: ${context.constraints.map((c) => c.description).join(', ')}
 
 ${examples}
 
@@ -373,7 +376,7 @@ Response:
       id: `task-${index + 1}`,
       description: task.description || `Task ${index + 1}`,
       status: 'pending' as PlanStatus,
-      type: task.type || 'interaction' as TaskType,
+      type: task.type || ('interaction' as TaskType),
       capabilities: task.capabilities || [],
       estimatedDuration: task.estimatedDuration || 5000,
       priority: task.priority ?? 0.5,
@@ -412,13 +415,16 @@ Response:
     return optimized;
   }
 
-  private identifyParallelTasks(tasks: PlannedTask[], dependencies: TaskPlan['dependencies']): TaskPlan['dependencies'] {
+  private identifyParallelTasks(
+    tasks: PlannedTask[],
+    dependencies: TaskPlan['dependencies']
+  ): TaskPlan['dependencies'] {
     // Analyze task dependencies to find parallel execution opportunities
     const newDependencies = [...dependencies];
 
     // Tasks with no dependencies can run in parallel
-    const tasksWithDeps = new Set(dependencies.map(d => d.to));
-    const tasksWithoutDeps = tasks.filter(t => !tasksWithDeps.has(t.id));
+    const tasksWithDeps = new Set(dependencies.map((d) => d.to));
+    const tasksWithoutDeps = tasks.filter((t) => !tasksWithDeps.has(t.id));
 
     // Mark them as parallel (no sequential dependency needed)
     for (let i = 0; i < tasksWithoutDeps.length; i++) {
@@ -468,8 +474,8 @@ Response:
     let confidence = 0.5;
 
     // Boost confidence if tasks match available tools
-    const matchingCapabilities = plan.tasks.filter(task =>
-      task.capabilities.some(cap => context.availableTools.includes(cap))
+    const matchingCapabilities = plan.tasks.filter((task) =>
+      task.capabilities.some((cap) => context.availableTools.includes(cap))
     );
     confidence += (matchingCapabilities.length / plan.tasks.length) * 0.3;
 
@@ -478,7 +484,8 @@ Response:
     confidence -= dependencyRatio * 0.1;
 
     // Boost confidence for reasonable estimated duration
-    if (plan.estimatedDuration < 300000) { // Less than 5 minutes
+    if (plan.estimatedDuration < 300000) {
+      // Less than 5 minutes
       confidence += 0.1;
     }
 
@@ -491,14 +498,14 @@ Response:
     }
 
     const allTasks = this.getAllTasks(this.currentPlan.tasks);
-    return allTasks.filter(task => {
+    return allTasks.filter((task) => {
       // Skip completed, failed, or currently running tasks
       if (task.status !== 'pending') {
         return false;
       }
 
       // Check if dependencies are satisfied
-      const taskDeps = this.currentPlan!.dependencies.filter(d => d.to === task.id);
+      const taskDeps = this.currentPlan!.dependencies.filter((d) => d.to === task.id);
       for (const dep of taskDeps) {
         if (!this.executionState.completedTasks.includes(dep.from)) {
           return false;
@@ -543,7 +550,7 @@ Response:
     }
 
     const allTasks = this.getAllTasks(this.currentPlan.tasks);
-    const completedTasks = allTasks.filter(t => t.status === 'completed');
+    const completedTasks = allTasks.filter((t) => t.status === 'completed');
     this.executionState.progress = completedTasks.length / allTasks.length;
   }
 

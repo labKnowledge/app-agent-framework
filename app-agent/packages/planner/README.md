@@ -100,11 +100,13 @@ console.log(`Progress: ${(state.progress * 100).toFixed(0)}%`);
 ### TaskPlanner
 
 #### Constructor
+
 ```typescript
 new TaskPlanner(config?: PlannerConfig)
 ```
 
 #### Methods
+
 - `createPlan(request, context, llmFn)` - Create execution plan
 - `getNextTask()` - Get next task to execute
 - `completeTask(taskId, result)` - Mark task as complete
@@ -121,12 +123,12 @@ new TaskPlanner(config?: PlannerConfig)
 
 ```typescript
 interface PlannerConfig {
-  maxDepth?: number;              // Maximum planning depth (default: 5)
-  maxSubTasks?: number;          // Maximum sub-tasks per task (default: 10)
-  planningTimeout?: number;      // Planning timeout in ms (default: 30000)
-  enableReplanning?: boolean;     // Enable adaptive replanning (default: true)
+  maxDepth?: number; // Maximum planning depth (default: 5)
+  maxSubTasks?: number; // Maximum sub-tasks per task (default: 10)
+  planningTimeout?: number; // Planning timeout in ms (default: 30000)
+  enableReplanning?: boolean; // Enable adaptive replanning (default: true)
   maxReplanningAttempts?: number; // Maximum replanning attempts (default: 3)
-  useFewShot?: boolean;          // Use few-shot examples (default: true)
+  useFewShot?: boolean; // Use few-shot examples (default: true)
   strategy?: 'hierarchical' | 'linear' | 'adaptive'; // Planning strategy (default: 'adaptive')
 }
 ```
@@ -136,11 +138,7 @@ interface PlannerConfig {
 ### Simple Navigation Task
 
 ```typescript
-const plan = await planner.createPlan(
-  'Go to settings and change theme to dark',
-  context,
-  llmFn
-);
+const plan = await planner.createPlan('Go to settings and change theme to dark', context, llmFn);
 
 // Generates tasks like:
 // 1. Navigate to settings

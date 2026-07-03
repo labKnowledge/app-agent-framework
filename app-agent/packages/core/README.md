@@ -64,6 +64,7 @@ new AppAgentCore(config: AgentConfig)
 ```
 
 **AgentConfig:**
+
 - `baseURL`: LLM API base URL
 - `model`: Model identifier
 - `apiKey`: API key (optional)
@@ -79,24 +80,30 @@ new AppAgentCore(config: AgentConfig)
 #### Methods
 
 **execute(task: string): Promise<AgentResult>**
+
 - Execute a task with natural language
 - Returns result with success status and history
 
 **registerTool(tool: Tool): void**
+
 - Register a custom tool
 
 **unregisterTool(name: string): void**
+
 - Unregister a tool
 
 **getTools(): Map<string, Tool>**
+
 - Get all registered tools
 
 **dispose(): void**
+
 - Clean up agent resources
 
 #### Events
 
 **statuschange**: Emitted when agent status changes
+
 ```typescript
 agent.on('statuschange', ({ status }) => {
   // status: 'idle' | 'running' | 'waiting' | 'error' | 'completed' | 'disposed'
@@ -104,6 +111,7 @@ agent.on('statuschange', ({ status }) => {
 ```
 
 **historychange**: Emitted when history is updated
+
 ```typescript
 agent.on('historychange', ({ history }) => {
   // history: HistoricalEvent[]
@@ -111,6 +119,7 @@ agent.on('historychange', ({ history }) => {
 ```
 
 **activity**: Emitted for transient activity updates
+
 ```typescript
 agent.on('activity', ({ activity }) => {
   // activity: string (e.g., 'Thinking...', 'Executing: click')
@@ -118,6 +127,7 @@ agent.on('activity', ({ activity }) => {
 ```
 
 **dispose**: Emitted when agent is disposed
+
 ```typescript
 agent.on('dispose', () => {
   // Agent cleaned up

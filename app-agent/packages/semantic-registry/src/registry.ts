@@ -75,14 +75,14 @@ export class SemanticRegistry extends EventEmitter {
 
     if (query.filters) {
       results = results.filter((instance) =>
-        query.filters!.every((filter) => this.matchesFilter(instance, filter)),
+        query.filters!.every((filter) => this.matchesFilter(instance, filter))
       );
     }
 
     if (query.search) {
       const term = query.search.toLowerCase();
       results = results.filter((instance) =>
-        JSON.stringify(instance.properties).toLowerCase().includes(term),
+        JSON.stringify(instance.properties).toLowerCase().includes(term)
       );
     }
 

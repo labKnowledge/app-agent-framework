@@ -4,7 +4,8 @@
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { StateManager } from '../manager';
-import type { StateManagerConfig, AppState } from '../types';
+import type { AppState } from '@app-agent/entities';
+import type { StateManagerConfig } from '../types';
 
 describe('StateManager', () => {
   let stateManager: StateManager;
@@ -107,7 +108,7 @@ describe('StateManager', () => {
       const diff = stateManager.getStateDiff(oldState, newState);
 
       expect(diff.hasChanges).toBe(true);
-      expect(diff.changes.some(c => c.path === 'currentView')).toBe(true);
+      expect(diff.changes.some((c) => c.path === 'currentView')).toBe(true);
     });
 
     it('should detect user changes', () => {
@@ -134,17 +135,19 @@ describe('StateManager', () => {
       const diff = stateManager.getStateDiff(oldState, newState);
 
       expect(diff.hasChanges).toBe(true);
-      expect(diff.changes.some(c => c.path.startsWith('user'))).toBe(true);
+      expect(diff.changes.some((c) => c.path.startsWith('user'))).toBe(true);
     });
   });
 
   describe('History Management', () => {
     it('should maintain state history', async () => {
-      await stateManager.getCurrentState();
+      stateManager.startTracking(1000);
+      await new Promise((resolve) => setImmediate(resolve));
       const history = stateManager.getHistory();
 
       expect(history.entries).toBeDefined();
       expect(history.totalCaptured).toBeGreaterThan(0);
+      stateManager.stopTracking();
     });
 
     it('should enforce history limit', async () => {
@@ -265,7 +268,7 @@ describe('StateManager Diff Algorithm', () => {
     const diff = stateManager.getStateDiff(oldState, newState);
 
     expect(diff.hasChanges).toBe(true);
-    expect(diff.changes.some(c => c.path === 'user.attributes.theme')).toBe(true);
+    expect(diff.changes.some((c) => c.path === 'user.attributes.theme')).toBe(true);
   });
 
   it('should handle arrays correctly', () => {
@@ -292,7 +295,7 @@ describe('StateManager Diff Algorithm', () => {
     const diff = stateManager.getStateDiff(oldState, newState);
 
     expect(diff.hasChanges).toBe(true);
-    expect(diff.changes.some(c => c.path === 'context.items')).toBe(true);
+    expect(diff.changes.some((c) => c.path === 'context.items')).toBe(true);
   });
 
   it('should handle circular references safely', () => {
@@ -331,7 +334,7 @@ describe('StateManager Diff Algorithm', () => {
     const diff = stateManager.getStateDiff(oldState, newState);
 
     expect(diff.hasChanges).toBe(true);
-    expect(diff.changes.some(c => c.type === 'added')).toBe(true);
+    expect(diff.changes.some((c) => c.type === 'added')).toBe(true);
   });
 
   it('should detect removed fields', () => {
@@ -360,6 +363,6 @@ describe('StateManager Diff Algorithm', () => {
     const diff = stateManager.getStateDiff(oldState, newState);
 
     expect(diff.hasChanges).toBe(true);
-    expect(diff.changes.some(c => c.type === 'removed')).toBe(true);
+    expect(diff.changes.some((c) => c.type === 'removed')).toBe(true);
   });
 });

@@ -61,7 +61,7 @@ export type EntityPropertyType =
   | 'enum'
   | 'array'
   | 'object'
-  | 'reference'  // Reference to another entity
+  | 'reference' // Reference to another entity
   | 'computed'; // Computed from other properties
 
 /**

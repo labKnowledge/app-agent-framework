@@ -4,7 +4,7 @@
  * Execute actions on DOM elements
  */
 
-import type { InteractiveElement, ElementInteraction, ScrollPosition } from './types';
+import type { ElementInteraction, ScrollPosition } from './types';
 
 /**
  * DOM Actions Class
@@ -138,7 +138,9 @@ export class DOMActions {
       element.focus();
 
       // Find and select option
-      const option = Array.from(element.options).find(opt => opt.value === value || opt.text === value);
+      const option = Array.from(element.options).find(
+        (opt) => opt.value === value || opt.text === value
+      );
 
       if (!option) {
         return {
@@ -167,7 +169,10 @@ export class DOMActions {
   /**
    * Scroll page
    */
-  async scroll(direction: 'up' | 'down' | 'left' | 'right', amount = 100): Promise<ElementInteraction> {
+  async scroll(
+    direction: 'up' | 'down' | 'left' | 'right',
+    amount = 100
+  ): Promise<ElementInteraction> {
     try {
       const currentX = window.scrollX || document.documentElement.scrollLeft;
       const currentY = window.scrollY || document.documentElement.scrollTop;
@@ -261,7 +266,7 @@ export class DOMActions {
    * Check if element is interactable
    */
   private isInteractable(element: HTMLElement): boolean {
-    if (element.disabled) {
+    if ('disabled' in element && (element as HTMLInputElement).disabled) {
       return false;
     }
 
@@ -313,6 +318,6 @@ export class DOMActions {
    * Delay helper
    */
   private delay(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 }

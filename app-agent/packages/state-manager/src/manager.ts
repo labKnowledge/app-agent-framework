@@ -26,7 +26,7 @@ export class StateManager {
     entries: [],
     totalCaptured: 0,
   };
-  private checkInterval: NodeJS.Timeout | null = null;
+  private checkInterval: ReturnType<typeof setInterval> | null = null;
 
   constructor(config: StateManagerConfig) {
     this.config = config;
@@ -54,7 +54,7 @@ export class StateManager {
     }, intervalMs);
 
     // Initial state capture
-    this.getCurrentState().then(state => {
+    this.getCurrentState().then((state) => {
       this.addToHistory(state, true);
     });
   }

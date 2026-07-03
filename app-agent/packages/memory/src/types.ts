@@ -37,10 +37,7 @@ export interface MemoryEntry {
 /**
  * Memory content based on type
  */
-export type MemoryContent =
-  | WorkingMemory
-  | EpisodicMemory
-  | SemanticMemory;
+export type MemoryContent = WorkingMemory | EpisodicMemory | SemanticMemory;
 
 /**
  * Working memory - Current task context

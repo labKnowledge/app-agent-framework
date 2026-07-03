@@ -9,6 +9,7 @@ Week 2 focuses on implementing advanced AI capabilities that move beyond basic a
 ### 1. Enhanced Memory System (`@app-agent/memory`)
 
 **Research-Based Implementation:**
+
 - **Working Memory** - Short-term context tracking (inspired by cognitive science)
 - **Episodic Memory** - Long-term experience storage (like human episodic memory)
 - **Semantic Memory** - Knowledge and fact retention (similar to semantic networks)
@@ -16,6 +17,7 @@ Week 2 focuses on implementing advanced AI capabilities that move beyond basic a
 - **Automatic Consolidation** - Moving from short-term to long-term storage
 
 **Key Features:**
+
 ```typescript
 // Working memory for current tasks
 memory.updateWorkingMemory({
@@ -45,6 +47,7 @@ const relevant = memory.getRelevantContext('checkout process');
 ```
 
 **Advanced Capabilities:**
+
 - **Importance Scoring** - Automatic importance calculation based on outcome, duration, complexity
 - **Contradiction Detection** - Identifies conflicting semantic memories
 - **Memory Compression** - Efficient storage and retrieval
@@ -54,6 +57,7 @@ const relevant = memory.getRelevantContext('checkout process');
 ### 2. Task Planning System (`@app-agent/planner`)
 
 **Research-Based Implementation:**
+
 - **Intelligent Decomposition** - Breaking complex tasks into sub-tasks (like hierarchical planning)
 - **Dependency Management** - Sequential, parallel, and conditional dependencies
 - **Adaptive Replanning** - Dynamic adjustment when facing obstacles (like reactive planning)
@@ -61,6 +65,7 @@ const relevant = memory.getRelevantContext('checkout process');
 - **Few-Shot Learning** - Using examples for better planning
 
 **Key Features:**
+
 ```typescript
 const planner = new TaskPlanner({
   enableReplanning: true,
@@ -73,9 +78,7 @@ const plan = await planner.createPlan(
   'Find the best laptop under $1000 and add it to cart',
   {
     availableTools: ['navigate', 'click', 'input', 'observe'],
-    constraints: [
-      { type: 'time', description: 'Complete within 2 minutes' }
-    ],
+    constraints: [{ type: 'time', description: 'Complete within 2 minutes' }],
     preferences: {
       speed: 'normal',
       riskTolerance: 'medium',
@@ -94,6 +97,7 @@ while ((task = planner.getNextTask())) {
 ```
 
 **Advanced Capabilities:**
+
 - **Task Types** - observation, navigation, interaction, extraction, verification, decision, compound
 - **Priority Management** - Intelligent task ordering
 - **Retry Logic** - Configurable retry with exponential backoff
@@ -104,6 +108,7 @@ while ((task = planner.getNextTask())) {
 ### 3. Core Agent Integration
 
 **Memory Integration:**
+
 ```typescript
 const agent = new AppAgentCore({
   // ... other config
@@ -124,6 +129,7 @@ const agent = new AppAgentCore({
 ```
 
 **Planning Integration:**
+
 - Task planner can be integrated with core agent
 - Provides structured approach to complex requests
 - Enables better error recovery and adaptation
@@ -176,9 +182,13 @@ Based on research into automated planning and AI agent architectures:
 ### 1. Multi-Factor Relevance Scoring
 
 ```typescript
-relevance = base + (importance * 0.2) + (recency * 0.1) +
-            (access_frequency * 0.1) + (term_match * 0.3) +
-            (tag_match * 0.2)
+relevance =
+  base +
+  importance * 0.2 +
+  recency * 0.1 +
+  access_frequency * 0.1 +
+  term_match * 0.3 +
+  tag_match * 0.2;
 ```
 
 ### 2. Automatic Memory Consolidation
@@ -204,11 +214,13 @@ relevance = base + (importance * 0.2) + (recency * 0.1) +
 ## 📈 Performance Improvements
 
 ### Memory System
+
 - **Retrieval Speed** - O(1) for ID-based, O(n) for search with relevance scoring
 - **Storage Efficiency** - Automatic compression and limits
 - **Consolidation** - Background process, minimal overhead
 
 ### Planning System
+
 - **Planning Speed** - < 1 second for typical tasks
 - **Execution Optimization** - Parallel execution where possible
 - **Memory Usage** - Efficient task storage and tracking
@@ -216,6 +228,7 @@ relevance = base + (importance * 0.2) + (recency * 0.1) +
 ## 🎯 Real-World Impact
 
 ### Before Week 2:
+
 - ❌ No memory of past interactions
 - ❌ Every task starts from scratch
 - ❌ No learning from experience
@@ -223,6 +236,7 @@ relevance = base + (importance * 0.2) + (recency * 0.1) +
 - ❌ Limited error recovery
 
 ### After Week 2:
+
 - ✅ Remembers past interactions
 - ✅ Learns from experience
 - ✅ Retrieves relevant context
@@ -233,16 +247,19 @@ relevance = base + (importance * 0.2) + (recency * 0.1) +
 ## 🔮 Next Steps
 
 ### Immediate (Week 2 Remaining):
+
 1. **Workflow Orchestration Engine** - Complex multi-step processes
 2. **Advanced Tool System** - Tool composition and discovery
 3. **Enhanced LLM Integration** - Better prompts and context management
 
 ### Week 3:
+
 1. **Semantic Entity Registry** - Domain-level understanding
 2. **Multi-Agent System** - Specialized agent coordination
 3. **Learning System** - Pattern optimization
 
 ### Week 4:
+
 1. **UI Enhancements** - Better visual feedback
 2. **Framework Integrations** - React, Vue, Svelte
 3. **Performance Optimization** - Bundle size and speed
@@ -274,6 +291,7 @@ app-agent/
 ## ✅ Success Criteria
 
 ### Memory System
+
 - ✅ Stores working memory (current task context)
 - ✅ Consolidates to episodic memory (past experiences)
 - ✅ Manages semantic memory (learned facts)
@@ -282,6 +300,7 @@ app-agent/
 - ✅ Optional persistence
 
 ### Planning System
+
 - ✅ Decomposes complex tasks into sub-tasks
 - ✅ Manages task dependencies
 - ✅ Handles execution failures with retry
@@ -290,6 +309,7 @@ app-agent/
 - ✅ Real-time progress tracking
 
 ### Integration
+
 - ✅ Memory integrated with core agent
 - ✅ Observations recorded automatically
 - ✅ Actions tracked for episodic memory
@@ -304,6 +324,7 @@ We've successfully implemented two major advanced AI capabilities:
 2. **Task Planning System** - Intelligent task decomposition and execution management
 
 These capabilities transform the agent from a simple automation tool into an intelligent, adaptive system that can:
+
 - Learn from past experiences
 - Plan complex multi-step tasks
 - Adapt to changing circumstances

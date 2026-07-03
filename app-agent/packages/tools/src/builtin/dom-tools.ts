@@ -3,23 +3,17 @@
  */
 
 import { toolSchemas } from '@app-agent/entities';
-import type { z } from 'zod';
 import type { Tool } from '../types';
 
 export interface BuiltinToolDeps {
-  getFlatTree: () => {
-    interactiveElements: Map<number, { selector: string }>;
-  };
-  getElementByIndex: (
-    index: number,
-    tree: ReturnType<BuiltinToolDeps['getFlatTree']>,
-  ) => Element | null;
+  getFlatTree: () => unknown;
+  getElementByIndex: (index: number, tree: unknown) => Element | null;
   clickElement: (element: Element) => Promise<{ result: string }>;
   inputText: (element: Element, text: string) => Promise<{ result: string }>;
   selectDropdown: (element: Element, value: string) => Promise<{ result: string }>;
   scroll: (
     direction: 'up' | 'down' | 'left' | 'right',
-    amount: number,
+    amount: number
   ) => Promise<{ result: string }>;
   delay: (ms: number) => Promise<void>;
   onWait?: (duration: number) => void;
@@ -33,6 +27,10 @@ function baseMetadata(name: string) {
     riskLevel: 'low' as const,
   };
 }
+
+type DomTree = {
+  interactiveElements: Map<number, { selector: string }>;
+};
 
 export function createBuiltinTools(deps: BuiltinToolDeps): Tool[] {
   return [
@@ -51,10 +49,11 @@ export function createBuiltinTools(deps: BuiltinToolDeps): Tool[] {
       description: 'Wait for a specified amount of time',
       category: 'utility',
       inputSchema: toolSchemas.wait,
-      execute: async (params: z.infer<typeof toolSchemas.wait>) => {
-        await deps.delay(params.duration);
-        deps.onWait?.(params.duration);
-        return `Waited ${params.duration}ms`;
+      execute: async (params) => {
+        const { duration } = toolSchemas.wait.parse(params);
+        await deps.delay(duration);
+        deps.onWait?.(duration);
+        return `Waited ${duration}ms`;
       },
       metadata: baseMetadata('wait'),
     },
@@ -64,13 +63,14 @@ export function createBuiltinTools(deps: BuiltinToolDeps): Tool[] {
       description: 'Click an interactive element by its index',
       category: 'interaction',
       inputSchema: toolSchemas.click,
-      execute: async (params: z.infer<typeof toolSchemas.click>) => {
-        const tree = deps.getFlatTree();
-        const elementInfo = tree.interactiveElements.get(params.index);
+      execute: async (params) => {
+        const { index } = toolSchemas.click.parse(params);
+        const tree = deps.getFlatTree() as DomTree;
+        const elementInfo = tree.interactiveElements.get(index);
         if (!elementInfo) {
-          throw new Error(`Element not found at index ${params.index}`);
+          throw new Error(`Element not found at index ${index}`);
         }
-        const element = deps.getElementByIndex(params.index, tree);
+        const element = deps.getElementByIndex(index, tree);
         if (!element) {
           throw new Error(`Element not found in DOM: ${elementInfo.selector}`);
         }
@@ -85,13 +85,14 @@ export function createBuiltinTools(deps: BuiltinToolDeps): Tool[] {
       description: 'Enter text into an input field',
       category: 'interaction',
       inputSchema: toolSchemas.input,
-      execute: async (params: z.infer<typeof toolSchemas.input>) => {
-        const tree = deps.getFlatTree();
-        const element = deps.getElementByIndex(params.index, tree);
+      execute: async (params) => {
+        const { index, text } = toolSchemas.input.parse(params);
+        const tree = deps.getFlatTree() as DomTree;
+        const element = deps.getElementByIndex(index, tree);
         if (!element) {
-          throw new Error(`Element not found at index ${params.index}`);
+          throw new Error(`Element not found at index ${index}`);
         }
-        const result = await deps.inputText(element, params.text);
+        const result = await deps.inputText(element, text);
         return result.result;
       },
       metadata: baseMetadata('input'),
@@ -102,13 +103,14 @@ export function createBuiltinTools(deps: BuiltinToolDeps): Tool[] {
       description: 'Select an option from a dropdown',
       category: 'interaction',
       inputSchema: toolSchemas.select,
-      execute: async (params: z.infer<typeof toolSchemas.select>) => {
-        const tree = deps.getFlatTree();
-        const element = deps.getElementByIndex(params.index, tree);
+      execute: async (params) => {
+        const { index, value } = toolSchemas.select.parse(params);
+        const tree = deps.getFlatTree() as DomTree;
+        const element = deps.getElementByIndex(index, tree);
         if (!element) {
-          throw new Error(`Element not found at index ${params.index}`);
+          throw new Error(`Element not found at index ${index}`);
         }
-        const result = await deps.selectDropdown(element, params.value);
+        const result = await deps.selectDropdown(element, value);
         return result.result;
       },
       metadata: baseMetadata('select'),
@@ -119,8 +121,9 @@ export function createBuiltinTools(deps: BuiltinToolDeps): Tool[] {
       description: 'Scroll the page in a direction',
       category: 'interaction',
       inputSchema: toolSchemas.scroll,
-      execute: async (params: z.infer<typeof toolSchemas.scroll>) => {
-        const result = await deps.scroll(params.direction, params.amount);
+      execute: async (params) => {
+        const { direction, amount } = toolSchemas.scroll.parse(params);
+        const result = await deps.scroll(direction, amount);
         return result.result;
       },
       metadata: baseMetadata('scroll'),

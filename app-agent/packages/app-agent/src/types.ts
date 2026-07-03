@@ -2,11 +2,7 @@
  * Public facade configuration
  */
 
-import type {
-  AppState,
-  EntitySchema,
-  WorkflowDefinition,
-} from '@app-agent/entities';
+import type { AppState, EntitySchema, WorkflowDefinition } from '@app-agent/entities';
 import type { AgentConfig } from '@app-agent/core';
 
 export interface AppAgentConfig extends Omit<AgentConfig, 'entitySchemas' | 'customWorkflows'> {

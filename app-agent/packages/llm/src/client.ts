@@ -6,15 +6,17 @@
  */
 
 import EventEmitter from 'eventemitter3';
-import type { AgentReasoning, CoreLLMResponse, LLMMessage as CoreLLMMessage } from '@app-agent/entities';
+import type {
+  AgentReasoning,
+  CoreLLMResponse,
+  LLMMessage as CoreLLMMessage,
+} from '@app-agent/entities';
 import type {
   LLMMessage,
   LLMResponse,
   LLMClientConfig,
   PromptTemplate,
   PromptOptimization,
-  ChainOfThoughtConfig,
-  FewShotConfig,
   StreamingCallback,
   CostTracking,
   ContextManagement,
@@ -36,7 +38,7 @@ export class EnhancedLLMClient extends EventEmitter {
     this.config = {
       baseURL: config.baseURL,
       model: config.model,
-      apiKey: config.apiKey,
+      apiKey: config.apiKey ?? '',
       timeout: config.timeout ?? 60000,
       maxRetries: config.maxRetries ?? 3,
       retryDelay: config.retryDelay ?? 1000,
@@ -130,7 +132,7 @@ export class EnhancedLLMClient extends EventEmitter {
   async stream(
     messages: LLMMessage[],
     options?: PromptOptimization,
-    onChunk?: StreamingCallback,
+    onChunk?: StreamingCallback
   ): Promise<LLMResponse> {
     const startTime = Date.now();
     let fullContent = '';
@@ -140,22 +142,18 @@ export class EnhancedLLMClient extends EventEmitter {
       const optimizedMessages = this.optimizeMessages(messages, options);
 
       // Make streaming request
-      const response = await this.makeStreamingRequest(
-        optimizedMessages,
-        options,
-        (chunk) => {
-          fullContent += chunk.content;
-          if (onChunk) {
-            onChunk({
-              ...chunk,
-              timing: {
-                startTime,
-                currentTime: Date.now(),
-              },
-            });
-          }
-        },
-      );
+      const response = await this.makeStreamingRequest(optimizedMessages, options, (chunk) => {
+        fullContent += chunk.content;
+        if (onChunk) {
+          onChunk({
+            ...chunk,
+            timing: {
+              startTime,
+              currentTime: Date.now(),
+            },
+          });
+        }
+      });
 
       // Set full content
       response.message.content = fullContent;
@@ -188,7 +186,7 @@ export class EnhancedLLMClient extends EventEmitter {
   async useTemplate(
     templateId: string,
     variables: Record<string, unknown>,
-    options?: PromptOptimization,
+    options?: PromptOptimization
   ): Promise<LLMResponse> {
     const template = this.templates.get(templateId);
     if (!template) {
@@ -198,9 +196,7 @@ export class EnhancedLLMClient extends EventEmitter {
     // Build prompt from template
     const prompt = this.buildPromptFromTemplate(template, variables);
 
-    const messages: LLMMessage[] = [
-      { role: 'user', content: prompt },
-    ];
+    const messages: LLMMessage[] = [{ role: 'user', content: prompt }];
 
     return this.complete(messages, options);
   }
@@ -297,8 +293,8 @@ export class EnhancedLLMClient extends EventEmitter {
 
   private truncateMessages(messages: LLMMessage[], ratio: number): LLMMessage[] {
     // Keep system message, truncate others by priority
-    const system = messages.find(m => m.role === 'system');
-    const others = messages.filter(m => m.role !== 'system');
+    const system = messages.find((m) => m.role === 'system');
+    const others = messages.filter((m) => m.role !== 'system');
 
     const keepCount = Math.max(1, Math.floor(others.length * ratio));
     const kept = others.slice(-keepCount);
@@ -308,7 +304,7 @@ export class EnhancedLLMClient extends EventEmitter {
 
   private compressMessages(messages: LLMMessage[]): LLMMessage[] {
     // Compress message content by removing redundancy
-    return messages.map(msg => ({
+    return messages.map((msg) => ({
       ...msg,
       content: this.compressText(msg.content),
     }));
@@ -322,10 +318,7 @@ export class EnhancedLLMClient extends EventEmitter {
 
     const summary = this.createSummary(older);
 
-    return [
-      { role: 'system', content: `[Previous conversation summary]\n${summary}` },
-      ...recent,
-    ];
+    return [{ role: 'system', content: `[Previous conversation summary]\n${summary}` }, ...recent];
   }
 
   private getSystemPrompt(options?: PromptOptimization): string {
@@ -354,7 +347,7 @@ When responding:
 
   private buildPromptFromTemplate(
     template: PromptTemplate,
-    variables: Record<string, unknown>,
+    variables: Record<string, unknown>
   ): string {
     let content = template.content;
 
@@ -382,12 +375,7 @@ When responding:
     let compressed = text.replace(/\s+/g, ' ').trim();
 
     // Remove redundant phrases
-    const redundant = [
-      'I would like to',
-      'I want to',
-      'Can you please',
-      'Is it possible to',
-    ];
+    const redundant = ['I would like to', 'I want to', 'Can you please', 'Is it possible to'];
 
     for (const phrase of redundant) {
       compressed = compressed.replace(new RegExp(phrase, 'gi'), '');
@@ -398,9 +386,7 @@ When responding:
 
   private createSummary(messages: LLMMessage[]): string {
     // Create a simple summary of conversation
-    const summary = messages
-      .map(m => `${m.role}: ${m.content.substring(0, 100)}...`)
-      .join('\n');
+    const summary = messages.map((m) => `${m.role}: ${m.content.substring(0, 100)}...`).join('\n');
 
     return summary;
   }
@@ -479,14 +465,14 @@ When responding:
         evaluationPreviousGoal: 'Unable to parse evaluation',
         memory: content,
         nextGoal: 'Continue with task',
-        action: {},
-      } as import('@app-agent/entities').AgentReasoning['action'];
+        action: { done: true },
+      };
     }
   }
 
   private async makeRequest(
     messages: LLMMessage[],
-    options?: PromptOptimization,
+    _options?: PromptOptimization
   ): Promise<LLMResponse> {
     // This would make actual API call
     // For now, return mock response
@@ -508,7 +494,7 @@ When responding:
   private async makeStreamingRequest(
     messages: LLMMessage[],
     options?: PromptOptimization,
-    onChunk?: (chunk: { content: string; done: boolean }) => void,
+    onChunk?: (chunk: { content: string; done: boolean }) => void
   ): Promise<LLMResponse> {
     // This would make actual streaming API call
     // For now, simulate streaming
@@ -552,17 +538,17 @@ When responding:
     const promptPrice = 0.000001; // $1 per 1M tokens
     const completionPrice = 0.000002; // $2 per 1M tokens
 
-    return (
-      (usage.promptTokens * promptPrice) +
-      (usage.completionTokens * completionPrice)
-    );
+    return usage.promptTokens * promptPrice + usage.completionTokens * completionPrice;
   }
 
-  private updateCostTracking(usage: {
-    promptTokens: number;
-    completionTokens: number;
-    totalTokens: number;
-  }, cost: number): void {
+  private updateCostTracking(
+    usage: {
+      promptTokens: number;
+      completionTokens: number;
+      totalTokens: number;
+    },
+    cost: number
+  ): void {
     this.costTracking.totalCost += cost;
     this.costTracking.costByModel[this.config.model] =
       (this.costTracking.costByModel[this.config.model] || 0) + cost;
@@ -582,6 +568,6 @@ When responding:
   }
 
   private delay(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 }

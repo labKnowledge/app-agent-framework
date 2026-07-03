@@ -72,11 +72,15 @@ export class MemoryManager {
   /**
    * Add memory entry
    */
-  addMemory(type: MemoryType, content: MemoryContent, options: {
-    importance?: number;
-    tags?: string[];
-    expiresAt?: number;
-  } = {}): MemoryEntry {
+  addMemory(
+    type: MemoryType,
+    content: MemoryContent,
+    options: {
+      importance?: number;
+      tags?: string[];
+      expiresAt?: number;
+    } = {}
+  ): MemoryEntry {
     const entry: MemoryEntry = {
       id: this.generateId(),
       type,
@@ -277,7 +281,7 @@ export class MemoryManager {
     fact: string,
     confidence: number,
     source: SemanticMemory['source'],
-    evidence: string[] = [],
+    evidence: string[] = []
   ): void {
     // Check for contradictions
     const contradictions = this.findContradictions(fact);
@@ -302,7 +306,10 @@ export class MemoryManager {
    * Get relevant context for current situation
    */
   getRelevantContext(query: string, maxResults = 5): Array<{ content: string; relevance: number }> {
-    const terms = query.toLowerCase().split(/\s+/).filter(t => t.length > 3);
+    const terms = query
+      .toLowerCase()
+      .split(/\s+/)
+      .filter((t) => t.length > 3);
 
     const results = this.searchMemories({
       terms,
@@ -310,7 +317,7 @@ export class MemoryManager {
       relevanceThreshold: 0.3,
     });
 
-    return results.map(result => ({
+    return results.map((result) => ({
       content: this.formatMemoryContent(result.memory),
       relevance: result.relevance,
     }));
@@ -471,14 +478,14 @@ export class MemoryManager {
     // Term matching
     if (query.terms && query.terms.length > 0) {
       const content = this.formatMemoryContent(memory).toLowerCase();
-      const matchCount = query.terms.filter(term => content.includes(term.toLowerCase())).length;
+      const matchCount = query.terms.filter((term) => content.includes(term.toLowerCase())).length;
       const termBoost = (matchCount / query.terms.length) * 0.3;
       relevance += termBoost;
     }
 
     // Tag matching
     if (query.tags && query.tags.length > 0) {
-      const tagMatchCount = query.tags.filter(tag => memory.tags.includes(tag)).length;
+      const tagMatchCount = query.tags.filter((tag) => memory.tags.includes(tag)).length;
       const tagBoost = (tagMatchCount / query.tags.length) * 0.2;
       relevance += tagBoost;
     }
@@ -501,7 +508,7 @@ export class MemoryManager {
       reasons.push('recent');
     }
 
-    if (query.tags && query.tags.some(tag => memory.tags.includes(tag))) {
+    if (query.tags && query.tags.some((tag) => memory.tags.includes(tag))) {
       reasons.push('tag match');
     }
 
@@ -512,34 +519,40 @@ export class MemoryManager {
     const content = memory.content;
 
     switch (content.type) {
-      case 'working':
+      case 'working': {
         const working = content as WorkingMemory;
         return `Task: ${working.currentTask} | Goal: ${working.currentGoal}`;
+      }
 
-      case 'episodic':
+      case 'episodic': {
         const episodic = content as EpisodicMemory;
         return `Task: ${episodic.task} | Outcome: ${episodic.outcome}`;
+      }
 
-      case 'semantic':
+      case 'semantic': {
         const semantic = content as SemanticMemory;
         return semantic.fact;
+      }
 
       default:
         return JSON.stringify(content);
     }
   }
 
-  private extractLessons(workingMemory: WorkingMemory, outcome: 'success' | 'failure' | 'partial'): string[] {
+  private extractLessons(
+    workingMemory: WorkingMemory,
+    outcome: 'success' | 'failure' | 'partial'
+  ): string[] {
     const lessons: string[] = [];
 
     // Extract lessons from successful actions
-    const successfulActions = workingMemory.recentActions.filter(a => a.success);
+    const successfulActions = workingMemory.recentActions.filter((a) => a.success);
     if (successfulActions.length > 0) {
       lessons.push(`${successfulActions.length} actions succeeded`);
     }
 
     // Extract lessons from failed actions
-    const failedActions = workingMemory.recentActions.filter(a => !a.success);
+    const failedActions = workingMemory.recentActions.filter((a) => !a.success);
     if (failedActions.length > 0) {
       lessons.push(`${failedActions.length} actions failed - avoid these patterns`);
     }
@@ -587,7 +600,10 @@ export class MemoryManager {
     for (const memory of this.semanticMemories) {
       const content = memory.content as SemanticMemory;
       // Simple contradiction detection - can be enhanced
-      if (content.fact.includes('not ') && fact.replace('not ', '') === content.fact.replace('not ', '')) {
+      if (
+        content.fact.includes('not ') &&
+        fact.replace('not ', '') === content.fact.replace('not ', '')
+      ) {
         contradictions.push(content.fact);
       }
     }
@@ -600,7 +616,43 @@ export class MemoryManager {
     const words = fact.toLowerCase().split(/\s+/);
     const tags: string[] = [];
 
-    const stopWords = new Set(['the', 'a', 'an', 'is', 'are', 'was', 'were', 'be', 'been', 'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'could', 'should', 'may', 'might', 'must', 'can', 'not', 'but', 'and', 'or', 'if', 'then', 'when', 'where', 'how', 'what', 'why', 'who']);
+    const stopWords = new Set([
+      'the',
+      'a',
+      'an',
+      'is',
+      'are',
+      'was',
+      'were',
+      'be',
+      'been',
+      'have',
+      'has',
+      'had',
+      'do',
+      'does',
+      'did',
+      'will',
+      'would',
+      'could',
+      'should',
+      'may',
+      'might',
+      'must',
+      'can',
+      'not',
+      'but',
+      'and',
+      'or',
+      'if',
+      'then',
+      'when',
+      'where',
+      'how',
+      'what',
+      'why',
+      'who',
+    ]);
 
     for (const word of words) {
       if (word.length > 3 && !stopWords.has(word)) {
@@ -634,7 +686,7 @@ export class MemoryManager {
 
         // Remove from working memory
         this.memories.delete(workingMemory.id);
-        this.workingMemories = this.workingMemories.filter(m => m.id !== workingMemory.id);
+        this.workingMemories = this.workingMemories.filter((m) => m.id !== workingMemory.id);
       }
     }
   }
@@ -651,10 +703,7 @@ export class MemoryManager {
         memories: Array.from(this.memories.entries()),
         timestamp: Date.now(),
       };
-      await this.config.storage.set(
-        this.config.persistenceKey,
-        JSON.stringify(data),
-      );
+      await this.config.storage.set(this.config.persistenceKey, JSON.stringify(data));
     } catch (error) {
       console.error('Failed to save memories to persistence:', error);
     }

@@ -67,6 +67,7 @@ new StateManager(config: StateManagerConfig)
 ```
 
 **StateManagerConfig:**
+
 - `getAppState`: Callback to get current application state
 - `stateChangeThreshold`: Time threshold for debouncing (default: 1000ms)
 - `historyLimit`: Maximum history entries (default: 100)
@@ -75,40 +76,52 @@ new StateManager(config: StateManagerConfig)
 #### Methods
 
 **getCurrentState(): Promise<AppState>**
+
 - Get current application state
 
 **startTracking(intervalMs?): void**
+
 - Start automatic state change tracking
 - Interval: Check interval in ms (default: 1000)
 
 **stopTracking(): void**
+
 - Stop automatic tracking
 
 **getStateDiff(oldState, newState): StateDiff**
+
 - Calculate difference between two states
 
 **isStateSignificant(diff): boolean**
+
 - Check if change is significant (moderate or major)
 
 **formatStateDiff(diff): string**
+
 - Format state diff for display
 
 **getHistory(): StateHistory**
+
 - Get compressed state history
 
 **compressHistory(): StateHistory**
+
 - Compress history by merging similar entries
 
 **addListener(listener): void**
+
 - Add state change listener
 
 **removeListener(listener): void**
+
 - Remove state change listener
 
 **clearHistory(): void**
+
 - Clear all history
 
 **dispose(): void**
+
 - Clean up resources
 
 ## State Types
@@ -127,7 +140,7 @@ interface StateDiff {
 
 ```typescript
 interface FieldChange {
-  path: string;          // e.g., 'user.id', 'currentView'
+  path: string; // e.g., 'user.id', 'currentView'
   oldValue: unknown;
   newValue: unknown;
   type: 'added' | 'removed' | 'updated';
@@ -146,6 +159,7 @@ Changes are classified as:
 ## History Compression
 
 The state manager automatically compresses history by:
+
 - Merging similar consecutive states
 - Limiting total entries (configurable)
 - Storing only significant changes

@@ -12,7 +12,12 @@ export function getStateDiff(oldState: AppState, newState: AppState): StateDiff 
   const changes: FieldChange[] = [];
 
   // Compare top-level fields
-  compareFields(oldState, newState, '', changes);
+  compareFields(
+    oldState as unknown as Record<string, unknown>,
+    newState as unknown as Record<string, unknown>,
+    '',
+    changes
+  );
 
   const hasChanges = changes.length > 0;
   const changeType = determineChangeType(changes);
@@ -32,7 +37,7 @@ function compareFields(
   newObj: Record<string, unknown>,
   path: string,
   changes: FieldChange[],
-  visited = new WeakSet(),
+  visited = new WeakSet()
 ): void {
   // Circular reference detection
   if (visited.has(oldObj) || visited.has(newObj)) {
@@ -67,10 +72,21 @@ function compareFields(
     }
 
     // Handle nested objects
-    if (typeof oldValue === 'object' && typeof newValue === 'object' &&
-        oldValue !== null && newValue !== null && !Array.isArray(oldValue) && !Array.isArray(newValue)) {
-      compareFields(oldValue as Record<string, unknown>, newValue as Record<string, unknown>,
-                   fieldPath, changes, visited);
+    if (
+      typeof oldValue === 'object' &&
+      typeof newValue === 'object' &&
+      oldValue !== null &&
+      newValue !== null &&
+      !Array.isArray(oldValue) &&
+      !Array.isArray(newValue)
+    ) {
+      compareFields(
+        oldValue as Record<string, unknown>,
+        newValue as Record<string, unknown>,
+        fieldPath,
+        changes,
+        visited
+      );
       continue;
     }
 
@@ -102,7 +118,9 @@ function determineChangeType(changes: FieldChange[]): 'none' | 'minor' | 'modera
 
   // Check for major changes
   const majorPaths = ['user.id', 'user.role', 'user.isAuthenticated'];
-  const hasMajorChange = changes.some(change => majorPaths.some(path => change.path.startsWith(path)));
+  const hasMajorChange = changes.some((change) =>
+    majorPaths.some((path) => change.path.startsWith(path))
+  );
 
   if (hasMajorChange) {
     return 'major';
@@ -110,8 +128,8 @@ function determineChangeType(changes: FieldChange[]): 'none' | 'minor' | 'modera
 
   // Check for moderate changes
   const moderatePaths = ['currentView', 'user.attributes'];
-  const hasModerateChange = changes.some(change =>
-    moderatePaths.some(path => change.path.startsWith(path)),
+  const hasModerateChange = changes.some((change) =>
+    moderatePaths.some((path) => change.path.startsWith(path))
   );
 
   if (hasModerateChange || changes.length > 3) {
@@ -137,7 +155,7 @@ export function formatStateDiff(diff: StateDiff): string {
     return 'No changes';
   }
 
-  const lines = diff.changes.map(change => {
+  const lines = diff.changes.map((change) => {
     const symbol = change.type === 'added' ? '+' : change.type === 'removed' ? '-' : '~';
     const oldValue = JSON.stringify(change.oldValue);
     const newValue = JSON.stringify(change.newValue);

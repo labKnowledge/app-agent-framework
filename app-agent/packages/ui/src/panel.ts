@@ -37,7 +37,9 @@ export class AppAgentPanel {
 
     // Apply theme
     if (this.config.theme === 'auto') {
-      this.config.theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      this.config.theme = window.matchMedia('(prefers-color-scheme: dark)').matches
+        ? 'dark'
+        : 'light';
     }
 
     this.initialize();
@@ -195,17 +197,26 @@ export class AppAgentPanel {
           <button class="app-agent-submit" disabled>${this.state.status === 'running' ? 'Running...' : 'Submit'}</button>
         </div>
 
-        ${this.state.history.length > 0 ? `
+        ${
+          this.state.history.length > 0
+            ? `
           <div class="app-agent-history">
             <div class="app-agent-history-header">History</div>
-            ${this.state.history.slice(-10).map((item, i) => `
+            ${this.state.history
+              .slice(-10)
+              .map(
+                (item, _i) => `
               <div class="app-agent-history-item app-agent-history-${this.escapeHtml(item.type)}">
                 <span class="app-agent-history-type">${this.escapeHtml(item.type.toUpperCase())}</span>
                 <span class="app-agent-history-data">${this.formatHistoryData(item.data)}</span>
               </div>
-            `).join('')}
+            `
+              )
+              .join('')}
           </div>
-        ` : ''}
+        `
+            : ''
+        }
       </div>
     `;
   }
@@ -241,7 +252,7 @@ export class AppAgentPanel {
     }
 
     // Clear previous listeners to prevent memory leaks
-    this.eventCleanupCallbacks.forEach(cleanup => cleanup());
+    this.eventCleanupCallbacks.forEach((cleanup) => cleanup());
     this.eventCleanupCallbacks = [];
 
     // Toggle event
@@ -265,9 +276,7 @@ export class AppAgentPanel {
         }
       };
       submitBtn.addEventListener('click', submitHandler);
-      this.eventCleanupCallbacks.push(() =>
-        submitBtn.removeEventListener('click', submitHandler)
-      );
+      this.eventCleanupCallbacks.push(() => submitBtn.removeEventListener('click', submitHandler));
 
       const keypressHandler = (e: KeyboardEvent) => {
         if (e.key === 'Enter' && input.value.trim() && !this.isDisposed) {
@@ -278,9 +287,7 @@ export class AppAgentPanel {
         }
       };
       input.addEventListener('keypress', keypressHandler);
-      this.eventCleanupCallbacks.push(() =>
-        input.removeEventListener('keypress', keypressHandler)
-      );
+      this.eventCleanupCallbacks.push(() => input.removeEventListener('keypress', keypressHandler));
     }
   }
 
@@ -486,7 +493,7 @@ export class AppAgentPanel {
     this.isDisposed = true;
 
     // Clean up all event listeners first to prevent memory leaks
-    this.eventCleanupCallbacks.forEach(cleanup => {
+    this.eventCleanupCallbacks.forEach((cleanup) => {
       try {
         cleanup();
       } catch (error) {

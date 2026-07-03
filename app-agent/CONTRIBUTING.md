@@ -28,7 +28,7 @@ pnpm bench         # performance benchmarks
 
 ## Package layers
 
-See [AGENTS.md](./AGENTS.md) and [docs/adr/README.md](./docs/adr/README.md) before adding packages or changing dependency rules.
+See [AGENTS.md](./AGENTS.md), [docs/packages.md](./docs/packages.md), and [docs/adr/README.md](./docs/adr/README.md) before adding packages or changing dependency rules.
 
 ## Pull requests
 
@@ -39,7 +39,7 @@ See [AGENTS.md](./AGENTS.md) and [docs/adr/README.md](./docs/adr/README.md) befo
 
 ## Releases
 
-Releases use [Changesets](https://github.com/changesets/changesets). Add a changeset when your PR should trigger a version bump:
+See [docs/publishing.md](./docs/publishing.md). Releases use [Changesets](https://github.com/changesets/changesets). Add a changeset when your PR should trigger a version bump:
 
 ```bash
 pnpm changeset

@@ -109,6 +109,8 @@ pnpm test:coverage
 
 ## Further Reading
 
+- [Documentation index](./README.md)
 - [Architecture](./architecture.md)
 - [ADR index](./adr/README.md)
+- [Packages](./packages.md)
 - Research archive: [rnd/](../../rnd/)

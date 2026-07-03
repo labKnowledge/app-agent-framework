@@ -2,7 +2,7 @@
 
 Canonical architecture documentation for the app-agent monorepo.
 
-> Research and vision documents are archived in `rnd/`. This file reflects the implemented package structure.
+> Research and vision documents are archived in [`../../rnd/README.md`](../../rnd/README.md). This file reflects the implemented package structure. See also [Documentation index](./README.md) and [Packages](./packages.md).
 
 ## Vision
 

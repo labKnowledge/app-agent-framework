@@ -156,9 +156,9 @@ App-Agent is like a kernel for your application:
 
 **Status**: Complete ✅
 
-Research and planning are finalized. **Implementation is in progress** in [`../app-agent/`](../app-agent/).
+Research and planning are finalized. **Alpha implementation** ships from [`../app-agent/`](../app-agent/) as `@gakwaya/*` on npm.
 
-### Completed
+### Completed research
 - ✅ Comprehensive research of page-agent
 - ✅ Comprehensive research of browser-use
 - ✅ Technical architecture specification
@@ -166,27 +166,27 @@ Research and planning are finalized. **Implementation is in progress** in [`../a
 - ✅ Success metrics and criteria
 - ✅ Risk assessment and mitigation
 
-### Implementation Progress (app-agent/)
-- ✅ Phase 1: Monorepo, core ReAct loop, state, LLM, tools, UI
-- ✅ Phase 2 (partial): Semantic registry, workflow, planner, memory
-- ✅ Phase 3 (started): React, Vue, Svelte integration packages + demos
-- ⏳ Phase 4: Performance polish, launch prep
+### Implementation (app-agent/) — 2026-07-03
+- ✅ Phases 1–4 complete
+- ✅ Published on npm as `@gakwaya/*`
+- 📖 [Documentation hub](../app-agent/docs/README.md)
+- 📊 [Live progress](../app-agent/docs/project/progress.md)
 
-### Next Steps
-- ⏳ Expand integration test coverage
-- ⏳ Production bundle optimization
-- ⏳ Example applications hardening
+### Post-alpha
+- Expand consumer documentation and API reference
+- Cross-browser E2E matrix
+- Tighten bundle size budgets
 
 ## 🤝 Contributing
 
-This is the research and planning phase. Contributions during implementation will follow the roadmap outlined in `IMPLEMENTATION-plan.md`.
+Implementation lives in `app-agent/`. See [Contributing](../app-agent/CONTRIBUTING.md) and [Agent Guide](../app-agent/AGENTS.md).
 
 ## 📄 License
 
-TBD - Will be determined before public launch.
+MIT — see published `@gakwaya/*` packages.
 
 ---
 
-**Last Updated**: 2026-07-03
-**Status**: Research Complete ✅ → Implementation In Progress 🚀
-**Implementation**: See [`../app-agent/`](../app-agent/) and [`../app-agent/docs/getting-started.md`](../app-agent/docs/getting-started.md)
+**Last Updated**: 2026-07-03  
+**Status**: Research complete → **Alpha shipped on npm**  
+**Implementation**: [app-agent/](../app-agent/) · [Documentation](../app-agent/docs/README.md) · [Getting started](../app-agent/docs/getting-started.md)

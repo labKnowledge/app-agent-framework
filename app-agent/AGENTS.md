@@ -69,4 +69,4 @@ pnpm test
 
 ## Research Archive
 
-Historical research and vision docs live in `../rnd/`. Canonical architecture: [docs/architecture.md](./docs/architecture.md).
+Historical research and vision docs live in [`../rnd/README.md`](../rnd/README.md). Canonical docs: [docs/README.md](./docs/README.md) · [architecture.md](./docs/architecture.md).

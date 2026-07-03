@@ -1,7 +1,7 @@
 # App-Agent Implementation Progress
 
 **Last Updated**: 2026-07-03  
-**Status**: Alpha (`0.1.0`) — publish prep complete, Phase 2 gaps closed
+**Status**: Alpha — `@gakwaya/*` published on npm (`0.1.2` facade)
 
 ## Phase Summary
 
@@ -41,9 +41,9 @@
 
 ## Publishing
 
-- Library builds output `dist/` via shared Vite config
-- Changesets configured for monorepo releases
-- npm publish requires `@app-agent` scope and `NPM_TOKEN` in CI
+- Libraries publish to npm as `@gakwaya/*` — see [docs/publishing.md](../publishing.md)
+- `@gakwaya/app-agent@0.1.2` includes consumer README on npm
+- Changesets + `pnpm release` for version bumps
 
 ## Next (post-alpha)
 

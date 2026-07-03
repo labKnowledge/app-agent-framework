@@ -11,4 +11,4 @@
 | [ADR-0007](./ADR-0007-multi-agent-coordinator.md)        | Multi-agent coordinator             | Accepted |
 | [ADR-0008](./ADR-0008-learning-system.md)                | Learning system                     | Accepted |
 
-See also [Architecture Overview](../architecture.md) and [AGENTS.md](../../AGENTS.md).
+See also [Architecture Overview](../architecture.md), [Documentation index](../README.md), and [AGENTS.md](../../AGENTS.md).

@@ -12,7 +12,7 @@ Accepted
 
 ## Considered Options
 
-1. Export everything from `@gakwaya/core`
+1. Export everything from `@gakwaya/app-agent-core`
 2. Create `@gakwaya/app-agent` facade package
 3. Per-framework integration packages only
 
@@ -22,8 +22,8 @@ Accepted
 
 - Thin `AppAgent` class wraps `AppAgentCore`
 - Maps `entities`/`workflows` config to `SemanticRegistry` + `WorkflowEngine`
-- Re-exports commonly needed types from `@gakwaya/entities`
-- Re-exports `AppAgentPanel` from `@gakwaya/ui`
+- Re-exports commonly needed types from `@gakwaya/app-agent-entities`
+- Re-exports `AppAgentPanel` from `@gakwaya/app-agent-ui`
 
 ### Positive Consequences
 

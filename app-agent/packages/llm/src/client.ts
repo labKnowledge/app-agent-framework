@@ -7,7 +7,7 @@
 
 import EventEmitter from 'eventemitter3';
 import { parseReasoningContent } from './parse-reasoning';
-import type { CoreLLMResponse, LLMMessage as CoreLLMMessage } from '@gakwaya/entities';
+import type { CoreLLMResponse, LLMMessage as CoreLLMMessage } from '@gakwaya/app-agent-entities';
 import type {
   LLMMessage,
   LLMResponse,
@@ -439,7 +439,7 @@ When responding:
     }
   }
 
-  private parseReasoning(content: string): import('@gakwaya/entities').AgentReasoning {
+  private parseReasoning(content: string): import('@gakwaya/app-agent-entities').AgentReasoning {
     try {
       return parseReasoningContent(content);
     } catch {

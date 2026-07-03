@@ -4,17 +4,17 @@
 
 import EventEmitter from 'eventemitter3';
 import { z } from 'zod';
-import { toolSchemas } from '@gakwaya/entities';
-import { EnhancedLLMClient } from '@gakwaya/llm';
-import { ToolRegistry, createBuiltinTools, agentToolToTool } from '@gakwaya/tools';
-import type { ToolContext } from '@gakwaya/tools';
-import { TaskPlanner } from '@gakwaya/planner';
-import { WorkflowEngine } from '@gakwaya/workflow';
-import { SemanticRegistry } from '@gakwaya/semantic-registry';
-import { StateManager } from '@gakwaya/state-manager';
-import { MemoryManager } from '@gakwaya/memory';
-import { MultiAgentCoordinator, createBuiltInAgents } from '@gakwaya/multi-agent';
-import { LearningSystem } from '@gakwaya/learning';
+import { toolSchemas } from '@gakwaya/app-agent-entities';
+import { EnhancedLLMClient } from '@gakwaya/app-agent-llm';
+import { ToolRegistry, createBuiltinTools, agentToolToTool } from '@gakwaya/app-agent-tools';
+import type { ToolContext } from '@gakwaya/app-agent-tools';
+import { TaskPlanner } from '@gakwaya/app-agent-planner';
+import { WorkflowEngine } from '@gakwaya/app-agent-workflow';
+import { SemanticRegistry } from '@gakwaya/app-agent-semantic-registry';
+import { StateManager } from '@gakwaya/app-agent-state-manager';
+import { MemoryManager } from '@gakwaya/app-agent-memory';
+import { MultiAgentCoordinator, createBuiltInAgents } from '@gakwaya/app-agent-multi-agent';
+import { LearningSystem } from '@gakwaya/app-agent-learning';
 import type {
   AgentConfig,
   AgentResult,
@@ -507,7 +507,7 @@ export class AppAgentCore extends EventEmitter {
       onWait: (duration) => {
         this._states.totalWaitTime += duration;
       },
-    }) as import('@gakwaya/tools').Tool[];
+    }) as import('@gakwaya/app-agent-tools').Tool[];
 
     for (const tool of builtins) {
       this.toolRegistry.registerTool(tool);
@@ -535,7 +535,7 @@ export class AppAgentCore extends EventEmitter {
 
     for (const [id, def] of Object.entries(this.config.customWorkflows)) {
       if (def && typeof def === 'object' && 'name' in def) {
-        const workflowDef = def as import('@gakwaya/entities').WorkflowDefinition;
+        const workflowDef = def as import('@gakwaya/app-agent-entities').WorkflowDefinition;
         const steps = Array.isArray(workflowDef.steps)
           ? workflowDef.steps.map((step, i) =>
               typeof step === 'string'
@@ -661,7 +661,7 @@ export class AppAgentCore extends EventEmitter {
     return this.memoryManager;
   }
 
-  getMemoryStats(): import('@gakwaya/memory').MemoryStats | undefined {
+  getMemoryStats(): import('@gakwaya/app-agent-memory').MemoryStats | undefined {
     return this.memoryManager?.getStats();
   }
 
@@ -676,7 +676,7 @@ export class AppAgentCore extends EventEmitter {
   addSemanticMemory(
     fact: string,
     confidence: number,
-    source: import('@gakwaya/memory').SemanticMemory['source']
+    source: import('@gakwaya/app-agent-memory').SemanticMemory['source']
   ): void {
     this.memoryManager?.addSemanticMemory(fact, confidence, source);
   }

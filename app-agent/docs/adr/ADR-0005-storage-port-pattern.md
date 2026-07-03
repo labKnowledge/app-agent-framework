@@ -18,7 +18,7 @@ Accepted
 
 ## Decision Outcome
 
-**Chosen option**: Injectable `StoragePort` in `@gakwaya/entities`.
+**Chosen option**: Injectable `StoragePort` in `@gakwaya/app-agent-entities`.
 
 ```typescript
 interface StoragePort {

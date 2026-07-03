@@ -2,7 +2,7 @@
  * State Difference Calculation
  */
 
-import type { AppState } from '@gakwaya/entities';
+import type { AppState } from '@gakwaya/app-agent-entities';
 import type { StateDiff, FieldChange } from './types';
 
 /**

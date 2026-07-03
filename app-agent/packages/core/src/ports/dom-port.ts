@@ -2,7 +2,7 @@
  * DOM port for browser isolation
  */
 
-import type { DOMState } from '@gakwaya/entities';
+import type { DOMState } from '@gakwaya/app-agent-entities';
 
 export interface DOMPort {
   getChecksum(): string;

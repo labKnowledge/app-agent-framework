@@ -2,7 +2,7 @@
 
 **Status:** Fixed  
 **Reported from:** Kidsync HAR  
-**Affects:** `@gakwaya/core`  
+**Affects:** `@gakwaya/app-agent-core`  
 **Severity:** High — model cannot choose element indices
 
 ## Summary

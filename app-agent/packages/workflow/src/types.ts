@@ -367,7 +367,7 @@ export interface WorkflowEngineConfig {
   /** Persistence key */
   persistenceKey?: string;
   /** Injectable storage port */
-  storage?: import('@gakwaya/entities').StoragePort;
+  storage?: import('@gakwaya/app-agent-entities').StoragePort;
   /** Checkpoint interval (ms) */
   checkpointInterval?: number;
   /** Enable metrics */

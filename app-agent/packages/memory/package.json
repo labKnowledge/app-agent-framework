@@ -1,6 +1,6 @@
 {
-  "name": "@gakwaya/memory",
-  "version": "0.1.2",
+  "name": "@gakwaya/app-agent-memory",
+  "version": "1.0.0",
   "type": "module",
   "description": "Memory management system for AI agents with working, episodic, and semantic memory",
   "main": "./dist/index.js",
@@ -20,7 +20,7 @@
     "prepublishOnly": "pnpm build"
   },
   "dependencies": {
-    "@gakwaya/entities": "workspace:*",
+    "@gakwaya/app-agent-entities": "workspace:*",
     "eventemitter3": "^5.0.1"
   },
   "devDependencies": {

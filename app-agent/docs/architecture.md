@@ -14,28 +14,28 @@ App-Agent is an **application-centric** AI agent framework. Unlike page-centric 
 flowchart TB
   subgraph publicLayer [Public Layer]
     facade["@gakwaya/app-agent"]
-    ui["@gakwaya/ui"]
+    ui["@gakwaya/app-agent-ui"]
   end
 
   subgraph orchestration [Orchestration]
-    core["@gakwaya/core"]
+    core["@gakwaya/app-agent-core"]
   end
 
   subgraph intelligence [Intelligence]
-    llm["@gakwaya/llm"]
-    tools["@gakwaya/tools"]
-    planner["@gakwaya/planner"]
-    workflow["@gakwaya/workflow"]
-    registry["@gakwaya/semantic-registry"]
+    llm["@gakwaya/app-agent-llm"]
+    tools["@gakwaya/app-agent-tools"]
+    planner["@gakwaya/app-agent-planner"]
+    workflow["@gakwaya/app-agent-workflow"]
+    registry["@gakwaya/app-agent-semantic-registry"]
   end
 
   subgraph infrastructure [Infrastructure]
-    sm["@gakwaya/state-manager"]
-    mem["@gakwaya/memory"]
+    sm["@gakwaya/app-agent-state-manager"]
+    mem["@gakwaya/app-agent-memory"]
   end
 
   subgraph domain [Domain]
-    entities["@gakwaya/entities"]
+    entities["@gakwaya/app-agent-entities"]
   end
 
   facade --> core

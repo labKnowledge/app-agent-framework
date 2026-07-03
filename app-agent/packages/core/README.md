@@ -1,4 +1,4 @@
-# @gakwaya/core
+# @gakwaya/app-agent-core
 
 Core agent logic for App-Agent - implements the ReAct (Reasoning + Acting) loop with app state awareness.
 
@@ -15,7 +15,7 @@ Core agent logic for App-Agent - implements the ReAct (Reasoning + Acting) loop 
 ## Usage
 
 ```typescript
-import { AppAgentCore } from '@gakwaya/core';
+import { AppAgentCore } from '@gakwaya/app-agent-core';
 
 const agent = new AppAgentCore({
   baseURL: 'https://api.openai.com/v1',

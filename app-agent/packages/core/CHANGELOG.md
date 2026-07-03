@@ -1,5 +1,25 @@
 # @gakwaya/core
 
+## 1.0.0
+
+### Major Changes
+
+- Rename all modules to `@gakwaya/app-agent-*` prefixed npm names. Legacy `@gakwaya/core`, `@gakwaya/entities`, etc. are deprecated on npm after this release. See ADR-0009 and docs/packages.md.
+
+### Patch Changes
+
+- Updated dependencies
+  - @gakwaya/app-agent-entities@1.0.0
+  - @gakwaya/app-agent-semantic-registry@1.0.0
+  - @gakwaya/app-agent-state-manager@1.0.0
+  - @gakwaya/app-agent-memory@1.0.0
+  - @gakwaya/app-agent-llm@1.0.0
+  - @gakwaya/app-agent-tools@1.0.0
+  - @gakwaya/app-agent-planner@1.0.0
+  - @gakwaya/app-agent-workflow@1.0.0
+  - @gakwaya/app-agent-multi-agent@1.0.0
+  - @gakwaya/app-agent-learning@1.0.0
+
 ## 0.1.2
 
 ### Patch Changes

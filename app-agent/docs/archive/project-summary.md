@@ -38,7 +38,7 @@ app-agent/
 
 ### ✅ Core Features Implemented
 
-#### 1. **@gakwaya/core** - Core Agent System
+#### 1. **@gakwaya/app-agent-core** - Core Agent System
 
 **AppAgentCore Class:**
 
@@ -63,7 +63,7 @@ app-agent/
 - `packages/core/src/index.ts` - Public exports
 - `packages/core/README.md` - Documentation
 
-#### 2. **@gakwaya/state-manager** - State Tracking System
+#### 2. **@gakwaya/app-agent-state-manager** - State Tracking System
 
 **StateManager Class:**
 

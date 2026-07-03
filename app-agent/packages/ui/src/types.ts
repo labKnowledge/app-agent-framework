@@ -2,7 +2,7 @@
  * UI Types
  */
 
-import type { AgentStatus, HistoricalEvent } from '@gakwaya/entities';
+import type { AgentStatus, HistoricalEvent } from '@gakwaya/app-agent-entities';
 
 /**
  * Panel configuration

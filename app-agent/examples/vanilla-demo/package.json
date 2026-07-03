@@ -8,7 +8,7 @@
   },
   "dependencies": {
     "@gakwaya/app-agent": "workspace:*",
-    "@gakwaya/ui": "workspace:*"
+    "@gakwaya/app-agent-ui": "workspace:*"
   },
   "devDependencies": {
     "vite": "^5.0.0",

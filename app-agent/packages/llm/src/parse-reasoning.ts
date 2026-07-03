@@ -2,7 +2,7 @@
  * Parse and normalize LLM ReAct reasoning responses
  */
 
-import type { AgentAction, AgentReasoning } from '@gakwaya/entities';
+import type { AgentAction, AgentReasoning } from '@gakwaya/app-agent-entities';
 
 const TOOL_ALIASES: Record<string, string> = {
   click_element: 'click',

@@ -2,7 +2,7 @@
 
 **Status:** Fixed  
 **Reported from:** Kidsync HAR (dashboard `/dashboard`)  
-**Affects:** `@gakwaya/core`  
+**Affects:** `@gakwaya/app-agent-core`  
 **Severity:** Medium — zero indexed elements on common SPAs
 
 ## Summary

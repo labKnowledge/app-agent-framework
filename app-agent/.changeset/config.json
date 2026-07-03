@@ -3,7 +3,27 @@
   "changelog": "@changesets/cli/changelog",
   "commit": false,
   "fixed": [],
-  "linked": [],
+  "linked": [
+    [
+      "@gakwaya/app-agent",
+      "@gakwaya/app-agent-core",
+      "@gakwaya/app-agent-entities",
+      "@gakwaya/app-agent-ui",
+      "@gakwaya/app-agent-semantic-registry",
+      "@gakwaya/app-agent-state-manager",
+      "@gakwaya/app-agent-memory",
+      "@gakwaya/app-agent-llm",
+      "@gakwaya/app-agent-tools",
+      "@gakwaya/app-agent-planner",
+      "@gakwaya/app-agent-workflow",
+      "@gakwaya/app-agent-multi-agent",
+      "@gakwaya/app-agent-learning",
+      "@gakwaya/app-agent-integrations-shared",
+      "@gakwaya/app-agent-react",
+      "@gakwaya/app-agent-vue",
+      "@gakwaya/app-agent-svelte"
+    ]
+  ],
   "access": "public",
   "baseBranch": "main",
   "updateInternalDependencies": "patch",

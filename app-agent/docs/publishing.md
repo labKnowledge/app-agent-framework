@@ -35,7 +35,7 @@ pnpm pack:smoke         # tarball layout for @gakwaya/app-agent
 
 ```bash
 pnpm add @gakwaya/app-agent
-pnpm add @gakwaya/integrations-react @gakwaya/ui   # React
+pnpm add @gakwaya/app-agent-react @gakwaya/app-agent-ui   # React
 ```
 
 ## Build notes
@@ -43,6 +43,19 @@ pnpm add @gakwaya/integrations-react @gakwaya/ui   # React
 - Production builds use **terser minify + light obfuscation**
 - Faster local builds: `SKIP_OBFUSCATE=1 pnpm build`
 
+## Deprecating legacy package names
+
+After publishing **0.2.0** under `@gakwaya/app-agent-*` names, deprecate the old flat `@gakwaya/*` packages (requires npm auth):
+
+```bash
+pnpm exec tsx scripts/deprecate-legacy-packages.ts --dry-run   # preview
+pnpm exec tsx scripts/deprecate-legacy-packages.ts            # apply
+```
+
+Do **not** unpublish legacy packages — deprecation preserves existing lockfiles while steering users to new names.
+
 ## Scope history
 
-Packages originally used `@app-agent/*` but that org was unavailable for publish. The scope was migrated to `@gakwaya/*` for npm; internal monorepo imports match the published scope.
+1. Packages originally used `@app-agent/*` but that org was unavailable for publish.
+2. Scope migrated to flat `@gakwaya/*` (0.1.x).
+3. As of 0.2.0, modules renamed to `@gakwaya/app-agent-*` prefix ([ADR-0009](./adr/ADR-0009-prefixed-package-names.md)).

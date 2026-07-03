@@ -1,4 +1,4 @@
-import type { AgentResult } from '@gakwaya/entities';
+import type { AgentResult } from '@gakwaya/app-agent-entities';
 import type { AgentContext, AgentDelegate, AgentRoutingResult, SpecializedAgent } from './types';
 
 const KEYWORD_WEIGHT = 1.0;

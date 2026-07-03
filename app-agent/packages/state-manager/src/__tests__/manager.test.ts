@@ -4,7 +4,7 @@
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { StateManager } from '../manager';
-import type { AppState } from '@gakwaya/entities';
+import type { AppState } from '@gakwaya/app-agent-entities';
 import type { StateManagerConfig } from '../types';
 
 describe('StateManager', () => {

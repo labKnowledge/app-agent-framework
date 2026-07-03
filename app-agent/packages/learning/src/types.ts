@@ -1,4 +1,4 @@
-import type { AgentResult } from '@gakwaya/entities';
+import type { AgentResult } from '@gakwaya/app-agent-entities';
 
 export type LearningStorageType = 'memory' | 'indexedDB';
 

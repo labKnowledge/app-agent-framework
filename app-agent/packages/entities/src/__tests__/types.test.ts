@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { toolSchemas } from '../tool-schemas';
 
-describe('@gakwaya/entities', () => {
+describe('@gakwaya/app-agent-entities', () => {
   it('validates built-in tool schemas', () => {
     expect(toolSchemas.click.parse({ index: 0 })).toEqual({ index: 0 });
     expect(toolSchemas.wait.parse({})).toEqual({ duration: 1000 });

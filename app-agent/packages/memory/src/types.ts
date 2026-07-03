@@ -178,7 +178,7 @@ export interface MemoryManagerConfig {
   embeddingModel?: string;
   enablePersistence?: boolean;
   persistenceKey?: string;
-  storage?: import('@gakwaya/entities').StoragePort;
+  storage?: import('@gakwaya/app-agent-entities').StoragePort;
 }
 
 /**

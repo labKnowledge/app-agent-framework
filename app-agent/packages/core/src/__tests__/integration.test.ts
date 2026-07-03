@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { AppAgentCore } from '../agent';
-import { InMemoryStorageAdapter } from '@gakwaya/entities';
+import { InMemoryStorageAdapter } from '@gakwaya/app-agent-entities';
 
 describe('core integration', () => {
   it('wires state-manager and memory with entities types', async () => {

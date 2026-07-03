@@ -10,11 +10,11 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      '@gakwaya/entities': path.resolve(packages, 'entities/src'),
-      '@gakwaya/core': path.resolve(packages, 'core/src'),
-      '@gakwaya/semantic-registry': path.resolve(packages, 'semantic-registry/src'),
-      '@gakwaya/workflow': path.resolve(packages, 'workflow/src'),
-      '@gakwaya/ui': path.resolve(packages, 'ui/src'),
+      '@gakwaya/app-agent-entities': path.resolve(packages, 'entities/src'),
+      '@gakwaya/app-agent-core': path.resolve(packages, 'core/src'),
+      '@gakwaya/app-agent-semantic-registry': path.resolve(packages, 'semantic-registry/src'),
+      '@gakwaya/app-agent-workflow': path.resolve(packages, 'workflow/src'),
+      '@gakwaya/app-agent-ui': path.resolve(packages, 'ui/src'),
       '@gakwaya/app-agent': path.resolve(__dirname, './src'),
     },
   },

@@ -7,7 +7,7 @@
     "build": "vite build"
   },
   "dependencies": {
-    "@gakwaya/integrations-vue": "workspace:*",
+    "@gakwaya/app-agent-vue": "workspace:*",
     "vue": "^3.4.0"
   },
   "devDependencies": {

@@ -10,7 +10,7 @@
       "name": "infrastructure",
       "path": "packages/(state-manager|memory|llm|tools|planner|workflow|semantic-registry)",
       "allowedImports": ["packages/entities"],
-      "forbiddenPatterns": ["@gakwaya/core", "@gakwaya/ui", "@gakwaya/app-agent"]
+      "forbiddenPatterns": ["@gakwaya/app-agent-core", "@gakwaya/app-agent-ui", "@gakwaya/app-agent"]
     },
     {
       "name": "core",
@@ -26,13 +26,13 @@
         "packages/semantic-registry",
         "packages/core"
       ],
-      "forbiddenPatterns": ["@gakwaya/ui", "@gakwaya/app-agent"]
+      "forbiddenPatterns": ["@gakwaya/app-agent-ui", "@gakwaya/app-agent"]
     },
     {
       "name": "ui",
       "path": "packages/ui",
       "allowedImports": ["packages/entities", "packages/core"],
-      "forbiddenPatterns": ["@gakwaya/planner", "@gakwaya/workflow", "@gakwaya/memory"]
+      "forbiddenPatterns": ["@gakwaya/app-agent-planner", "@gakwaya/app-agent-workflow", "@gakwaya/app-agent-memory"]
     },
     {
       "name": "facade",

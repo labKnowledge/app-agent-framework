@@ -1,4 +1,4 @@
-# @gakwaya/workflow
+# @gakwaya/app-agent-workflow
 
 Advanced workflow orchestration engine for executing complex multi-step processes with state management, parallel execution, and error recovery.
 
@@ -16,7 +16,7 @@ Advanced workflow orchestration engine for executing complex multi-step processe
 ## Installation
 
 ```bash
-pnpm add @gakwaya/workflow
+pnpm add @gakwaya/app-agent-workflow
 ```
 
 ## Usage
@@ -24,7 +24,7 @@ pnpm add @gakwaya/workflow
 ### Basic Workflow Execution
 
 ```typescript
-import { WorkflowEngine } from '@gakwaya/workflow';
+import { WorkflowEngine } from '@gakwaya/app-agent-workflow';
 
 const engine = new WorkflowEngine({
   maxConcurrentWorkflows: 5,

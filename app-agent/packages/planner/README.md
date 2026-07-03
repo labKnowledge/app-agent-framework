@@ -1,4 +1,4 @@
-# @gakwaya/planner
+# @gakwaya/app-agent-planner
 
 Intelligent task planning and decomposition system for AI agents. Breaks complex user requests into executable sub-tasks with dependency management, adaptive replanning, and execution tracking.
 
@@ -14,13 +14,13 @@ Intelligent task planning and decomposition system for AI agents. Breaks complex
 ## Installation
 
 ```bash
-pnpm add @gakwaya/planner
+pnpm add @gakwaya/app-agent-planner
 ```
 
 ## Usage
 
 ```typescript
-import { TaskPlanner } from '@gakwaya/planner';
+import { TaskPlanner } from '@gakwaya/app-agent-planner';
 
 const planner = new TaskPlanner({
   maxDepth: 5,

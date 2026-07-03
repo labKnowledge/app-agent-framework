@@ -1,4 +1,4 @@
-# @gakwaya/state-manager
+# @gakwaya/app-agent-state-manager
 
 State management integration for App-Agent - tracks application state changes and maintains history.
 
@@ -14,7 +14,7 @@ State management integration for App-Agent - tracks application state changes an
 ## Usage
 
 ```typescript
-import { StateManager } from '@gakwaya/state-manager';
+import { StateManager } from '@gakwaya/app-agent-state-manager';
 
 const stateManager = new StateManager({
   getAppState: async () => ({

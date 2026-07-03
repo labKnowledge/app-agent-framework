@@ -36,11 +36,11 @@ See [examples/vanilla-demo](../examples/vanilla-demo/).
 ## React
 
 ```bash
-pnpm add @gakwaya/integrations-react react
+pnpm add @gakwaya/app-agent-react react
 ```
 
 ```tsx
-import { AppAgentProvider, useAppAgent, AppAgentPanel } from '@gakwaya/integrations-react';
+import { AppAgentProvider, useAppAgent, AppAgentPanel } from '@gakwaya/app-agent-react';
 
 function Shop() {
   const { execute } = useAppAgent();
@@ -66,7 +66,7 @@ See [examples/react-demo](../examples/react-demo/).
 ## Vue
 
 ```bash
-pnpm add @gakwaya/integrations-vue vue
+pnpm add @gakwaya/app-agent-vue vue
 ```
 
 ```vue
@@ -76,7 +76,7 @@ pnpm add @gakwaya/integrations-vue vue
 ```
 
 ```typescript
-import { AppAgentProvider, useAppAgent, AppAgentPanel } from '@gakwaya/integrations-vue';
+import { AppAgentProvider, useAppAgent, AppAgentPanel } from '@gakwaya/app-agent-vue';
 ```
 
 See [examples/vue-demo](../examples/vue-demo/).
@@ -84,13 +84,13 @@ See [examples/vue-demo](../examples/vue-demo/).
 ## Svelte
 
 ```bash
-pnpm add @gakwaya/integrations-svelte svelte
+pnpm add @gakwaya/app-agent-svelte svelte
 ```
 
 ```svelte
 <script>
-  import { setAppAgentContext } from '@gakwaya/integrations-svelte';
-  import AppAgentPanel from '@gakwaya/integrations-svelte/AppAgentPanel.svelte';
+  import { setAppAgentContext } from '@gakwaya/app-agent-svelte';
+  import AppAgentPanel from '@gakwaya/app-agent-svelte/AppAgentPanel.svelte';
 
   const agent = setAppAgentContext(agentConfig);
 </script>

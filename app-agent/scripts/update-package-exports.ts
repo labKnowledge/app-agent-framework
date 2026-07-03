@@ -55,14 +55,14 @@ function updatePackage(packageDir: string): void {
     },
   };
 
-  if (pkg.name === '@gakwaya/ui' && existsSync(join(packageDir, 'src/style.css'))) {
+  if (pkg.name === '@gakwaya/app-agent-ui' && existsSync(join(packageDir, 'src/style.css'))) {
     exports['./style.css'] = {
       types: './dist/style.css',
       import: './dist/style.css',
     };
   }
 
-  if (pkg.name === '@gakwaya/integrations-svelte') {
+  if (pkg.name === '@gakwaya/app-agent-svelte') {
     exports['./AppAgentPanel.svelte'] = {
       types: './dist/AppAgentPanel.svelte',
       import: './dist/AppAgentPanel.svelte',

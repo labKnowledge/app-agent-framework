@@ -71,7 +71,7 @@ importers:
 
   examples/react-demo:
     dependencies:
-      '@gakwaya/integrations-react':
+      '@gakwaya/app-agent-react':
         specifier: workspace:*
         version: link:../../packages/integrations/react
       react:
@@ -99,7 +99,7 @@ importers:
 
   examples/svelte-demo:
     dependencies:
-      '@gakwaya/integrations-svelte':
+      '@gakwaya/app-agent-svelte':
         specifier: workspace:*
         version: link:../../packages/integrations/svelte
     devDependencies:
@@ -121,7 +121,7 @@ importers:
       '@gakwaya/app-agent':
         specifier: workspace:*
         version: link:../../packages/app-agent
-      '@gakwaya/ui':
+      '@gakwaya/app-agent-ui':
         specifier: workspace:*
         version: link:../../packages/ui
     devDependencies:
@@ -134,7 +134,7 @@ importers:
 
   examples/vue-demo:
     dependencies:
-      '@gakwaya/integrations-vue':
+      '@gakwaya/app-agent-vue':
         specifier: workspace:*
         version: link:../../packages/integrations/vue
       vue:
@@ -153,19 +153,19 @@ importers:
 
   packages/app-agent:
     dependencies:
-      '@gakwaya/core':
+      '@gakwaya/app-agent-core':
         specifier: workspace:*
         version: link:../core
-      '@gakwaya/entities':
+      '@gakwaya/app-agent-entities':
         specifier: workspace:*
         version: link:../entities
-      '@gakwaya/semantic-registry':
+      '@gakwaya/app-agent-semantic-registry':
         specifier: workspace:*
         version: link:../semantic-registry
-      '@gakwaya/ui':
+      '@gakwaya/app-agent-ui':
         specifier: workspace:*
         version: link:../ui
-      '@gakwaya/workflow':
+      '@gakwaya/app-agent-workflow':
         specifier: workspace:*
         version: link:../workflow
     devDependencies:
@@ -181,34 +181,34 @@ importers:
 
   packages/core:
     dependencies:
-      '@gakwaya/entities':
+      '@gakwaya/app-agent-entities':
         specifier: workspace:*
         version: link:../entities
-      '@gakwaya/learning':
+      '@gakwaya/app-agent-learning':
         specifier: workspace:*
         version: link:../learning
-      '@gakwaya/llm':
+      '@gakwaya/app-agent-llm':
         specifier: workspace:*
         version: link:../llm
-      '@gakwaya/memory':
+      '@gakwaya/app-agent-memory':
         specifier: workspace:*
         version: link:../memory
-      '@gakwaya/multi-agent':
+      '@gakwaya/app-agent-multi-agent':
         specifier: workspace:*
         version: link:../multi-agent
-      '@gakwaya/planner':
+      '@gakwaya/app-agent-planner':
         specifier: workspace:*
         version: link:../planner
-      '@gakwaya/semantic-registry':
+      '@gakwaya/app-agent-semantic-registry':
         specifier: workspace:*
         version: link:../semantic-registry
-      '@gakwaya/state-manager':
+      '@gakwaya/app-agent-state-manager':
         specifier: workspace:*
         version: link:../state-manager
-      '@gakwaya/tools':
+      '@gakwaya/app-agent-tools':
         specifier: workspace:*
         version: link:../tools
-      '@gakwaya/workflow':
+      '@gakwaya/app-agent-workflow':
         specifier: workspace:*
         version: link:../workflow
       eventemitter3:
@@ -252,13 +252,13 @@ importers:
       '@gakwaya/app-agent':
         specifier: workspace:*
         version: link:../../app-agent
-      '@gakwaya/entities':
+      '@gakwaya/app-agent-entities':
         specifier: workspace:*
         version: link:../../entities
-      '@gakwaya/integrations-shared':
+      '@gakwaya/app-agent-integrations-shared':
         specifier: workspace:*
         version: link:../shared
-      '@gakwaya/ui':
+      '@gakwaya/app-agent-ui':
         specifier: workspace:*
         version: link:../../ui
     devDependencies:
@@ -292,10 +292,10 @@ importers:
       '@gakwaya/app-agent':
         specifier: workspace:*
         version: link:../../app-agent
-      '@gakwaya/entities':
+      '@gakwaya/app-agent-entities':
         specifier: workspace:*
         version: link:../../entities
-      '@gakwaya/ui':
+      '@gakwaya/app-agent-ui':
         specifier: workspace:*
         version: link:../../ui
     devDependencies:
@@ -314,13 +314,13 @@ importers:
       '@gakwaya/app-agent':
         specifier: workspace:*
         version: link:../../app-agent
-      '@gakwaya/entities':
+      '@gakwaya/app-agent-entities':
         specifier: workspace:*
         version: link:../../entities
-      '@gakwaya/integrations-shared':
+      '@gakwaya/app-agent-integrations-shared':
         specifier: workspace:*
         version: link:../shared
-      '@gakwaya/ui':
+      '@gakwaya/app-agent-ui':
         specifier: workspace:*
         version: link:../../ui
     devDependencies:
@@ -342,13 +342,13 @@ importers:
       '@gakwaya/app-agent':
         specifier: workspace:*
         version: link:../../app-agent
-      '@gakwaya/entities':
+      '@gakwaya/app-agent-entities':
         specifier: workspace:*
         version: link:../../entities
-      '@gakwaya/integrations-shared':
+      '@gakwaya/app-agent-integrations-shared':
         specifier: workspace:*
         version: link:../shared
-      '@gakwaya/ui':
+      '@gakwaya/app-agent-ui':
         specifier: workspace:*
         version: link:../../ui
     devDependencies:
@@ -367,7 +367,7 @@ importers:
 
   packages/learning:
     dependencies:
-      '@gakwaya/entities':
+      '@gakwaya/app-agent-entities':
         specifier: workspace:*
         version: link:../entities
     devDependencies:
@@ -383,7 +383,7 @@ importers:
 
   packages/llm:
     dependencies:
-      '@gakwaya/entities':
+      '@gakwaya/app-agent-entities':
         specifier: workspace:*
         version: link:../entities
       eventemitter3:
@@ -405,7 +405,7 @@ importers:
 
   packages/memory:
     dependencies:
-      '@gakwaya/entities':
+      '@gakwaya/app-agent-entities':
         specifier: workspace:*
         version: link:../entities
       eventemitter3:
@@ -427,7 +427,7 @@ importers:
 
   packages/multi-agent:
     dependencies:
-      '@gakwaya/entities':
+      '@gakwaya/app-agent-entities':
         specifier: workspace:*
         version: link:../entities
     devDependencies:
@@ -443,7 +443,7 @@ importers:
 
   packages/planner:
     dependencies:
-      '@gakwaya/entities':
+      '@gakwaya/app-agent-entities':
         specifier: workspace:*
         version: link:../entities
       eventemitter3:
@@ -465,7 +465,7 @@ importers:
 
   packages/semantic-registry:
     dependencies:
-      '@gakwaya/entities':
+      '@gakwaya/app-agent-entities':
         specifier: workspace:*
         version: link:../entities
       eventemitter3:
@@ -484,7 +484,7 @@ importers:
 
   packages/state-manager:
     dependencies:
-      '@gakwaya/entities':
+      '@gakwaya/app-agent-entities':
         specifier: workspace:*
         version: link:../entities
     devDependencies:
@@ -500,7 +500,7 @@ importers:
 
   packages/tools:
     dependencies:
-      '@gakwaya/entities':
+      '@gakwaya/app-agent-entities':
         specifier: workspace:*
         version: link:../entities
       eventemitter3:
@@ -525,10 +525,10 @@ importers:
 
   packages/ui:
     dependencies:
-      '@gakwaya/core':
+      '@gakwaya/app-agent-core':
         specifier: workspace:*
         version: link:../core
-      '@gakwaya/entities':
+      '@gakwaya/app-agent-entities':
         specifier: workspace:*
         version: link:../entities
     devDependencies:
@@ -544,7 +544,7 @@ importers:
 
   packages/workflow:
     dependencies:
-      '@gakwaya/entities':
+      '@gakwaya/app-agent-entities':
         specifier: workspace:*
         version: link:../entities
       eventemitter3:

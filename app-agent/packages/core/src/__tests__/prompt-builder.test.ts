@@ -4,7 +4,7 @@ import {
   buildUserPrompt,
   toolDescriptorsFromNames,
 } from '../prompt-builder';
-import type { AgentObservation } from '@gakwaya/entities';
+import type { AgentObservation } from '@gakwaya/app-agent-entities';
 
 const observation: AgentObservation = {
   appState: {

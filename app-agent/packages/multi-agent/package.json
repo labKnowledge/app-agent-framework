@@ -1,6 +1,6 @@
 {
-  "name": "@gakwaya/multi-agent",
-  "version": "0.1.2",
+  "name": "@gakwaya/app-agent-multi-agent",
+  "version": "1.0.0",
   "type": "module",
   "description": "Multi-agent coordination for specialized task routing",
   "main": "./dist/index.js",
@@ -19,7 +19,7 @@
     "prepublishOnly": "pnpm build"
   },
   "dependencies": {
-    "@gakwaya/entities": "workspace:*"
+    "@gakwaya/app-agent-entities": "workspace:*"
   },
   "devDependencies": {
     "typescript": "^5.3.0",

@@ -2,7 +2,7 @@
 
 **Status:** Fixed  
 **Reported from:** Kidsync HAR analysis  
-**Affects:** `@gakwaya/core`  
+**Affects:** `@gakwaya/app-agent-core`  
 **Severity:** Medium — empty or outdated observations after route change
 
 ## Summary

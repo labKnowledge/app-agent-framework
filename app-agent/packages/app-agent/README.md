@@ -15,7 +15,7 @@ npm install @gakwaya/app-agent
 ### React (optional)
 
 ```bash
-pnpm add @gakwaya/integrations-react @gakwaya/ui
+pnpm add @gakwaya/app-agent-react @gakwaya/app-agent-ui
 ```
 
 ## Quick start
@@ -80,7 +80,7 @@ agent.dispose();
 ## React integration
 
 ```tsx
-import { AppAgentProvider, useAppAgent, AppAgentPanel } from '@gakwaya/integrations-react';
+import { AppAgentProvider, useAppAgent, AppAgentPanel } from '@gakwaya/app-agent-react';
 
 function Shop() {
   const { execute } = useAppAgent();
@@ -105,11 +105,11 @@ export function App() {
 
 | Package | Purpose |
 |---------|---------|
-| `@gakwaya/integrations-react` | React provider + hooks + panel |
-| `@gakwaya/integrations-vue` | Vue composables + provider |
-| `@gakwaya/integrations-svelte` | Svelte context + panel |
-| `@gakwaya/ui` | Standalone agent panel UI |
-| `@gakwaya/core` | Core ReAct orchestrator (advanced) |
+| `@gakwaya/app-agent-react` | React provider + hooks + panel |
+| `@gakwaya/app-agent-vue` | Vue composables + provider |
+| `@gakwaya/app-agent-svelte` | Svelte context + panel |
+| `@gakwaya/app-agent-ui` | Standalone agent panel UI |
+| `@gakwaya/app-agent-core` | Core ReAct orchestrator (advanced) |
 
 ## Links
 

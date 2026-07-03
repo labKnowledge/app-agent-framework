@@ -1,7 +1,7 @@
 /**
- * LLM Client — re-exported from @gakwaya/llm for backward compatibility
+ * LLM Client — re-exported from @gakwaya/app-agent-llm for backward compatibility
  *
- * @deprecated Import EnhancedLLMClient from @gakwaya/llm instead
+ * @deprecated Import EnhancedLLMClient from @gakwaya/app-agent-llm instead
  */
 
-export { EnhancedLLMClient as LLMClient } from '@gakwaya/llm';
+export { EnhancedLLMClient as LLMClient } from '@gakwaya/app-agent-llm';

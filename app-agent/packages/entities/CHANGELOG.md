@@ -1,5 +1,11 @@
 # @gakwaya/entities
 
+## 1.0.0
+
+### Major Changes
+
+- Rename all modules to `@gakwaya/app-agent-*` prefixed npm names. Legacy `@gakwaya/core`, `@gakwaya/entities`, etc. are deprecated on npm after this release. See ADR-0009 and docs/packages.md.
+
 ## 0.1.2
 
 ### Patch Changes

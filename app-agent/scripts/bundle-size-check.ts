@@ -13,12 +13,12 @@ const PACKAGES_DIR = join(ROOT, 'packages');
 
 /** Gzip budget in KB for primary dist entry */
 const BUDGETS_KB_GZIP: Record<string, number> = {
-  '@gakwaya/entities': 5,
-  '@gakwaya/core': 100,
-  '@gakwaya/tools': 40,
-  '@gakwaya/llm': 30,
+  '@gakwaya/app-agent-entities': 5,
+  '@gakwaya/app-agent-core': 100,
+  '@gakwaya/app-agent-tools': 40,
+  '@gakwaya/app-agent-llm': 30,
   '@gakwaya/app-agent': 100,
-  '@gakwaya/ui': 30,
+  '@gakwaya/app-agent-ui': 30,
 };
 
 function gzipSizeKb(filePath: string): number {

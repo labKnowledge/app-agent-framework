@@ -2,8 +2,8 @@
  * Prompt construction for ReAct loop
  */
 
-import type { AgentObservation } from '@gakwaya/entities';
-import type { LLMMessage } from '@gakwaya/entities';
+import type { AgentObservation } from '@gakwaya/app-agent-entities';
+import type { LLMMessage } from '@gakwaya/app-agent-entities';
 
 export interface ToolPromptDescriptor {
   name: string;

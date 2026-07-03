@@ -10,5 +10,6 @@
 | [ADR-0006](./ADR-0006-framework-integrations.md)         | Framework integration packages      | Accepted |
 | [ADR-0007](./ADR-0007-multi-agent-coordinator.md)        | Multi-agent coordinator             | Accepted |
 | [ADR-0008](./ADR-0008-learning-system.md)                | Learning system                     | Accepted |
+| [ADR-0009](./ADR-0009-prefixed-package-names.md)         | Prefixed npm package names          | Accepted |
 
 See also [Architecture Overview](../architecture.md), [Documentation index](../README.md), and [AGENTS.md](../../AGENTS.md).

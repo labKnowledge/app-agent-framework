@@ -12,7 +12,7 @@ Accepted
 
 ## Decision Outcome
 
-Add `@gakwaya/learning` infrastructure package with:
+Add `@gakwaya/app-agent-learning` infrastructure package with:
 
 - `LearningSystem` — records patterns after successful tasks
 - `PatternMatcher` — similarity scoring to find reusable patterns
@@ -20,7 +20,7 @@ Add `@gakwaya/learning` infrastructure package with:
 
 ### Layer Rules
 
-`@gakwaya/learning` → `@gakwaya/entities` (+ storage port types)
+`@gakwaya/app-agent-learning` → `@gakwaya/app-agent-entities` (+ storage port types)
 
 ### Integration
 

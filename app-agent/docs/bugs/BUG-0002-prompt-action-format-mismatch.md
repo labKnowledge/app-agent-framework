@@ -2,7 +2,7 @@
 
 **Status:** Fixed  
 **Reported from:** Kidsync HAR (`kids.eligapris.tech-app-agent-struggling.har`)  
-**Affects:** `@gakwaya/core`, `@gakwaya/llm`  
+**Affects:** `@gakwaya/app-agent-core`, `@gakwaya/app-agent-llm`  
 **Severity:** High — every LLM step fails action execution
 
 ## Summary

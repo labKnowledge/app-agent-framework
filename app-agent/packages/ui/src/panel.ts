@@ -5,7 +5,7 @@
  */
 
 import type { PanelConfig, PanelState } from './types';
-import type { AgentStatus, HistoricalEvent } from '@gakwaya/entities';
+import type { AgentStatus, HistoricalEvent } from '@gakwaya/app-agent-entities';
 
 /**
  * AppAgentPanel Class

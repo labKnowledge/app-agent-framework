@@ -3,10 +3,10 @@
  */
 
 import { AppAgent } from '@gakwaya/app-agent';
-import { AppAgentPanel } from '@gakwaya/ui';
+import { AppAgentPanel } from '@gakwaya/app-agent-ui';
 import type { AppAgentConfig } from '@gakwaya/app-agent';
-import type { AgentStatus, HistoricalEvent } from '@gakwaya/entities';
-import type { PanelConfig } from '@gakwaya/ui';
+import type { AgentStatus, HistoricalEvent } from '@gakwaya/app-agent-entities';
+import type { PanelConfig } from '@gakwaya/app-agent-ui';
 
 export interface AgentContextState {
   status: AgentStatus;

@@ -16,20 +16,20 @@
 
 | Package | Status |
 |---------|--------|
-| `@gakwaya/entities` | Complete |
-| `@gakwaya/state-manager` | Complete |
-| `@gakwaya/memory` | Complete |
-| `@gakwaya/llm` | Complete |
-| `@gakwaya/tools` | Complete |
-| `@gakwaya/planner` | Complete |
-| `@gakwaya/workflow` | Complete |
-| `@gakwaya/semantic-registry` | Complete |
-| `@gakwaya/multi-agent` | Complete |
-| `@gakwaya/learning` | Complete |
-| `@gakwaya/core` | Complete |
-| `@gakwaya/ui` | Complete |
+| `@gakwaya/app-agent-entities` | Complete |
+| `@gakwaya/app-agent-state-manager` | Complete |
+| `@gakwaya/app-agent-memory` | Complete |
+| `@gakwaya/app-agent-llm` | Complete |
+| `@gakwaya/app-agent-tools` | Complete |
+| `@gakwaya/app-agent-planner` | Complete |
+| `@gakwaya/app-agent-workflow` | Complete |
+| `@gakwaya/app-agent-semantic-registry` | Complete |
+| `@gakwaya/app-agent-multi-agent` | Complete |
+| `@gakwaya/app-agent-learning` | Complete |
+| `@gakwaya/app-agent-core` | Complete |
+| `@gakwaya/app-agent-ui` | Complete |
 | `@gakwaya/app-agent` | Complete (public facade) |
-| `@gakwaya/integrations-*` | Complete |
+| `@gakwaya/app-agent-react`, `@gakwaya/app-agent-vue`, `@gakwaya/app-agent-svelte` | Complete |
 | Demos (vanilla, react, vue, svelte) | Complete |
 
 ## Testing

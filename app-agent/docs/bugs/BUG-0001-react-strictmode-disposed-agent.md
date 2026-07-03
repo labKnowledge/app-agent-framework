@@ -2,7 +2,7 @@
 
 **Status:** Fixed (core + integrations-react)  
 **Reported from:** Kidsync app-agent pilot integration  
-**Affects:** `@gakwaya/integrations-react`, `@gakwaya/core`  
+**Affects:** `@gakwaya/app-agent-react`, `@gakwaya/app-agent-core`  
 **Severity:** High — agent unusable in default React 18+ dev setups
 
 ## Summary
@@ -30,7 +30,7 @@ No user cancellation occurred. The agent never reaches `observe()` / `think()`.
 
 Two interacting issues:
 
-### 1. `@gakwaya/core` — `AbortController` is never reset per task
+### 1. `@gakwaya/app-agent-core` — `AbortController` is never reset per task
 
 `AppAgentCore` creates one `AbortController` in the constructor. `dispose()` calls `abortController.abort()` and sets `status = 'disposed'`. `runTask()` checks `abortController.signal.aborted` at the start of each step but **never creates a fresh controller** for a new task.
 
@@ -38,7 +38,7 @@ Once aborted (via `dispose()` or any future cancel API), every subsequent `execu
 
 Relevant code: `packages/core/src/agent.ts` — constructor, `runTask()`, `dispose()`.
 
-### 2. `@gakwaya/integrations-react` — provider disposes agent on unmount
+### 2. `@gakwaya/app-agent-react` — provider disposes agent on unmount
 
 ```tsx
 const context = useMemo(() => createAgentContext(config, …), []);

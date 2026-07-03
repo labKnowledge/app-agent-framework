@@ -2,7 +2,7 @@
 
 **Status:** Fixed  
 **Reported from:** Kidsync HAR  
-**Affects:** `@gakwaya/tools`, `@gakwaya/entities`, `@gakwaya/core`  
+**Affects:** `@gakwaya/app-agent-tools`, `@gakwaya/app-agent-entities`, `@gakwaya/app-agent-core`  
 **Severity:** Medium — model invents `navigate_to_url`
 
 ## Summary

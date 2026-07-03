@@ -1,4 +1,4 @@
-# @gakwaya/tools
+# @gakwaya/app-agent-tools
 
 Advanced tool system with composition, discovery, caching, and enhanced execution capabilities for AI agents.
 
@@ -16,7 +16,7 @@ Advanced tool system with composition, discovery, caching, and enhanced executio
 ## Installation
 
 ```bash
-pnpm add @gakwaya/tools
+pnpm add @gakwaya/app-agent-tools
 ```
 
 ## Usage
@@ -24,7 +24,7 @@ pnpm add @gakwaya/tools
 ### Basic Tool Registration
 
 ```typescript
-import { ToolRegistry } from '@gakwaya/tools';
+import { ToolRegistry } from '@gakwaya/app-agent-tools';
 import { z } from 'zod';
 
 const registry = new ToolRegistry({

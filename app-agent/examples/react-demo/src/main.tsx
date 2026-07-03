@@ -1,6 +1,6 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
-import { AppAgentProvider, useAppAgent, AppAgentPanel } from '@gakwaya/integrations-react';
+import { AppAgentProvider, useAppAgent, AppAgentPanel } from '@gakwaya/app-agent-react';
 import {
   initialShopState,
   getDemoAppState,

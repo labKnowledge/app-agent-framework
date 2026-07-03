@@ -1,6 +1,6 @@
 {
-  "name": "@gakwaya/integrations-react",
-  "version": "0.1.3",
+  "name": "@gakwaya/app-agent-react",
+  "version": "1.0.0",
   "type": "module",
   "description": "React integration for App-Agent",
   "main": "./dist/index.js",
@@ -20,9 +20,9 @@
   },
   "dependencies": {
     "@gakwaya/app-agent": "workspace:*",
-    "@gakwaya/entities": "workspace:*",
-    "@gakwaya/integrations-shared": "workspace:*",
-    "@gakwaya/ui": "workspace:*"
+    "@gakwaya/app-agent-entities": "workspace:*",
+    "@gakwaya/app-agent-integrations-shared": "workspace:*",
+    "@gakwaya/app-agent-ui": "workspace:*"
   },
   "peerDependencies": {
     "react": ">=18.0.0"

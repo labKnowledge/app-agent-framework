@@ -1,5 +1,5 @@
 /**
- * Core orchestration types — domain types live in @gakwaya/entities
+ * Core orchestration types — domain types live in @gakwaya/app-agent-entities
  */
 
 import type {
@@ -10,7 +10,7 @@ import type {
   IAgent,
   AgentTool,
   DOMState,
-} from '@gakwaya/entities';
+} from '@gakwaya/app-agent-entities';
 
 export type {
   AppState,
@@ -34,17 +34,17 @@ export type {
   InputAction,
   SelectAction,
   ScrollAction,
-} from '@gakwaya/entities';
+} from '@gakwaya/app-agent-entities';
 
-export { toolSchemas } from '@gakwaya/entities';
+export { toolSchemas } from '@gakwaya/app-agent-entities';
 
-/** @deprecated Use AgentTool from @gakwaya/entities */
+/** @deprecated Use AgentTool from @gakwaya/app-agent-entities */
 export type Tool<TParams = unknown> = AgentTool<TParams>;
 
-/** @deprecated Use AgentToolContext from @gakwaya/entities */
-export type ToolContext = import('@gakwaya/entities').AgentToolContext;
+/** @deprecated Use AgentToolContext from @gakwaya/app-agent-entities */
+export type ToolContext = import('@gakwaya/app-agent-entities').AgentToolContext;
 
-export type LLMResponse = import('@gakwaya/entities').CoreLLMResponse;
+export type LLMResponse = import('@gakwaya/app-agent-entities').CoreLLMResponse;
 
 /**
  * Core agent configuration
@@ -66,12 +66,12 @@ export interface AgentConfig {
   enableMultiAgent?: boolean;
   /** Enable pattern learning from successful tasks (default: false) */
   enableLearning?: boolean;
-  learningConfig?: import('@gakwaya/learning').LearningConfig;
-  customAgents?: Record<string, import('@gakwaya/multi-agent').SpecializedAgent>;
-  memoryConfig?: import('@gakwaya/memory').MemoryManagerConfig;
+  learningConfig?: import('@gakwaya/app-agent-learning').LearningConfig;
+  customAgents?: Record<string, import('@gakwaya/app-agent-multi-agent').SpecializedAgent>;
+  memoryConfig?: import('@gakwaya/app-agent-memory').MemoryManagerConfig;
   customTools?: Record<string, AgentTool | null>;
-  customWorkflows?: Record<string, import('@gakwaya/entities').WorkflowDefinition>;
-  entitySchemas?: Record<string, import('@gakwaya/entities').EntitySchema>;
+  customWorkflows?: Record<string, import('@gakwaya/app-agent-entities').WorkflowDefinition>;
+  entitySchemas?: Record<string, import('@gakwaya/app-agent-entities').EntitySchema>;
   onBeforeStep?: (agent: IAgent, step: number) => Promise<void>;
   onAfterStep?: (agent: IAgent, history: HistoricalEvent[]) => Promise<void>;
   onBeforeTask?: (agent: IAgent) => Promise<void>;
@@ -103,7 +103,7 @@ export type AgentEventPayload =
   | { type: 'activity'; activity: string }
   | {
       type: 'statechange';
-      diff: import('@gakwaya/state-manager').StateDiff;
+      diff: import('@gakwaya/app-agent-state-manager').StateDiff;
       newState: AppState;
       oldState: AppState;
     }

@@ -1,4 +1,4 @@
-# @gakwaya/memory
+# @gakwaya/app-agent-memory
 
 Memory management system for AI agents with comprehensive capabilities for working memory, episodic memory, and semantic memory.
 
@@ -14,13 +14,13 @@ Memory management system for AI agents with comprehensive capabilities for worki
 ## Installation
 
 ```bash
-pnpm add @gakwaya/memory
+pnpm add @gakwaya/app-agent-memory
 ```
 
 ## Usage
 
 ```typescript
-import { MemoryManager } from '@gakwaya/memory';
+import { MemoryManager } from '@gakwaya/app-agent-memory';
 
 const memory = new MemoryManager({
   maxWorkingMemory: 50,

@@ -25,10 +25,10 @@ Accepted
 
 | Layer          | Packages                                                                              |
 | -------------- | ------------------------------------------------------------------------------------- |
-| Domain         | `@gakwaya/entities`                                                                 |
+| Domain         | `@gakwaya/app-agent-entities`                                                                 |
 | Infrastructure | `state-manager`, `memory`, `llm`, `tools`, `planner`, `workflow`, `semantic-registry` |
-| Orchestration  | `@gakwaya/core`                                                                     |
-| Presentation   | `@gakwaya/ui`                                                                       |
+| Orchestration  | `@gakwaya/app-agent-core`                                                                     |
+| Presentation   | `@gakwaya/app-agent-ui`                                                                       |
 | Public API     | `@gakwaya/app-agent`                                                                |
 
 ### Positive Consequences

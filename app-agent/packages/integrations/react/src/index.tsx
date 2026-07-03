@@ -2,7 +2,8 @@ import React, {
   createContext,
   useContext,
   useEffect,
-  useMemo,
+  useRef,
+  useState,
   useSyncExternalStore,
   type ReactNode,
 } from 'react';
@@ -27,9 +28,17 @@ export function AppAgentProvider({
   mountPanel = true,
   panelConfig,
 }: AppAgentProviderProps) {
-  const context = useMemo(() => createAgentContext(config, { mountPanel, panelConfig }), []);
+  const configRef = useRef(config);
+  configRef.current = config;
 
-  useEffect(() => () => context.dispose(), [context]);
+  // useState lazy init (not useMemo []) — each mount gets a fresh agent after StrictMode remount/dispose
+  const [context] = useState(() =>
+    createAgentContext(configRef.current, { mountPanel, panelConfig })
+  );
+
+  useEffect(() => {
+    return () => context.dispose();
+  }, [context]);
 
   return <AgentReactContext.Provider value={context}>{children}</AgentReactContext.Provider>;
 }

@@ -135,6 +135,15 @@ describe('AppAgentCore', () => {
       expect(() => agent.dispose()).not.toThrow();
       expect(agent.status).toBe('disposed');
     });
+
+    it('should reject execute after dispose with a clear error', async () => {
+      agent.dispose();
+
+      const result = await agent.execute('test task');
+
+      expect(result.success).toBe(false);
+      expect(result.error?.message).toBe('Agent has been disposed');
+    });
   });
 
   describe('Error Handling', () => {

@@ -1,5 +1,13 @@
 # @gakwaya/ui
 
+## 0.1.2
+
+### Patch Changes
+
+- Updated dependencies
+  - @gakwaya/entities@0.1.2
+  - @gakwaya/core@0.1.2
+
 ## 0.1.1
 
 ### Patch Changes

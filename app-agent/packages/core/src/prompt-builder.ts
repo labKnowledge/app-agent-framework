@@ -5,6 +5,44 @@
 import type { AgentObservation } from '@gakwaya/entities';
 import type { LLMMessage } from '@gakwaya/entities';
 
+export interface ToolPromptDescriptor {
+  name: string;
+  description: string;
+  parameters: string;
+}
+
+const TOOL_PARAM_HINTS: Record<string, string> = {
+  done: '(none — use { "done": true })',
+  wait: '{ "duration": number }',
+  click: '{ "index": number }',
+  input: '{ "index": number, "text": string }',
+  select: '{ "index": number, "value": string }',
+  scroll: '{ "direction"?: "up"|"down"|"left"|"right", "amount"?: number }',
+  navigate: '{ "path": string }',
+};
+
+export function buildToolsSection(tools: ToolPromptDescriptor[]): string {
+  if (tools.length === 0) {
+    return '';
+  }
+
+  const lines = tools.map(
+    (tool) => `- ${tool.name}: ${tool.description}\n  parameters: ${tool.parameters}`
+  );
+
+  return `\nAvailable actions (use exactly one tool name as the sole key in "action"):\n${lines.join('\n')}\n`;
+}
+
+export function toolDescriptorsFromNames(
+  tools: Array<{ name: string; description: string }>
+): ToolPromptDescriptor[] {
+  return tools.map((tool) => ({
+    name: tool.name,
+    description: tool.description,
+    parameters: TOOL_PARAM_HINTS[tool.name] ?? '{}',
+  }));
+}
+
 export function buildSystemPrompt(entityContext?: string): string {
   const entitySection = entityContext ? `\nRegistered entities:\n${entityContext}\n` : '';
 
@@ -28,15 +66,22 @@ Always respond with a JSON object containing:
 - evaluation_previous_goal: What happened in the last step?
 - memory: What should you remember?
 - next_goal: What do you want to achieve next?
-- action: { action_name: parameters }
+- action: an object with exactly ONE key — the tool name — and tool parameters as the value
 
-Available actions will be provided in the user message.`;
+Action format examples:
+- { "click": { "index": 0 } }
+- { "wait": { "duration": 2000 } }
+- { "navigate": { "path": "/attendance" } }
+- { "done": true }
+
+Do NOT use "action_name", "parameters", "click_element", or "navigate_to_url". Use only the tool names listed in the user message.`;
 }
 
 export function buildUserPrompt(
   task: string,
   observation: AgentObservation,
-  history: Array<{ type: string; data: unknown }>
+  history: Array<{ type: string; data: unknown }>,
+  tools?: ToolPromptDescriptor[]
 ): string {
   const { appState, domState, observations, stepNumber, totalWaitTime } = observation;
 
@@ -50,6 +95,13 @@ export function buildUserPrompt(
           })
           .join('\n')}\n`
       : '';
+
+  const interactiveSection =
+    domState.content.trim().length > 0
+      ? `Interactive Elements:\n${domState.content}\n${domState.footer ? `${domState.footer}\n` : ''}`
+      : `Interactive Elements:\n(no indexed elements found — use "wait" or "scroll" to allow the page to render, or "navigate" with a path; do not invent tool names)\n`;
+
+  const toolsSection = tools ? buildToolsSection(tools) : '';
 
   return `Task: ${task}
 
@@ -65,7 +117,7 @@ DOM State:
 - URL: ${domState.url}
 - Title: ${domState.title}
 
-${observations.length > 0 ? `Observations:\n${observations.map((o) => `- ${o}`).join('\n')}\n` : ''}${historyText}`;
+${interactiveSection}${toolsSection}${observations.length > 0 ? `Observations:\n${observations.map((o) => `- ${o}`).join('\n')}\n` : ''}${historyText}`;
 }
 
 export function buildMessages(
@@ -73,9 +125,10 @@ export function buildMessages(
   observation: AgentObservation,
   history: Array<{ type: string; data: unknown }>,
   entityContext?: string,
-  memoryContext?: string
+  memoryContext?: string,
+  tools?: ToolPromptDescriptor[]
 ): LLMMessage[] {
-  let userContent = buildUserPrompt(task, observation, history);
+  let userContent = buildUserPrompt(task, observation, history, tools);
   if (memoryContext) {
     userContent += memoryContext;
   }

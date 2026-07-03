@@ -1,5 +1,14 @@
 # @gakwaya/integrations-shared
 
+## 0.1.3
+
+### Patch Changes
+
+- Updated dependencies
+  - @gakwaya/entities@0.1.2
+  - @gakwaya/app-agent@0.1.3
+  - @gakwaya/ui@0.1.2
+
 ## 0.1.2
 
 ### Patch Changes

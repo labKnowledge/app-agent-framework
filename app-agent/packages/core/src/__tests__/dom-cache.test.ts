@@ -73,4 +73,20 @@ describe('AppAgentCore DOM cache', () => {
 
     expect(getFlatTreeSpy).toHaveBeenCalledTimes(2);
   });
+
+  it('rebuilds DOM when URL changes', async () => {
+    const observe = (agent as unknown as { observe: () => Promise<unknown> }).observe.bind(agent);
+    const getLocationHrefSpy = vi.spyOn(
+      (agent as unknown as { domEnv: { port: { getLocationHref: () => string } } }).domEnv.port,
+      'getLocationHref'
+    );
+
+    getLocationHrefSpy.mockReturnValue('https://example.com/dashboard');
+    await observe();
+
+    getLocationHrefSpy.mockReturnValue('https://example.com/attendance');
+    await observe();
+
+    expect(getFlatTreeSpy).toHaveBeenCalledTimes(2);
+  });
 });

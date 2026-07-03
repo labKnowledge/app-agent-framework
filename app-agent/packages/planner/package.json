@@ -1,6 +1,6 @@
 {
   "name": "@gakwaya/planner",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "type": "module",
   "description": "Intelligent task planning and decomposition system for AI agents",
   "main": "./dist/index.js",

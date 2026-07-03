@@ -24,6 +24,9 @@ export const toolSchemas = {
     direction: z.enum(['up', 'down', 'left', 'right']).default('down'),
     amount: z.number().min(0).default(100),
   }),
+  navigate: z.object({
+    path: z.string().min(1),
+  }),
 } as const;
 
 export type ToolSchemaName = keyof typeof toolSchemas;

@@ -1,5 +1,17 @@
 # @gakwaya/app-agent
 
+## 0.1.3
+
+### Patch Changes
+
+- Fix Kidsync production agent failures: StrictMode lifecycle, prompt/action format alignment, DOM observation in prompts, MUI interactive detection, navigate tool, and SPA DOM cache invalidation.
+- Updated dependencies
+  - @gakwaya/entities@0.1.2
+  - @gakwaya/core@0.1.2
+  - @gakwaya/semantic-registry@0.1.2
+  - @gakwaya/ui@0.1.2
+  - @gakwaya/workflow@0.1.2
+
 ## 0.1.2
 
 ### Patch Changes

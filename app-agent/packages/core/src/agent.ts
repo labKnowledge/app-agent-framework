@@ -26,7 +26,7 @@ import type {
   AgentActionResult,
   AgentTool,
 } from './types';
-import { buildMessages } from './prompt-builder';
+import { buildMessages, toolDescriptorsFromNames } from './prompt-builder';
 import { buildDOMState, createBrowserDOMEnvironment } from './ports';
 import type { FlatDOMTree } from './dom/types';
 
@@ -50,6 +50,8 @@ export class AppAgentCore extends EventEmitter {
     timestamp: number;
     checksum: string;
   } | null = null;
+
+  private _disposed = false;
 
   public task = '';
   public taskId = '';
@@ -150,6 +152,16 @@ export class AppAgentCore extends EventEmitter {
   }
 
   async execute(task: string): Promise<AgentResult> {
+    if (this._status === 'disposed') {
+      return {
+        success: false,
+        result: 'Agent has been disposed',
+        steps: 0,
+        history: [],
+        error: new Error('Agent has been disposed'),
+      };
+    }
+
     if (this.config.enableMultiAgent && this.multiAgentCoordinator && this.routingEnabled) {
       const route = this.multiAgentCoordinator.selectAgent(task);
       if (route) {
@@ -165,6 +177,19 @@ export class AppAgentCore extends EventEmitter {
   }
 
   private async runTask(task: string): Promise<AgentResult> {
+    if (this._status === 'disposed') {
+      return {
+        success: false,
+        result: 'Agent has been disposed',
+        steps: 0,
+        history: [],
+        error: new Error('Agent has been disposed'),
+      };
+    }
+
+    // Fresh cancellation scope per task (dispose() aborts the in-flight controller only)
+    this.abortController = new AbortController();
+
     this.taskStartedAt = Date.now();
     this.task = task;
     this.taskId = this.generateId();
@@ -214,6 +239,9 @@ export class AppAgentCore extends EventEmitter {
 
       for (let step = 1; step <= maxSteps; step++) {
         if (this.abortController.signal.aborted) {
+          if (this._disposed) {
+            throw new Error('Agent has been disposed');
+          }
           throw new Error('Task aborted by user');
         }
 
@@ -306,10 +334,11 @@ export class AppAgentCore extends EventEmitter {
     }
 
     if (this.shouldRebuildDOM()) {
+      const tree = this.domEnv.processor.getFlatTree();
       this.domCache = {
-        tree: this.domEnv.processor.getFlatTree(),
+        tree,
         timestamp: Date.now(),
-        checksum: this.domEnv.port.getChecksum(),
+        checksum: `${this.domEnv.port.getChecksum()}-${tree.interactiveElements.size}`,
       };
     }
 
@@ -373,7 +402,8 @@ export class AppAgentCore extends EventEmitter {
       observation,
       this.history,
       this.semanticRegistry.getContextSummary(),
-      memoryContext
+      memoryContext,
+      toolDescriptorsFromNames(this.toolRegistry.getAllTools())
     );
 
     const response = await this.llmClient.invokeReAct(messages);
@@ -421,6 +451,10 @@ export class AppAgentCore extends EventEmitter {
 
       const result = await this.toolRegistry.executeByName(actionName, validatedParams, context);
 
+      if (['click', 'input', 'select', 'scroll', 'navigate'].includes(actionName)) {
+        this.domCache = null;
+      }
+
       if (this.memoryManager) {
         this.memoryManager.addAction({
           timestamp: Date.now(),
@@ -464,6 +498,12 @@ export class AppAgentCore extends EventEmitter {
       selectDropdown: (el, value) => this.domEnv.actions.selectDropdown(el as HTMLElement, value),
       scroll: (dir, amount) => this.domEnv.actions.scroll(dir, amount),
       delay: (ms) => this.delay(ms),
+      navigate: (path) => {
+        if (typeof window !== 'undefined') {
+          window.location.assign(path);
+        }
+        return Promise.resolve({ result: `Navigated to ${path}` });
+      },
       onWait: (duration) => {
         this._states.totalWaitTime += duration;
       },
@@ -535,8 +575,13 @@ export class AppAgentCore extends EventEmitter {
 
   private shouldRebuildDOM(): boolean {
     if (!this.domCache) return true;
+    if (this._states.lastURL && this.domEnv.port.getLocationHref() !== this._states.lastURL) {
+      return true;
+    }
     if (this.domCache.timestamp < Date.now() - 5000) return true;
-    return this.domEnv.port.getChecksum() !== this.domCache.checksum;
+    const tree = this.domCache.tree;
+    const expectedChecksum = `${this.domEnv.port.getChecksum()}-${tree.interactiveElements.size}`;
+    return expectedChecksum !== this.domCache.checksum;
   }
 
   private addHistoryEvent(event: HistoricalEvent): void {
@@ -562,6 +607,12 @@ export class AppAgentCore extends EventEmitter {
   }
 
   dispose(): void {
+    if (this._status === 'disposed') {
+      return;
+    }
+
+    this._disposed = true;
+
     if (this.memoryManager) this.memoryManager.dispose();
     if (this.stateManager) this.stateManager.dispose();
     this.domCache = null;

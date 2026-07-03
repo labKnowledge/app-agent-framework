@@ -6,11 +6,8 @@
  */
 
 import EventEmitter from 'eventemitter3';
-import type {
-  AgentReasoning,
-  CoreLLMResponse,
-  LLMMessage as CoreLLMMessage,
-} from '@gakwaya/entities';
+import { parseReasoningContent } from './parse-reasoning';
+import type { CoreLLMResponse, LLMMessage as CoreLLMMessage } from '@gakwaya/entities';
 import type {
   LLMMessage,
   LLMResponse,
@@ -442,24 +439,9 @@ When responding:
     }
   }
 
-  private parseReasoning(content: string): AgentReasoning {
+  private parseReasoning(content: string): import('@gakwaya/entities').AgentReasoning {
     try {
-      const parsed = JSON.parse(content);
-      if (
-        typeof parsed.evaluation_previous_goal !== 'string' ||
-        typeof parsed.memory !== 'string' ||
-        typeof parsed.next_goal !== 'string' ||
-        typeof parsed.action !== 'object'
-      ) {
-        throw new Error('Invalid reasoning structure');
-      }
-
-      return {
-        evaluationPreviousGoal: parsed.evaluation_previous_goal,
-        memory: parsed.memory,
-        nextGoal: parsed.next_goal,
-        action: parsed.action,
-      };
+      return parseReasoningContent(content);
     } catch {
       return {
         evaluationPreviousGoal: 'Unable to parse evaluation',

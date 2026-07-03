@@ -5,4 +5,9 @@
  */
 
 export { EnhancedLLMClient } from './client';
+export {
+  parseReasoningContent,
+  normalizeActionShape,
+  stripMarkdownFences,
+} from './parse-reasoning';
 export type * from './types';

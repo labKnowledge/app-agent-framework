@@ -1,6 +1,6 @@
 {
   "name": "@gakwaya/core",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "type": "module",
   "description": "Core agent logic for App-Agent",
   "main": "./dist/index.js",

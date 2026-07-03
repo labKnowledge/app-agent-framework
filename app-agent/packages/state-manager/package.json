@@ -1,6 +1,6 @@
 {
   "name": "@gakwaya/state-manager",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "type": "module",
   "description": "App state integration and tracking for App-Agent",
   "main": "./dist/index.js",

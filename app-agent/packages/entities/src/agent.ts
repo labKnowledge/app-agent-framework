@@ -180,6 +180,13 @@ export type SelectAction = { select: { index: number; value: string } };
 export type ScrollAction = {
   scroll: { direction?: 'up' | 'down' | 'left' | 'right'; amount?: number };
 };
+export type NavigateAction = { navigate: { path: string } };
 
 export type AgentAction =
-  DoneAction | WaitAction | ClickAction | InputAction | SelectAction | ScrollAction;
+  | DoneAction
+  | WaitAction
+  | ClickAction
+  | InputAction
+  | SelectAction
+  | ScrollAction
+  | NavigateAction;

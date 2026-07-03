@@ -1,6 +1,6 @@
 {
   "name": "@gakwaya/memory",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "type": "module",
   "description": "Memory management system for AI agents with working, episodic, and semantic memory",
   "main": "./dist/index.js",

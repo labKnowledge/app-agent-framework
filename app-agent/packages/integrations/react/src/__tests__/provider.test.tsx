@@ -4,7 +4,7 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen, act } from '@testing-library/react';
 import '@testing-library/jest-dom/vitest';
-import React from 'react';
+import React, { StrictMode } from 'react';
 import { AppAgentProvider, useAppAgent } from '../index';
 
 const agentConfig = {
@@ -58,5 +58,17 @@ describe('integrations-react', () => {
     });
 
     expect(screen.getByTestId('status')).toBeTruthy();
+  });
+
+  it('survives React StrictMode remount without leaving a disposed agent', () => {
+    render(
+      <StrictMode>
+        <AppAgentProvider config={agentConfig} mountPanel={false}>
+          <StatusView />
+        </AppAgentProvider>
+      </StrictMode>
+    );
+
+    expect(screen.getByTestId('status')).toHaveTextContent('idle');
   });
 });

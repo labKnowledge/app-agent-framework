@@ -1,6 +1,6 @@
 {
   "name": "@gakwaya/integrations-svelte",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "type": "module",
   "description": "Svelte integration for App-Agent",
   "main": "./dist/index.js",

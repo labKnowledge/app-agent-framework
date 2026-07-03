@@ -179,12 +179,29 @@ export class DOMProcessor {
       return true;
     }
 
-    // Check for attributes that make elements interactive
+    // Check for ARIA roles that indicate interactivity
+    const role = element.getAttribute('role')?.toLowerCase();
+    const interactiveRoles = new Set([
+      'button',
+      'link',
+      'menuitem',
+      'tab',
+      'checkbox',
+      'switch',
+      'combobox',
+      'option',
+      'radio',
+      'menuitemcheckbox',
+      'menuitemradio',
+    ]);
+    if (role && interactiveRoles.has(role)) {
+      return true;
+    }
+
     if (
       element.hasAttribute('onclick') ||
       element.hasAttribute('onchange') ||
       element.hasAttribute('onsubmit') ||
-      element.hasAttribute('role') ||
       element.getAttribute('tabindex') !== null
     ) {
       return true;
@@ -415,16 +432,13 @@ export class DOMProcessor {
   dehydrateTree(tree: FlatDOMTree): string {
     const lines: string[] = [];
 
-    for (const node of tree.nodes) {
-      if (node.interactive && node.element) {
-        const el = node.element;
-        const marker = el.enabled ? '*' : '!';
-        lines.push(
-          `[${el.index}]${marker}<${el.type} />${el.text ? '\n    ' + el.text : ''}${
-            el.placeholder ? '\n    placeholder: ' + el.placeholder : ''
-          }`
-        );
-      }
+    for (const el of tree.interactiveElements.values()) {
+      const marker = el.enabled ? '*' : '!';
+      lines.push(
+        `[${el.index}]${marker}<${el.type} />${el.text ? '\n    ' + el.text : ''}${
+          el.placeholder ? '\n    placeholder: ' + el.placeholder : ''
+        }`
+      );
     }
 
     return lines.join('\n');

@@ -15,6 +15,7 @@ export interface BuiltinToolDeps {
     direction: 'up' | 'down' | 'left' | 'right',
     amount: number
   ) => Promise<{ result: string }>;
+  navigate: (path: string) => Promise<{ result: string }>;
   delay: (ms: number) => Promise<void>;
   onWait?: (duration: number) => void;
 }
@@ -127,6 +128,19 @@ export function createBuiltinTools(deps: BuiltinToolDeps): Tool[] {
         return result.result;
       },
       metadata: baseMetadata('scroll'),
+    },
+    {
+      id: 'navigate',
+      name: 'navigate',
+      description: 'Navigate to a URL or in-app path',
+      category: 'navigation',
+      inputSchema: toolSchemas.navigate,
+      execute: async (params) => {
+        const { path } = toolSchemas.navigate.parse(params);
+        const result = await deps.navigate(path);
+        return result.result;
+      },
+      metadata: baseMetadata('navigate'),
     },
   ];
 }

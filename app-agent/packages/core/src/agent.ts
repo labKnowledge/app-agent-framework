@@ -23,6 +23,7 @@ import { toolSchemas } from './types';
 import { LLMClient } from './llm/client';
 import { DOMProcessor, DOMActions } from './dom';
 import { StateManager } from '@app-agent/state-manager';
+import { MemoryManager } from '@app-agent/memory';
 
 /**
  * Core Agent Class
@@ -41,6 +42,7 @@ export class AppAgentCore extends EventEmitter {
   private domProcessor: DOMProcessor;
   private domActions: DOMActions;
   private stateManager?: StateManager;
+  private memoryManager?: MemoryManager;
   private domCache: {
     tree: ReturnType<DOMProcessor['getFlatTree']>;
     timestamp: number;
@@ -91,6 +93,21 @@ export class AppAgentCore extends EventEmitter {
       });
       this.stateManager.startTracking(1000);
     }
+
+    // Initialize memory manager if enabled
+    if (config.enableMemory) {
+      this.memoryManager = new MemoryManager(config.memoryConfig);
+
+      // Initialize working memory
+      this.memoryManager.updateWorkingMemory({
+        currentTask: '',
+        currentGoal: '',
+        recentObservations: [],
+        recentActions: [],
+        context: {},
+        temporaryState: {},
+      });
+    }
   }
 
   /**
@@ -123,6 +140,18 @@ export class AppAgentCore extends EventEmitter {
 
     // Clear DOM cache for new task
     this.domCache = null;
+
+    // Initialize working memory for new task
+    if (this.memoryManager) {
+      this.memoryManager.updateWorkingMemory({
+        currentTask: task,
+        currentGoal: `Complete task: ${task}`,
+        recentObservations: [],
+        recentActions: [],
+        context: {},
+        temporaryState: {},
+      });
+    }
 
     this.setStatus('running');
 
@@ -165,6 +194,12 @@ export class AppAgentCore extends EventEmitter {
         // Check if done
         if (this.isDone(reasoning)) {
           this.setStatus('completed');
+
+          // Consolidate episode to memory if enabled
+          if (this.memoryManager) {
+            this.memoryManager.consolidateEpisode(this.task, 'success');
+          }
+
           const result: AgentResult = {
             success: true,
             result: reasoning.memory,
@@ -285,6 +320,16 @@ export class AppAgentCore extends EventEmitter {
       observations.push('Warning: No interactive elements found on page');
     }
 
+    // Add observation to memory if enabled
+    if (this.memoryManager) {
+      this.memoryManager.addObservation({
+        timestamp: Date.now(),
+        type: 'observation',
+        data: { appState, domState, observations },
+        importance: 0.6,
+      });
+    }
+
     return {
       appState,
       domState,
@@ -301,6 +346,21 @@ export class AppAgentCore extends EventEmitter {
     this.showActivity('Reasoning...');
 
     const messages = this.buildMessages(observation);
+
+    // Add relevant context from memory if available
+    let memoryContext = '';
+    if (this.memoryManager) {
+      const relevantContext = this.memoryManager.getRelevantContext(this.task, 3);
+      if (relevantContext.length > 0) {
+        memoryContext = '\n\nRelevant Memory Context:\n' +
+          relevantContext.map(ctx => `- ${ctx.content} (relevance: ${ctx.relevance.toFixed(2)})`).join('\n');
+      }
+    }
+
+    // Add memory context to user message
+    if (memoryContext) {
+      messages[messages.length - 1].content += memoryContext;
+    }
 
     const response = await this.llmClient.invoke(messages, {
       // Tools will be added here
@@ -347,6 +407,17 @@ export class AppAgentCore extends EventEmitter {
       };
 
       const result = await tool.execute(validatedParams, context);
+
+      // Record action in memory if enabled
+      if (this.memoryManager) {
+        this.memoryManager.addAction({
+          timestamp: Date.now(),
+          type: actionName,
+          parameters: validatedParams,
+          result,
+          success: true,
+        });
+      }
 
       return {
         success: true,
@@ -620,6 +691,11 @@ ${this.history.length > 0 ? `History:\n${this.formatHistory()}\n` : ''}
    * Dispose of agent resources
    */
   dispose(): void {
+    // Clean up memory manager
+    if (this.memoryManager) {
+      this.memoryManager.dispose();
+    }
+
     // Clean up state manager
     if (this.stateManager) {
       this.stateManager.dispose();
@@ -656,6 +732,29 @@ ${this.history.length > 0 ? `History:\n${this.formatHistory()}\n` : ''}
    */
   getTools(): Map<string, import('./types').Tool> {
     return new Map(this.tools);
+  }
+
+  /**
+   * Get memory manager instance
+   */
+  getMemoryManager(): MemoryManager | undefined {
+    return this.memoryManager;
+  }
+
+  /**
+   * Get memory statistics
+   */
+  getMemoryStats(): import('@app-agent/memory').MemoryStats | undefined {
+    return this.memoryManager?.getStats();
+  }
+
+  /**
+   * Add semantic memory
+   */
+  addSemanticMemory(fact: string, confidence: number, source: import('@app-agent/memory').SemanticMemory['source']): void {
+    if (this.memoryManager) {
+      this.memoryManager.addSemanticMemory(fact, confidence, source);
+    }
   }
 }
 

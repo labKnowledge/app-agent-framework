@@ -57,6 +57,10 @@ export interface AgentConfig {
   language?: string;
   /** Whether to track state changes (default: false) */
   trackState?: boolean;
+  /** Whether to enable memory system (default: false) */
+  enableMemory?: boolean;
+  /** Memory manager configuration */
+  memoryConfig?: import('@app-agent/memory').MemoryManagerConfig;
 
   // Extensibility
   /** Custom tools to register */

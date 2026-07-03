@@ -2,6 +2,28 @@ import { readFileSync, copyFileSync, mkdirSync, existsSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
 import { defineConfig, type Plugin, type UserConfig } from 'vite';
 import dts from 'vite-plugin-dts';
+import obfuscator from 'rollup-plugin-obfuscator';
+import type { ObfuscatorOptions } from 'javascript-obfuscator';
+
+/** Light obfuscation — minify + hex identifiers + encoded string literals only. */
+const LIGHT_OBFUSCATION: ObfuscatorOptions = {
+  compact: true,
+  controlFlowFlattening: false,
+  deadCodeInjection: false,
+  debugProtection: false,
+  disableConsoleOutput: false,
+  identifierNamesGenerator: 'hexadecimal',
+  renameGlobals: false,
+  selfDefending: false,
+  simplify: true,
+  splitStrings: false,
+  stringArray: true,
+  stringArrayEncoding: ['base64'],
+  stringArrayThreshold: 0.5,
+  unicodeEscapeSequence: false,
+};
+
+const skipObfuscate = process.env.SKIP_OBFUSCATE === '1';
 
 export interface ViteLibConfigOptions {
   entry?: string;
@@ -97,6 +119,15 @@ export function createViteLibConfig(
     plugins.push(copyAssetsPlugin(packageDir, options.copyAssets));
   }
 
+  const rollupPlugins: Plugin[] = skipObfuscate
+    ? []
+    : [
+        obfuscator({
+          global: true,
+          options: LIGHT_OBFUSCATION,
+        }) as Plugin,
+      ];
+
   return defineConfig({
     root: packageDir,
     plugins,
@@ -108,9 +139,16 @@ export function createViteLibConfig(
       },
       outDir: resolve(packageDir, 'dist'),
       emptyOutDir: true,
-      sourcemap: true,
+      minify: 'terser',
+      sourcemap: skipObfuscate,
+      terserOptions: {
+        compress: { passes: 1 },
+        mangle: true,
+        format: { comments: false },
+      },
       rollupOptions: {
         external: createExternal(dependencies, peerDependencies),
+        plugins: rollupPlugins,
       },
     },
   });

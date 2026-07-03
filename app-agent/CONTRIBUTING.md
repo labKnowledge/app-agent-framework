@@ -19,10 +19,12 @@ pnpm install
 ```bash
 pnpm validate      # typecheck + lint + test + arch + build + bundle check
 pnpm test:coverage # coverage thresholds
-pnpm build         # compile all packages to dist/
+pnpm build         # compile all packages to dist/ (terser minify + light obfuscation)
 pnpm test:e2e      # Playwright smoke tests (run test:e2e:install first)
 pnpm bench         # performance benchmarks
 ```
+
+`pnpm build` minifies output with terser and applies light obfuscation (hex identifiers, encoded string literals — no control-flow flattening). For faster local iteration: `SKIP_OBFUSCATE=1 pnpm build`.
 
 ## Package layers
 

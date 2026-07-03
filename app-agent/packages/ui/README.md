@@ -1,4 +1,4 @@
-# @app-agent/ui
+# @gakwaya/ui
 
 UI components for App-Agent - panel and visual feedback during automation.
 
@@ -14,7 +14,7 @@ UI components for App-Agent - panel and visual feedback during automation.
 ## Usage
 
 ```typescript
-import { AppAgentPanel, SimulatorMask } from '@app-agent/ui';
+import { AppAgentPanel, SimulatorMask } from '@gakwaya/ui';
 
 // Create panel
 const panel = new AppAgentPanel({

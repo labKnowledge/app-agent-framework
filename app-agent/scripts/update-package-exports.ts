@@ -41,7 +41,7 @@ function updatePackage(packageDir: string): void {
 
   pkg.main = './dist/index.js';
   pkg.types = './dist/index.d.ts';
-  pkg.files = ['dist', 'README.md'];
+  pkg.files = existsSync(join(packageDir, 'README.md')) ? ['dist', 'README.md'] : ['dist'];
   pkg.repository = { ...REPO, directory: `app-agent/${relDir}` };
   pkg.homepage = HOMEPAGE;
   pkg.bugs = { url: BUGS };
@@ -55,14 +55,14 @@ function updatePackage(packageDir: string): void {
     },
   };
 
-  if (pkg.name === '@app-agent/ui' && existsSync(join(packageDir, 'src/style.css'))) {
+  if (pkg.name === '@gakwaya/ui' && existsSync(join(packageDir, 'src/style.css'))) {
     exports['./style.css'] = {
       types: './dist/style.css',
       import: './dist/style.css',
     };
   }
 
-  if (pkg.name === '@app-agent/integrations-svelte') {
+  if (pkg.name === '@gakwaya/integrations-svelte') {
     exports['./AppAgentPanel.svelte'] = {
       types: './dist/AppAgentPanel.svelte',
       import: './dist/AppAgentPanel.svelte',

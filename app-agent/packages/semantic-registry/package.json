@@ -1,6 +1,6 @@
 {
-  "name": "@app-agent/semantic-registry",
-  "version": "0.1.0",
+  "name": "@gakwaya/semantic-registry",
+  "version": "0.1.1",
   "type": "module",
   "description": "Runtime semantic entity registry for App-Agent",
   "main": "./dist/index.js",
@@ -19,7 +19,7 @@
     "prepublishOnly": "pnpm build"
   },
   "dependencies": {
-    "@app-agent/entities": "workspace:*",
+    "@gakwaya/entities": "workspace:*",
     "eventemitter3": "^5.0.1"
   },
   "devDependencies": {
@@ -31,8 +31,7 @@
     "typescript": "^5.0.0"
   },
   "files": [
-    "dist",
-    "README.md"
+    "dist"
   ],
   "repository": {
     "type": "git",

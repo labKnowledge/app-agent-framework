@@ -4,7 +4,7 @@
  * Demonstrates the public facade with app state awareness
  */
 
-import { AppAgent } from '@app-agent/app-agent';
+import { AppAgent } from '@gakwaya/app-agent';
 
 async function getAppState() {
   return {

@@ -5,8 +5,8 @@ import {
   type AgentContext,
   type AgentContextState,
   type CreateAgentContextOptions,
-} from '@app-agent/integrations-shared';
-import type { AppAgentConfig } from '@app-agent/app-agent';
+} from '@gakwaya/integrations-shared';
+import type { AppAgentConfig } from '@gakwaya/app-agent';
 
 const AGENT_CONTEXT_KEY = Symbol('app-agent-context');
 

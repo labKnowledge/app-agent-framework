@@ -4,7 +4,7 @@
  * Manages application state tracking, change detection, and history
  */
 
-import type { AppState } from '@app-agent/entities';
+import type { AppState } from '@gakwaya/entities';
 import type {
   StateManagerConfig,
   StateDiff,

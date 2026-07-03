@@ -1,5 +1,5 @@
 import { createApp } from 'vue';
-import { AppAgentProvider, useAppAgent, AppAgentPanel } from '@app-agent/integrations-vue';
+import { AppAgentProvider, useAppAgent, AppAgentPanel } from '@gakwaya/integrations-vue';
 import {
   initialShopState,
   getDemoAppState,

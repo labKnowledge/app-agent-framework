@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Smoke test: pack @app-agent/app-agent and verify dist artifacts are included.
+ * Smoke test: pack @gakwaya/app-agent and verify dist artifacts are included.
  */
 
 import { readFileSync, existsSync } from 'node:fs';
@@ -18,7 +18,7 @@ function run(cmd: string, cwd: string): string {
 console.log('Building packages...');
 run('pnpm build', ROOT);
 
-console.log('Packing @app-agent/app-agent...');
+console.log('Packing @gakwaya/app-agent...');
 const packLines = run('pnpm pack --pack-destination /tmp/app-agent-pack', PKG_DIR)
   .trim()
   .split('\n')
@@ -34,6 +34,23 @@ if (!existsSync(tarballPath)) {
 }
 
 const listing = run(`tar -tzf "${tarballPath}"`, ROOT);
+const FORBIDDEN_IN_TARBALL = [
+  'package/src/',
+  'package/__tests__/',
+  'package/examples/',
+  'package/e2e/',
+  'package/vite.config',
+  'package/vitest.config',
+  'package/tsconfig',
+];
+
+for (const pattern of FORBIDDEN_IN_TARBALL) {
+  if (listing.split('\n').some((line) => line.includes(pattern))) {
+    console.error(`Tarball must not include dev files: ${pattern}`);
+    process.exit(1);
+  }
+}
+
 const required = ['package/dist/index.js', 'package/dist/index.d.ts', 'package/package.json'];
 
 for (const file of required) {

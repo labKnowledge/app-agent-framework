@@ -12,41 +12,41 @@ Accepted
 
 ## Considered Options
 
-1. Single `@app-agent/integrations` package with optional peer deps for all frameworks
-2. Per-framework packages plus `@app-agent/integrations-shared` for common context logic
+1. Single `@gakwaya/integrations` package with optional peer deps for all frameworks
+2. Per-framework packages plus `@gakwaya/integrations-shared` for common context logic
 3. Framework code only in demo apps without published packages
 
 ## Decision Outcome
 
-**Chosen option**: Per-framework packages under `packages/integrations/` plus `@app-agent/integrations-shared`.
+**Chosen option**: Per-framework packages under `packages/integrations/` plus `@gakwaya/integrations-shared`.
 
 ### Package Layout
 
 ```
 packages/integrations/
-├── shared/   @app-agent/integrations-shared
-├── react/    @app-agent/integrations-react
-├── vue/      @app-agent/integrations-vue
-└── svelte/   @app-agent/integrations-svelte
+├── shared/   @gakwaya/integrations-shared
+├── react/    @gakwaya/integrations-react
+├── vue/      @gakwaya/integrations-vue
+└── svelte/   @gakwaya/integrations-svelte
 ```
 
 ### Layer Rules
 
 | Package | May depend on |
 |---------|----------------|
-| `integrations-shared` | `@app-agent/app-agent`, `@app-agent/ui`, `@app-agent/entities` |
+| `integrations-shared` | `@gakwaya/app-agent`, `@gakwaya/ui`, `@gakwaya/entities` |
 | `integrations-react` | shared, facade, ui, entities, `react` (peer) |
 | `integrations-vue` | shared, facade, ui, entities, `vue` (peer) |
 | `integrations-svelte` | shared, facade, ui, entities, `svelte` (peer) |
 
-Integration packages **must not** import `@app-agent/core` or other infrastructure packages directly.
+Integration packages **must not** import `@gakwaya/core` or other infrastructure packages directly.
 
 ### Shared Contract
 
 `createAgentContext(config, options)` in `integrations-shared`:
 
 - Instantiates `AppAgent` from the public facade
-- Optionally mounts `AppAgentPanel` from `@app-agent/ui`
+- Optionally mounts `AppAgentPanel` from `@gakwaya/ui`
 - Bridges `statuschange`, `activity`, and `historychange` events to a subscribe/getState API
 - Calls `dispose()` on panel and agent on teardown
 

@@ -1,6 +1,6 @@
 {
-  "name": "@app-agent/planner",
-  "version": "0.1.0",
+  "name": "@gakwaya/planner",
+  "version": "0.1.1",
   "type": "module",
   "description": "Intelligent task planning and decomposition system for AI agents",
   "main": "./dist/index.js",
@@ -20,7 +20,7 @@
     "prepublishOnly": "pnpm build"
   },
   "dependencies": {
-    "@app-agent/entities": "workspace:*",
+    "@gakwaya/entities": "workspace:*",
     "eventemitter3": "^5.0.1"
   },
   "devDependencies": {

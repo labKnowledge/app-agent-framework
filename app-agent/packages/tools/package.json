@@ -1,6 +1,6 @@
 {
-  "name": "@app-agent/tools",
-  "version": "0.1.0",
+  "name": "@gakwaya/tools",
+  "version": "0.1.1",
   "type": "module",
   "description": "Advanced tool system with composition, discovery, and enhanced execution",
   "main": "./dist/index.js",
@@ -20,7 +20,7 @@
     "prepublishOnly": "pnpm build"
   },
   "dependencies": {
-    "@app-agent/entities": "workspace:*",
+    "@gakwaya/entities": "workspace:*",
     "eventemitter3": "^5.0.1",
     "zod": "^3.22.4"
   },

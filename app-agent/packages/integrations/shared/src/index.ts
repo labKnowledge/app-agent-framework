@@ -2,11 +2,11 @@
  * Shared agent context for framework integrations
  */
 
-import { AppAgent } from '@app-agent/app-agent';
-import { AppAgentPanel } from '@app-agent/ui';
-import type { AppAgentConfig } from '@app-agent/app-agent';
-import type { AgentStatus, HistoricalEvent } from '@app-agent/entities';
-import type { PanelConfig } from '@app-agent/ui';
+import { AppAgent } from '@gakwaya/app-agent';
+import { AppAgentPanel } from '@gakwaya/ui';
+import type { AppAgentConfig } from '@gakwaya/app-agent';
+import type { AgentStatus, HistoricalEvent } from '@gakwaya/entities';
+import type { PanelConfig } from '@gakwaya/ui';
 
 export interface AgentContextState {
   status: AgentStatus;

@@ -13,29 +13,29 @@ App-Agent is an **application-centric** AI agent framework. Unlike page-centric 
 ```mermaid
 flowchart TB
   subgraph publicLayer [Public Layer]
-    facade["@app-agent/app-agent"]
-    ui["@app-agent/ui"]
+    facade["@gakwaya/app-agent"]
+    ui["@gakwaya/ui"]
   end
 
   subgraph orchestration [Orchestration]
-    core["@app-agent/core"]
+    core["@gakwaya/core"]
   end
 
   subgraph intelligence [Intelligence]
-    llm["@app-agent/llm"]
-    tools["@app-agent/tools"]
-    planner["@app-agent/planner"]
-    workflow["@app-agent/workflow"]
-    registry["@app-agent/semantic-registry"]
+    llm["@gakwaya/llm"]
+    tools["@gakwaya/tools"]
+    planner["@gakwaya/planner"]
+    workflow["@gakwaya/workflow"]
+    registry["@gakwaya/semantic-registry"]
   end
 
   subgraph infrastructure [Infrastructure]
-    sm["@app-agent/state-manager"]
-    mem["@app-agent/memory"]
+    sm["@gakwaya/state-manager"]
+    mem["@gakwaya/memory"]
   end
 
   subgraph domain [Domain]
-    entities["@app-agent/entities"]
+    entities["@gakwaya/entities"]
   end
 
   facade --> core
@@ -114,7 +114,7 @@ See [ADR index](./adr/README.md):
 ## Consumer API
 
 ```typescript
-import { AppAgent } from '@app-agent/app-agent';
+import { AppAgent } from '@gakwaya/app-agent';
 
 const agent = new AppAgent({
   baseURL: 'https://api.openai.com/v1',

@@ -6,7 +6,7 @@ Week 2 focuses on implementing advanced AI capabilities that move beyond basic a
 
 ## 🚀 What We Built
 
-### 1. Enhanced Memory System (`@app-agent/memory`)
+### 1. Enhanced Memory System (`@gakwaya/memory`)
 
 **Research-Based Implementation:**
 
@@ -54,7 +54,7 @@ const relevant = memory.getRelevantContext('checkout process');
 - **Persistence** - Optional localStorage integration
 - **Access Tracking** - Frequency-based memory optimization
 
-### 2. Task Planning System (`@app-agent/planner`)
+### 2. Task Planning System (`@gakwaya/planner`)
 
 **Research-Based Implementation:**
 

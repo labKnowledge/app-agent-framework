@@ -2,7 +2,7 @@
  * State Manager Types
  */
 
-import type { AppState } from '@app-agent/entities';
+import type { AppState } from '@gakwaya/entities';
 
 /**
  * State difference between two states

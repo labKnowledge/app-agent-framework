@@ -6,23 +6,23 @@ Application Intelligence Framework monorepo. AI agents that understand entire we
 
 | Package                        | Layer          | Purpose                                   |
 | ------------------------------ | -------------- | ----------------------------------------- |
-| `@app-agent/entities`          | Domain         | Shared types only — zero internal deps    |
-| `@app-agent/semantic-registry` | Infrastructure | Runtime entity registry                   |
-| `@app-agent/state-manager`     | Infrastructure | App state tracking and diffing            |
-| `@app-agent/memory`            | Infrastructure | Working, episodic, semantic memory        |
-| `@app-agent/llm`               | Infrastructure | LLM client with prompts and cost tracking |
-| `@app-agent/tools`             | Infrastructure | Tool registry, built-ins, composition     |
-| `@app-agent/planner`           | Infrastructure | Task decomposition                        |
-| `@app-agent/workflow`          | Infrastructure | Workflow orchestration engine             |
-| `@app-agent/multi-agent`       | Infrastructure | Specialized agent routing                 |
-| `@app-agent/learning`          | Infrastructure | Pattern learning and replay               |
-| `@app-agent/core`              | Orchestration  | ReAct loop — composes all infrastructure  |
-| `@app-agent/ui`                | Presentation   | Panel and visual feedback                 |
-| `@app-agent/app-agent`         | Public API     | Facade — **only consumer-facing import**  |
-| `@app-agent/integrations-shared` | Integration  | Shared agent context for frameworks     |
-| `@app-agent/integrations-react` | Integration | React Provider + hooks                  |
-| `@app-agent/integrations-vue`  | Integration  | Vue Provider + composable                 |
-| `@app-agent/integrations-svelte` | Integration | Svelte store + context                  |
+| `@gakwaya/entities`          | Domain         | Shared types only — zero internal deps    |
+| `@gakwaya/semantic-registry` | Infrastructure | Runtime entity registry                   |
+| `@gakwaya/state-manager`     | Infrastructure | App state tracking and diffing            |
+| `@gakwaya/memory`            | Infrastructure | Working, episodic, semantic memory        |
+| `@gakwaya/llm`               | Infrastructure | LLM client with prompts and cost tracking |
+| `@gakwaya/tools`             | Infrastructure | Tool registry, built-ins, composition     |
+| `@gakwaya/planner`           | Infrastructure | Task decomposition                        |
+| `@gakwaya/workflow`          | Infrastructure | Workflow orchestration engine             |
+| `@gakwaya/multi-agent`       | Infrastructure | Specialized agent routing                 |
+| `@gakwaya/learning`          | Infrastructure | Pattern learning and replay               |
+| `@gakwaya/core`              | Orchestration  | ReAct loop — composes all infrastructure  |
+| `@gakwaya/ui`                | Presentation   | Panel and visual feedback                 |
+| `@gakwaya/app-agent`         | Public API     | Facade — **only consumer-facing import**  |
+| `@gakwaya/integrations-shared` | Integration  | Shared agent context for frameworks     |
+| `@gakwaya/integrations-react` | Integration | React Provider + hooks                  |
+| `@gakwaya/integrations-vue`  | Integration  | Vue Provider + composable                 |
+| `@gakwaya/integrations-svelte` | Integration | Svelte store + context                  |
 
 ## Layer Rules
 
@@ -40,13 +40,13 @@ Enforced by `pnpm arch:check` (dependency-cruiser).
 
 | Feature type              | Target package                  |
 | ------------------------- | ------------------------------- |
-| New domain type/interface | `@app-agent/entities`           |
-| Entity registration/query | `@app-agent/semantic-registry`  |
-| New built-in tool         | `@app-agent/tools/src/builtin/` |
-| New LLM prompt template   | `@app-agent/llm`                |
-| ReAct loop behavior       | `@app-agent/core`               |
-| UI component              | `@app-agent/ui`                 |
-| Public API change         | `@app-agent/app-agent` + ADR    |
+| New domain type/interface | `@gakwaya/entities`           |
+| Entity registration/query | `@gakwaya/semantic-registry`  |
+| New built-in tool         | `@gakwaya/tools/src/builtin/` |
+| New LLM prompt template   | `@gakwaya/llm`                |
+| ReAct loop behavior       | `@gakwaya/core`               |
+| UI component              | `@gakwaya/ui`                 |
+| Public API change         | `@gakwaya/app-agent` + ADR    |
 
 ## ADRs
 

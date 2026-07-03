@@ -1,6 +1,6 @@
 {
-  "name": "@app-agent/state-manager",
-  "version": "0.1.0",
+  "name": "@gakwaya/state-manager",
+  "version": "0.1.1",
   "type": "module",
   "description": "App state integration and tracking for App-Agent",
   "main": "./dist/index.js",
@@ -20,7 +20,7 @@
     "prepublishOnly": "pnpm build"
   },
   "dependencies": {
-    "@app-agent/entities": "workspace:*"
+    "@gakwaya/entities": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^20.10.0",

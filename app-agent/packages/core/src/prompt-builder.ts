@@ -2,8 +2,8 @@
  * Prompt construction for ReAct loop
  */
 
-import type { AgentObservation } from '@app-agent/entities';
-import type { LLMMessage } from '@app-agent/entities';
+import type { AgentObservation } from '@gakwaya/entities';
+import type { LLMMessage } from '@gakwaya/entities';
 
 export function buildSystemPrompt(entityContext?: string): string {
   const entitySection = entityContext ? `\nRegistered entities:\n${entityContext}\n` : '';

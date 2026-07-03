@@ -2,7 +2,7 @@
  * Built-in DOM interaction tools
  */
 
-import { toolSchemas } from '@app-agent/entities';
+import { toolSchemas } from '@gakwaya/entities';
 import type { Tool } from '../types';
 
 export interface BuiltinToolDeps {

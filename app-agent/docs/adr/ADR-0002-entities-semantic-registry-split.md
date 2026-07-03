@@ -13,15 +13,15 @@ Accepted
 ## Considered Options
 
 1. Single `semantic-registry` package (types + runtime)
-2. Split: `@app-agent/entities` (types) + `@app-agent/semantic-registry` (runtime)
+2. Split: `@gakwaya/entities` (types) + `@gakwaya/semantic-registry` (runtime)
 3. Keep types in `core`
 
 ## Decision Outcome
 
 **Chosen option**: Split types and runtime.
 
-- `@app-agent/entities` — pure TypeScript interfaces, Zod schemas, zero `@app-agent/*` deps
-- `@app-agent/semantic-registry` — `SemanticRegistry` class, imports types from `entities`
+- `@gakwaya/entities` — pure TypeScript interfaces, Zod schemas, zero `@gakwaya/*` deps
+- `@gakwaya/semantic-registry` — `SemanticRegistry` class, imports types from `entities`
 
 ### Positive Consequences
 
@@ -37,4 +37,4 @@ Accepted
 ## Validation
 
 - `entities-is-pure` rule in dependency-cruiser
-- `state-manager` imports `AppState` from `@app-agent/entities`, not `core`
+- `state-manager` imports `AppState` from `@gakwaya/entities`, not `core`

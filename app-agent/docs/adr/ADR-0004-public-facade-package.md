@@ -6,24 +6,24 @@ Accepted
 
 ## Decision Drivers
 
-- README documents `import { AppAgent } from '@app-agent/app-agent'` but package did not exist
+- README documents `import { AppAgent } from '@gakwaya/app-agent'` but package did not exist
 - Consumers should not need to wire core, registry, workflow, and UI separately
 - Stable public API separate from internal orchestration
 
 ## Considered Options
 
-1. Export everything from `@app-agent/core`
-2. Create `@app-agent/app-agent` facade package
+1. Export everything from `@gakwaya/core`
+2. Create `@gakwaya/app-agent` facade package
 3. Per-framework integration packages only
 
 ## Decision Outcome
 
-**Chosen option**: `@app-agent/app-agent` is the only consumer-facing import.
+**Chosen option**: `@gakwaya/app-agent` is the only consumer-facing import.
 
 - Thin `AppAgent` class wraps `AppAgentCore`
 - Maps `entities`/`workflows` config to `SemanticRegistry` + `WorkflowEngine`
-- Re-exports commonly needed types from `@app-agent/entities`
-- Re-exports `AppAgentPanel` from `@app-agent/ui`
+- Re-exports commonly needed types from `@gakwaya/entities`
+- Re-exports `AppAgentPanel` from `@gakwaya/ui`
 
 ### Positive Consequences
 
@@ -38,5 +38,5 @@ Accepted
 
 ## Validation
 
-- `examples/basic-example.ts` imports from `@app-agent/app-agent`
+- `examples/basic-example.ts` imports from `@gakwaya/app-agent`
 - Facade integration test passes

@@ -1,6 +1,6 @@
 {
-  "name": "@app-agent/app-agent",
-  "version": "0.1.0",
+  "name": "@gakwaya/app-agent",
+  "version": "0.1.2",
   "type": "module",
   "description": "Public facade for App-Agent — single consumer-facing import",
   "main": "./dist/index.js",
@@ -19,11 +19,11 @@
     "prepublishOnly": "pnpm build"
   },
   "dependencies": {
-    "@app-agent/entities": "workspace:*",
-    "@app-agent/core": "workspace:*",
-    "@app-agent/semantic-registry": "workspace:*",
-    "@app-agent/workflow": "workspace:*",
-    "@app-agent/ui": "workspace:*"
+    "@gakwaya/entities": "workspace:*",
+    "@gakwaya/core": "workspace:*",
+    "@gakwaya/semantic-registry": "workspace:*",
+    "@gakwaya/workflow": "workspace:*",
+    "@gakwaya/ui": "workspace:*"
   },
   "devDependencies": {
     "typescript": "^5.3.0",

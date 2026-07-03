@@ -10,7 +10,7 @@ import type {
   EntityRegistryConfig,
   EntityChangeEvent,
   EntityFilter,
-} from '@app-agent/entities';
+} from '@gakwaya/entities';
 
 export class SemanticRegistry extends EventEmitter {
   private schemas = new Map<string, EntitySchema>();

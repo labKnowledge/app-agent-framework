@@ -1,4 +1,4 @@
-import type { AppState, EntitySchema, WorkflowDefinition } from '@app-agent/entities';
+import type { AppState, EntitySchema, WorkflowDefinition } from '@gakwaya/entities';
 
 export const productEntity: EntitySchema = {
   type: 'Product',

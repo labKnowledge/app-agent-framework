@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { AppAgent } from '../app-agent';
 
-describe('@app-agent/app-agent facade', () => {
+describe('@gakwaya/app-agent facade', () => {
   it('maps entities and workflows config to core', () => {
     const agent = new AppAgent({
       baseURL: 'https://api.example.com/v1',

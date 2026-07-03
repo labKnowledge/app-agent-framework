@@ -16,20 +16,20 @@
 
 | Package | Status |
 |---------|--------|
-| `@app-agent/entities` | Complete |
-| `@app-agent/state-manager` | Complete |
-| `@app-agent/memory` | Complete |
-| `@app-agent/llm` | Complete |
-| `@app-agent/tools` | Complete |
-| `@app-agent/planner` | Complete |
-| `@app-agent/workflow` | Complete |
-| `@app-agent/semantic-registry` | Complete |
-| `@app-agent/multi-agent` | Complete |
-| `@app-agent/learning` | Complete |
-| `@app-agent/core` | Complete |
-| `@app-agent/ui` | Complete |
-| `@app-agent/app-agent` | Complete (public facade) |
-| `@app-agent/integrations-*` | Complete |
+| `@gakwaya/entities` | Complete |
+| `@gakwaya/state-manager` | Complete |
+| `@gakwaya/memory` | Complete |
+| `@gakwaya/llm` | Complete |
+| `@gakwaya/tools` | Complete |
+| `@gakwaya/planner` | Complete |
+| `@gakwaya/workflow` | Complete |
+| `@gakwaya/semantic-registry` | Complete |
+| `@gakwaya/multi-agent` | Complete |
+| `@gakwaya/learning` | Complete |
+| `@gakwaya/core` | Complete |
+| `@gakwaya/ui` | Complete |
+| `@gakwaya/app-agent` | Complete (public facade) |
+| `@gakwaya/integrations-*` | Complete |
 | Demos (vanilla, react, vue, svelte) | Complete |
 
 ## Testing

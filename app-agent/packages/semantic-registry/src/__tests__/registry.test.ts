@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { SemanticRegistry } from '../registry';
-import type { EntitySchema, EntityInstance } from '@app-agent/entities';
+import type { EntitySchema, EntityInstance } from '@gakwaya/entities';
 
 const productSchema: EntitySchema = {
   type: 'Product',

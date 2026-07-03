@@ -2,8 +2,8 @@
  * Public facade configuration
  */
 
-import type { AppState, EntitySchema, WorkflowDefinition } from '@app-agent/entities';
-import type { AgentConfig } from '@app-agent/core';
+import type { AppState, EntitySchema, WorkflowDefinition } from '@gakwaya/entities';
+import type { AgentConfig } from '@gakwaya/core';
 
 export interface AppAgentConfig extends Omit<AgentConfig, 'entitySchemas' | 'customWorkflows'> {
   /** Entity schema definitions keyed by type */

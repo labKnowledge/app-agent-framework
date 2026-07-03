@@ -5,7 +5,7 @@
   "description": "Application Intelligence Framework - AI agents that understand your entire app",
   "scripts": {
     "dev": "pnpm --filter './packages/**' dev",
-    "build": "pnpm -r --filter '@app-agent/*' run build",
+    "build": "pnpm -r --filter '@gakwaya/*' run build",
     "test": "pnpm --filter './packages/**' test && vitest run scripts/architecture.test.ts",
     "test:coverage": "vitest run --coverage --coverage.provider=v8 --coverage.thresholds.lines=50 --coverage.thresholds.functions=50 --coverage.thresholds.branches=40 --coverage.thresholds.statements=50",
     "lint": "eslint . --ext .ts,.tsx",

@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { setAppAgentContext } from '@app-agent/integrations-svelte';
-  import AppAgentPanel from '@app-agent/integrations-svelte/AppAgentPanel.svelte';
+  import { setAppAgentContext } from '@gakwaya/integrations-svelte';
+  import AppAgentPanel from '@gakwaya/integrations-svelte/AppAgentPanel.svelte';
   import {
     initialShopState,
     getDemoAppState,

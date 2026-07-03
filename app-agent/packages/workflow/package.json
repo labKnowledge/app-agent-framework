@@ -1,6 +1,6 @@
 {
-  "name": "@app-agent/workflow",
-  "version": "0.1.0",
+  "name": "@gakwaya/workflow",
+  "version": "0.1.1",
   "type": "module",
   "description": "Complex workflow orchestration with state management and error recovery",
   "main": "./dist/index.js",
@@ -20,7 +20,7 @@
     "prepublishOnly": "pnpm build"
   },
   "dependencies": {
-    "@app-agent/entities": "workspace:*",
+    "@gakwaya/entities": "workspace:*",
     "eventemitter3": "^5.0.1"
   },
   "devDependencies": {

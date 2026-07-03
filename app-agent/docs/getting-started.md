@@ -3,13 +3,13 @@
 ## Install
 
 ```bash
-pnpm add @app-agent/app-agent
+pnpm add @gakwaya/app-agent
 ```
 
 ## Vanilla JavaScript / TypeScript
 
 ```typescript
-import { AppAgent } from '@app-agent/app-agent';
+import { AppAgent } from '@gakwaya/app-agent';
 
 const agent = new AppAgent({
   baseURL: 'https://api.openai.com/v1',
@@ -36,11 +36,11 @@ See [examples/vanilla-demo](../examples/vanilla-demo/).
 ## React
 
 ```bash
-pnpm add @app-agent/integrations-react react
+pnpm add @gakwaya/integrations-react react
 ```
 
 ```tsx
-import { AppAgentProvider, useAppAgent, AppAgentPanel } from '@app-agent/integrations-react';
+import { AppAgentProvider, useAppAgent, AppAgentPanel } from '@gakwaya/integrations-react';
 
 function Shop() {
   const { execute } = useAppAgent();
@@ -66,7 +66,7 @@ See [examples/react-demo](../examples/react-demo/).
 ## Vue
 
 ```bash
-pnpm add @app-agent/integrations-vue vue
+pnpm add @gakwaya/integrations-vue vue
 ```
 
 ```vue
@@ -76,7 +76,7 @@ pnpm add @app-agent/integrations-vue vue
 ```
 
 ```typescript
-import { AppAgentProvider, useAppAgent, AppAgentPanel } from '@app-agent/integrations-vue';
+import { AppAgentProvider, useAppAgent, AppAgentPanel } from '@gakwaya/integrations-vue';
 ```
 
 See [examples/vue-demo](../examples/vue-demo/).
@@ -84,13 +84,13 @@ See [examples/vue-demo](../examples/vue-demo/).
 ## Svelte
 
 ```bash
-pnpm add @app-agent/integrations-svelte svelte
+pnpm add @gakwaya/integrations-svelte svelte
 ```
 
 ```svelte
 <script>
-  import { setAppAgentContext } from '@app-agent/integrations-svelte';
-  import AppAgentPanel from '@app-agent/integrations-svelte/AppAgentPanel.svelte';
+  import { setAppAgentContext } from '@gakwaya/integrations-svelte';
+  import AppAgentPanel from '@gakwaya/integrations-svelte/AppAgentPanel.svelte';
 
   const agent = setAppAgentContext(agentConfig);
 </script>

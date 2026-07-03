@@ -64,7 +64,7 @@ function createExternal(
 
   return (id: string) => {
     if (id.startsWith('node:')) return true;
-    if (id.startsWith('@app-agent/')) return true;
+    if (id.startsWith('@gakwaya/')) return true;
     return deps.some((dep) => id === dep || id.startsWith(`${dep}/`));
   };
 }
@@ -111,6 +111,9 @@ export function createViteLibConfig(
       ],
       rollupTypes: false,
       insertTypesEntry: true,
+      compilerOptions: {
+        declarationMap: false,
+      },
     }),
     ...(options.extraPlugins ?? []),
   ];

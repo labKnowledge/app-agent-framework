@@ -6,7 +6,7 @@
  */
 
 import EventEmitter from 'eventemitter3';
-import { LocalStorageAdapter, type StoragePort } from '@app-agent/entities';
+import { LocalStorageAdapter, type StoragePort } from '@gakwaya/entities';
 import type {
   Workflow,
   WorkflowExecution,

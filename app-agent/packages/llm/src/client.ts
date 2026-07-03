@@ -10,7 +10,7 @@ import type {
   AgentReasoning,
   CoreLLMResponse,
   LLMMessage as CoreLLMMessage,
-} from '@app-agent/entities';
+} from '@gakwaya/entities';
 import type {
   LLMMessage,
   LLMResponse,

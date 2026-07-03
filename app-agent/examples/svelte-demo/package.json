@@ -7,7 +7,7 @@
     "build": "vite build"
   },
   "dependencies": {
-    "@app-agent/integrations-svelte": "workspace:*"
+    "@gakwaya/integrations-svelte": "workspace:*"
   },
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "^3.0.0",

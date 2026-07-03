@@ -27,30 +27,28 @@ App-Agent is like a kernel for your application:
 ### Installation
 
 ```bash
-# Install dependencies
-pnpm install
-
-# Build all packages
-pnpm build
-
-# Run tests
-pnpm test
+pnpm add @gakwaya/app-agent
+# React apps:
+pnpm add @gakwaya/integrations-react @gakwaya/ui
 ```
 
 ### Basic Usage
 
 ```typescript
-import { AppAgent } from '@app-agent/app-agent';
+import { AppAgent } from '@gakwaya/app-agent';
 
 const agent = new AppAgent({
+  baseURL: 'https://api.openai.com/v1',
+  model: 'gpt-4',
+  apiKey: process.env.OPENAI_API_KEY,
   getAppState: async () => ({
     currentView: 'shop',
-    userRole: 'user',
-    cartItems: await getCartItems(),
+    user: { id: '1', role: 'customer', isAuthenticated: true, attributes: {} },
+    context: { cartItems: [] },
+    timestamp: Date.now(),
   }),
   entities: {
     Product: productEntity,
-    Cart: cartEntity,
   },
   workflows: {
     checkout: checkoutWorkflow,
@@ -60,19 +58,28 @@ const agent = new AppAgent({
 await agent.execute('Find the best laptop under $1000 and add it to my cart');
 ```
 
+### Monorepo development
+
+```bash
+cd app-agent
+pnpm install
+pnpm build
+pnpm validate
+```
+
 ## 📦 Packages
 
-- **@app-agent/app-agent** - Public facade (recommended import)
-- **@app-agent/entities** - Shared domain types
-- **@app-agent/core** - Core agent logic and ReAct loop
-- **@app-agent/state-manager** - App state integration and tracking
-- **@app-agent/semantic-registry** - Runtime entity registry
-- **@app-agent/workflow** - Workflow execution and orchestration
-- **@app-agent/planner** - Task planning and decomposition
-- **@app-agent/tools** - Tool registry and built-in actions
-- **@app-agent/llm** - LLM client with prompt optimization
-- **@app-agent/memory** - Working, episodic, and semantic memory
-- **@app-agent/ui** - Panel components and visual feedback
+- **@gakwaya/app-agent** - Public facade (recommended import)
+- **@gakwaya/entities** - Shared domain types
+- **@gakwaya/core** - Core agent logic and ReAct loop
+- **@gakwaya/state-manager** - App state integration and tracking
+- **@gakwaya/semantic-registry** - Runtime entity registry
+- **@gakwaya/workflow** - Workflow execution and orchestration
+- **@gakwaya/planner** - Task planning and decomposition
+- **@gakwaya/tools** - Tool registry and built-in actions
+- **@gakwaya/llm** - LLM client with prompt optimization
+- **@gakwaya/memory** - Working, episodic, and semantic memory
+- **@gakwaya/ui** - Panel components and visual feedback
 
 ## 📖 Documentation
 
@@ -107,6 +114,6 @@ MIT
 
 ---
 
-**Status**: In Development 🚧
-**Version**: 0.1.0
+**Status**: Alpha — published on npm as `@gakwaya/*`
+**Version**: 0.1.x
 **Research**: See `/rnd` folder for comprehensive research and planning

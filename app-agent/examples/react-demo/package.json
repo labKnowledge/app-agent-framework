@@ -7,7 +7,7 @@
     "build": "vite build"
   },
   "dependencies": {
-    "@app-agent/integrations-react": "workspace:*",
+    "@gakwaya/integrations-react": "workspace:*",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },

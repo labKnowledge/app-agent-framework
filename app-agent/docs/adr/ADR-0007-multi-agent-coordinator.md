@@ -12,7 +12,7 @@ Accepted
 
 ## Decision Outcome
 
-Add `@app-agent/multi-agent` infrastructure package with:
+Add `@gakwaya/multi-agent` infrastructure package with:
 
 - `MultiAgentCoordinator` — registers agents, scores tasks by capability keywords
 - `SpecializedAgent` interface — thin wrappers that delegate to core `execute()`
@@ -20,7 +20,7 @@ Add `@app-agent/multi-agent` infrastructure package with:
 
 ### Layer Rules
 
-`@app-agent/multi-agent` → `@app-agent/entities` only
+`@gakwaya/multi-agent` → `@gakwaya/entities` only
 
 ### Integration
 

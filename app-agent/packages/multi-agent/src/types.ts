@@ -1,4 +1,4 @@
-import type { AgentResult, AppState } from '@app-agent/entities';
+import type { AgentResult, AppState } from '@gakwaya/entities';
 
 export interface AgentContext {
   appState: AppState;

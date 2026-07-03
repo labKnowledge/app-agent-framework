@@ -1,6 +1,6 @@
 {
-  "name": "@app-agent/integrations-vue",
-  "version": "0.1.0",
+  "name": "@gakwaya/integrations-vue",
+  "version": "0.1.2",
   "type": "module",
   "description": "Vue integration for App-Agent",
   "main": "./dist/index.js",
@@ -19,10 +19,10 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@app-agent/app-agent": "workspace:*",
-    "@app-agent/entities": "workspace:*",
-    "@app-agent/integrations-shared": "workspace:*",
-    "@app-agent/ui": "workspace:*"
+    "@gakwaya/app-agent": "workspace:*",
+    "@gakwaya/entities": "workspace:*",
+    "@gakwaya/integrations-shared": "workspace:*",
+    "@gakwaya/ui": "workspace:*"
   },
   "peerDependencies": {
     "vue": ">=3.3.0"
@@ -34,8 +34,7 @@
     "vue": "^3.4.0"
   },
   "files": [
-    "dist",
-    "README.md"
+    "dist"
   ],
   "repository": {
     "type": "git",

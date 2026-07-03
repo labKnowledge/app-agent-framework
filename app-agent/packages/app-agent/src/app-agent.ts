@@ -2,8 +2,8 @@
  * AppAgent — public facade over AppAgentCore
  */
 
-import { AppAgentCore } from '@app-agent/core';
-import type { AgentResult } from '@app-agent/entities';
+import { AppAgentCore } from '@gakwaya/core';
+import type { AgentResult } from '@gakwaya/entities';
 import type { AppAgentConfig } from './types';
 
 export class AppAgent extends AppAgentCore {

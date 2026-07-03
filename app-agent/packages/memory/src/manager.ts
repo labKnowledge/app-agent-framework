@@ -20,7 +20,7 @@ import type {
   Action,
   MemoryConsolidationConfig,
 } from './types';
-import { LocalStorageAdapter, type StoragePort } from '@app-agent/entities';
+import { LocalStorageAdapter, type StoragePort } from '@gakwaya/entities';
 
 /**
  * Memory Manager Class

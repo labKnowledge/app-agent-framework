@@ -4,13 +4,13 @@
       "name": "entities",
       "path": "packages/entities",
       "allowedImports": ["packages/entities"],
-      "forbiddenPatterns": ["@app-agent/"]
+      "forbiddenPatterns": ["@gakwaya/"]
     },
     {
       "name": "infrastructure",
       "path": "packages/(state-manager|memory|llm|tools|planner|workflow|semantic-registry)",
       "allowedImports": ["packages/entities"],
-      "forbiddenPatterns": ["@app-agent/core", "@app-agent/ui", "@app-agent/app-agent"]
+      "forbiddenPatterns": ["@gakwaya/core", "@gakwaya/ui", "@gakwaya/app-agent"]
     },
     {
       "name": "core",
@@ -26,13 +26,13 @@
         "packages/semantic-registry",
         "packages/core"
       ],
-      "forbiddenPatterns": ["@app-agent/ui", "@app-agent/app-agent"]
+      "forbiddenPatterns": ["@gakwaya/ui", "@gakwaya/app-agent"]
     },
     {
       "name": "ui",
       "path": "packages/ui",
       "allowedImports": ["packages/entities", "packages/core"],
-      "forbiddenPatterns": ["@app-agent/planner", "@app-agent/workflow", "@app-agent/memory"]
+      "forbiddenPatterns": ["@gakwaya/planner", "@gakwaya/workflow", "@gakwaya/memory"]
     },
     {
       "name": "facade",

@@ -1,6 +1,6 @@
 {
-  "name": "@app-agent/integrations-svelte",
-  "version": "0.1.0",
+  "name": "@gakwaya/integrations-svelte",
+  "version": "0.1.2",
   "type": "module",
   "description": "Svelte integration for App-Agent",
   "main": "./dist/index.js",
@@ -10,7 +10,10 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
     },
-    "./AppAgentPanel.svelte": "./dist/AppAgentPanel.svelte"
+    "./AppAgentPanel.svelte": {
+      "types": "./dist/AppAgentPanel.svelte",
+      "import": "./dist/AppAgentPanel.svelte"
+    }
   },
   "scripts": {
     "build": "vite build",
@@ -20,10 +23,10 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@app-agent/app-agent": "workspace:*",
-    "@app-agent/entities": "workspace:*",
-    "@app-agent/integrations-shared": "workspace:*",
-    "@app-agent/ui": "workspace:*"
+    "@gakwaya/app-agent": "workspace:*",
+    "@gakwaya/entities": "workspace:*",
+    "@gakwaya/integrations-shared": "workspace:*",
+    "@gakwaya/ui": "workspace:*"
   },
   "peerDependencies": {
     "svelte": ">=4.0.0"
@@ -35,8 +38,7 @@
     "vitest": "^1.0.0"
   },
   "files": [
-    "dist",
-    "README.md"
+    "dist"
   ],
   "repository": {
     "type": "git",

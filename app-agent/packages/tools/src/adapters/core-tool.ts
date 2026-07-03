@@ -2,7 +2,7 @@
  * Convert legacy AgentTool definitions to enhanced Tool format
  */
 
-import type { AgentTool } from '@app-agent/entities';
+import type { AgentTool } from '@gakwaya/entities';
 import type { Tool, ToolCategory } from '../types';
 
 export function agentToolToTool(agentTool: AgentTool, category: ToolCategory = 'utility'): Tool {
@@ -14,9 +14,9 @@ export function agentToolToTool(agentTool: AgentTool, category: ToolCategory = '
     inputSchema: agentTool.inputSchema,
     execute: async (params, context) =>
       agentTool.execute(params, {
-        appState: context.appState as unknown as import('@app-agent/entities').AppState,
-        domState: context.domState as import('@app-agent/entities').DOMState | undefined,
-        agent: context.agent as import('@app-agent/entities').IAgent,
+        appState: context.appState as unknown as import('@gakwaya/entities').AppState,
+        domState: context.domState as import('@gakwaya/entities').DOMState | undefined,
+        agent: context.agent as import('@gakwaya/entities').IAgent,
         signal: context.signal,
       }),
     metadata: {

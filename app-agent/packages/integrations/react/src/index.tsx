@@ -10,9 +10,9 @@ import {
   createAgentContext,
   type AgentContext,
   type CreateAgentContextOptions,
-} from '@app-agent/integrations-shared';
-import type { AppAgentConfig } from '@app-agent/app-agent';
-import type { PanelConfig } from '@app-agent/ui';
+} from '@gakwaya/integrations-shared';
+import type { AppAgentConfig } from '@gakwaya/app-agent';
+import type { PanelConfig } from '@gakwaya/ui';
 
 const AgentReactContext = createContext<AgentContext | null>(null);
 

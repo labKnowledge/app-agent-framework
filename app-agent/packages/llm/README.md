@@ -1,4 +1,4 @@
-# @app-agent/llm
+# @gakwaya/llm
 
 Enhanced LLM integration package with advanced prompting, streaming support, cost tracking, and context management.
 
@@ -15,7 +15,7 @@ Enhanced LLM integration package with advanced prompting, streaming support, cos
 ## Installation
 
 ```bash
-pnpm add @app-agent/llm
+pnpm add @gakwaya/llm
 ```
 
 ## Usage
@@ -23,7 +23,7 @@ pnpm add @app-agent/llm
 ### Basic Completion
 
 ```typescript
-import { EnhancedLLMClient } from '@app-agent/llm';
+import { EnhancedLLMClient } from '@gakwaya/llm';
 
 const client = new EnhancedLLMClient({
   baseURL: 'https://api.openai.com/v1',

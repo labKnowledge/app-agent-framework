@@ -1,5 +1,5 @@
-import { AppAgent } from '@app-agent/app-agent';
-import { AppAgentPanel } from '@app-agent/ui';
+import { AppAgent } from '@gakwaya/app-agent';
+import { AppAgentPanel } from '@gakwaya/ui';
 import {
   initialShopState,
   getDemoAppState,

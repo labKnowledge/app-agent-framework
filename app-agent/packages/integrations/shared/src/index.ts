@@ -75,10 +75,7 @@ export function createAgentContext(
   return {
     agent,
     panel,
-    getState: () => ({
-      ...state,
-      history: [...state.history],
-    }),
+    getState: () => state,
     subscribe: (listener) => {
       listeners.add(listener);
       return () => listeners.delete(listener);

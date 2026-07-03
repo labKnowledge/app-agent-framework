@@ -20,7 +20,7 @@ module.exports = {
       severity: 'error',
       comment: 'Infrastructure packages must not depend on core',
       from: {
-        path: '^packages/(state-manager|memory|llm|tools|planner|workflow|semantic-registry)',
+        path: '^packages/(state-manager|memory|llm|tools|planner|workflow|semantic-registry|multi-agent|learning)',
       },
       to: { path: '^packages/core' },
     },

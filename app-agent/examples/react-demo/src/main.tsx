@@ -6,7 +6,7 @@ import {
   getDemoAppState,
   demoAgentConfig,
   type ShopState,
-} from '../shared/shop';
+} from '../../shared/shop';
 
 const shop: ShopState = structuredClone(initialShopState);
 

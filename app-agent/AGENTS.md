@@ -14,6 +14,8 @@ Application Intelligence Framework monorepo. AI agents that understand entire we
 | `@app-agent/tools`             | Infrastructure | Tool registry, built-ins, composition     |
 | `@app-agent/planner`           | Infrastructure | Task decomposition                        |
 | `@app-agent/workflow`          | Infrastructure | Workflow orchestration engine             |
+| `@app-agent/multi-agent`       | Infrastructure | Specialized agent routing                 |
+| `@app-agent/learning`          | Infrastructure | Pattern learning and replay               |
 | `@app-agent/core`              | Orchestration  | ReAct loop — composes all infrastructure  |
 | `@app-agent/ui`                | Presentation   | Panel and visual feedback                 |
 | `@app-agent/app-agent`         | Public API     | Facade — **only consumer-facing import**  |

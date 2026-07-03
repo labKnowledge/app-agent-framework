@@ -5,6 +5,6 @@
     "noEmit": true,
     "jsx": "react-jsx"
   },
-  "include": ["packages/*/src/**/*", "packages/integrations/*/src/**/*", "scripts/**/*"],
+  "include": ["packages/*/src/**/*", "packages/integrations/*/src/**/*", "scripts/**/*", "e2e/**/*"],
   "exclude": ["node_modules", "dist", "**/*.test.ts", "**/__tests__/**", "examples/**"]
 }

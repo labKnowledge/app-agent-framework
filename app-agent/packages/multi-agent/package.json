@@ -1,0 +1,46 @@
+{
+  "name": "@app-agent/multi-agent",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Multi-agent coordination for specialized task routing",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "vite build",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist",
+    "prepublishOnly": "pnpm build"
+  },
+  "dependencies": {
+    "@app-agent/entities": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.0",
+    "vite": "^5.0.0",
+    "vitest": "^1.0.0"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/labKnowledge/app-agent-framework.git",
+    "directory": "app-agent/packages/multi-agent"
+  },
+  "homepage": "https://github.com/labKnowledge/app-agent-framework/tree/main/app-agent",
+  "bugs": {
+    "url": "https://github.com/labKnowledge/app-agent-framework/issues"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "license": "MIT"
+}

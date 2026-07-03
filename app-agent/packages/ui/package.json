@@ -3,21 +3,21 @@
   "version": "0.1.0",
   "type": "module",
   "description": "UI components for App-Agent",
-  "main": "./src/index.ts",
-  "types": "./src/index.ts",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "types": "./src/index.ts",
-      "import": "./src/index.ts"
-    },
-    "./style.css": "./src/style.css"
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
   },
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "test": "vitest run --passWithNoTests",
     "typecheck": "tsc --noEmit",
-    "clean": "rm -rf dist"
+    "clean": "rm -rf dist",
+    "prepublishOnly": "pnpm build"
   },
   "dependencies": {
     "@app-agent/core": "workspace:*",
@@ -27,5 +27,22 @@
     "@types/node": "^20.10.0",
     "vite": "^5.0.0",
     "vitest": "^1.0.0"
-  }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/labKnowledge/app-agent-framework.git",
+    "directory": "app-agent/packages/ui"
+  },
+  "homepage": "https://github.com/labKnowledge/app-agent-framework/tree/main/app-agent",
+  "bugs": {
+    "url": "https://github.com/labKnowledge/app-agent-framework/issues"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "license": "MIT"
 }

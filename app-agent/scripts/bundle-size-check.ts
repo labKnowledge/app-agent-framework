@@ -1,40 +1,47 @@
 #!/usr/bin/env node
 /**
- * Bundle size budget check for app-agent packages.
- * Measures TypeScript source size as a proxy until full Rollup builds are wired.
+ * Bundle size budget check — measures gzip size of built dist/ artifacts.
  */
 
-import { readdirSync, statSync, readFileSync } from 'fs';
-import { join, relative, dirname } from 'path';
-import { fileURLToPath } from 'url';
+import { readdirSync, statSync, readFileSync, existsSync } from 'node:fs';
+import { join, relative, dirname } from 'node:path';
+import { gzipSync } from 'node:zlib';
+import { fileURLToPath } from 'node:url';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const PACKAGES_DIR = join(ROOT, 'packages');
 
-/** Generous initial budget in KB (source); tighten as builds stabilize */
-const BUDGETS_KB: Record<string, number> = {
-  '@app-agent/entities': 80,
-  '@app-agent/core': 200,
-  '@app-agent/tools': 120,
-  '@app-agent/llm': 80,
-  '@app-agent/app-agent': 250,
-  '@app-agent/ui': 100,
+/** Gzip budget in KB for primary dist entry */
+const BUDGETS_KB_GZIP: Record<string, number> = {
+  '@app-agent/entities': 5,
+  '@app-agent/core': 100,
+  '@app-agent/tools': 40,
+  '@app-agent/llm': 30,
+  '@app-agent/app-agent': 100,
+  '@app-agent/ui': 30,
 };
 
-function collectSourceBytes(dir: string): number {
-  let total = 0;
+function gzipSizeKb(filePath: string): number {
+  const content = readFileSync(filePath);
+  return gzipSync(content).length / 1024;
+}
+
+function findPackageDirs(dir: string): string[] {
+  const dirs: string[] = [];
   for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    if (!entry.isDirectory()) continue;
     const full = join(dir, entry.name);
-    if (entry.isDirectory()) {
-      if (entry.name === 'node_modules' || entry.name === '__tests__' || entry.name === 'dist') {
-        continue;
+    if (entry.name === 'integrations') {
+      for (const sub of readdirSync(full, { withFileTypes: true })) {
+        if (sub.isDirectory() && existsSync(join(full, sub.name, 'package.json'))) {
+          dirs.push(join(full, sub.name));
+        }
       }
-      total += collectSourceBytes(full);
-    } else if (entry.name.endsWith('.ts') || entry.name.endsWith('.tsx')) {
-      total += statSync(full).size;
+      continue;
     }
+    if (existsSync(join(full, 'package.json'))) dirs.push(full);
   }
-  return total;
+  return dirs;
 }
 
 function getPackageName(packageDir: string): string {
@@ -44,34 +51,27 @@ function getPackageName(packageDir: string): string {
 
 let failed = false;
 
-console.log('Bundle size check (source KB budgets):\n');
+console.log('Bundle size check (dist gzip KB budgets):\n');
 
-for (const entry of readdirSync(PACKAGES_DIR, { withFileTypes: true })) {
-  if (!entry.isDirectory()) continue;
+for (const packageDir of findPackageDirs(PACKAGES_DIR)) {
+  const name = getPackageName(packageDir);
+  const budget = BUDGETS_KB_GZIP[name];
+  if (!budget) continue;
 
-  const packageDir = join(PACKAGES_DIR, entry.name);
-  const packageJsonPath = join(packageDir, 'package.json');
-  try {
-    readFileSync(packageJsonPath);
-  } catch {
+  const distEntry = join(packageDir, 'dist', 'index.js');
+  if (!existsSync(distEntry)) {
+    console.log(`  FAIL ${name}: dist/index.js missing — run pnpm build first`);
+    failed = true;
     continue;
   }
 
-  const name = getPackageName(packageDir);
-  const budget = BUDGETS_KB[name];
-
-  if (!budget) continue;
-
-  const bytes = collectSourceBytes(join(packageDir, 'src'));
-  const kb = bytes / 1024;
+  const kb = gzipSizeKb(distEntry);
   const rel = relative(ROOT, packageDir);
   const status = kb <= budget ? 'OK' : 'FAIL';
 
-  console.log(`  ${status} ${name}: ${kb.toFixed(1)}KB / ${budget}KB (${rel})`);
+  console.log(`  ${status} ${name}: ${kb.toFixed(1)}KB gzip / ${budget}KB (${rel})`);
 
-  if (kb > budget) {
-    failed = true;
-  }
+  if (kb > budget) failed = true;
 }
 
 if (failed) {

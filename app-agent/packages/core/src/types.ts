@@ -62,6 +62,12 @@ export interface AgentConfig {
   enablePlanning?: boolean;
   /** Enable tool result caching in the tool registry (default: true) */
   enableToolCaching?: boolean;
+  /** Enable multi-agent task routing (default: false) */
+  enableMultiAgent?: boolean;
+  /** Enable pattern learning from successful tasks (default: false) */
+  enableLearning?: boolean;
+  learningConfig?: import('@app-agent/learning').LearningConfig;
+  customAgents?: Record<string, import('@app-agent/multi-agent').SpecializedAgent>;
   memoryConfig?: import('@app-agent/memory').MemoryManagerConfig;
   customTools?: Record<string, AgentTool | null>;
   customWorkflows?: Record<string, import('@app-agent/entities').WorkflowDefinition>;

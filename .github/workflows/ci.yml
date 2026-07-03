@@ -34,3 +34,31 @@ jobs:
 
       - name: Coverage
         run: pnpm test:coverage
+
+      - name: Benchmarks
+        run: pnpm bench
+        continue-on-error: true
+
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 8
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+          cache-dependency-path: app-agent/pnpm-lock.yaml
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Install Playwright browsers
+        run: pnpm test:e2e:install
+
+      - name: E2E smoke tests
+        run: CI=1 pnpm test:e2e

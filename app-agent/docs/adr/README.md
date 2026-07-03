@@ -8,5 +8,7 @@
 | [ADR-0004](./ADR-0004-public-facade-package.md)            | Public facade package               | Accepted |
 | [ADR-0005](./ADR-0005-storage-port-pattern.md)             | Storage port pattern                | Accepted |
 | [ADR-0006](./ADR-0006-framework-integrations.md)         | Framework integration packages      | Accepted |
+| [ADR-0007](./ADR-0007-multi-agent-coordinator.md)        | Multi-agent coordinator             | Accepted |
+| [ADR-0008](./ADR-0008-learning-system.md)                | Learning system                     | Accepted |
 
 See also [Architecture Overview](../architecture.md) and [AGENTS.md](../../AGENTS.md).

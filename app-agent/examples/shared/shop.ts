@@ -62,6 +62,9 @@ export const demoAgentConfig = {
   maxSteps: 20,
   trackState: true,
   enableMemory: true,
+  enableMultiAgent: true,
+  enableLearning: true,
+  learningConfig: { storage: 'memory' as const },
   entities: { Product: productEntity },
   workflows: { checkout: checkoutWorkflow },
 };

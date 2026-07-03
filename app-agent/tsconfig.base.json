@@ -33,7 +33,9 @@
       "@app-agent/integrations-shared": ["./packages/integrations/shared/src"],
       "@app-agent/integrations-react": ["./packages/integrations/react/src"],
       "@app-agent/integrations-vue": ["./packages/integrations/vue/src"],
-      "@app-agent/integrations-svelte": ["./packages/integrations/svelte/src"]
+      "@app-agent/integrations-svelte": ["./packages/integrations/svelte/src"],
+      "@app-agent/multi-agent": ["./packages/multi-agent/src"],
+      "@app-agent/learning": ["./packages/learning/src"]
     }
   },
   "exclude": ["node_modules", "dist", "**/*.test.ts"]

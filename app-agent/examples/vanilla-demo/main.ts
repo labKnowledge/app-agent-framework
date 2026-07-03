@@ -1,4 +1,5 @@
 import { AppAgent } from '@app-agent/app-agent';
+import { AppAgentPanel } from '@app-agent/ui';
 import {
   initialShopState,
   getDemoAppState,
@@ -39,6 +40,11 @@ const agent = new AppAgent({
   ...demoAgentConfig,
   getAppState: () => getDemoAppState(shop),
   enableToolCaching: true,
+});
+
+const panel = new AppAgentPanel();
+panel.onSubmit((task) => {
+  void agent.execute(task);
 });
 
 renderProducts();

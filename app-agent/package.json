@@ -5,7 +5,7 @@
   "description": "Application Intelligence Framework - AI agents that understand your entire app",
   "scripts": {
     "dev": "pnpm --filter './packages/**' dev",
-    "build": "pnpm --filter './packages/**' build",
+    "build": "pnpm -r --filter '@app-agent/*' run build",
     "test": "pnpm --filter './packages/**' test && vitest run scripts/architecture.test.ts",
     "test:coverage": "vitest run --coverage --coverage.provider=v8 --coverage.thresholds.lines=50 --coverage.thresholds.functions=50 --coverage.thresholds.branches=40 --coverage.thresholds.statements=50",
     "lint": "eslint . --ext .ts,.tsx",
@@ -15,7 +15,12 @@
     "arch:check": "dependency-cruiser packages --config .dependency-cruiser.cjs",
     "bundle:check": "tsx scripts/bundle-size-check.ts",
     "bench": "vitest bench --run",
-    "validate": "pnpm typecheck && pnpm lint && pnpm test && pnpm arch:check && pnpm bundle:check",
+    "pack:smoke": "tsx scripts/pack-smoke-test.ts",
+    "test:e2e": "playwright test --config playwright.config.mjs",
+    "test:e2e:install": "playwright install chromium",
+    "version-packages": "changeset version",
+    "release": "pnpm build && changeset publish",
+    "validate": "pnpm typecheck && pnpm lint && pnpm build && pnpm test && pnpm arch:check && pnpm bundle:check",
     "prepare": "husky install || true"
   },
   "keywords": [
@@ -42,7 +47,11 @@
     "dependency-cruiser": "^16.4.0",
     "tsx": "^4.7.0",
     "@types/node": "^20.10.0",
-    "@vitest/coverage-v8": "^1.0.0"
+    "@vitest/coverage-v8": "^1.0.0",
+    "vite": "^5.0.0",
+    "vite-plugin-dts": "^3.7.0",
+    "@changesets/cli": "^2.27.0",
+    "@playwright/test": "^1.41.0"
   },
   "engines": {
     "node": ">=18.0.0",

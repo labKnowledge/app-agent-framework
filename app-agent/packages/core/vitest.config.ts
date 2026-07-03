@@ -1,5 +1,5 @@
 import { defineConfig } from 'vitest/config';
-import path from 'path';
+import path from 'node:path';
 
 const packages = path.resolve(__dirname, '..');
 
@@ -20,6 +20,8 @@ export default defineConfig({
       '@app-agent/tools': path.resolve(packages, 'tools/src'),
       '@app-agent/planner': path.resolve(packages, 'planner/src'),
       '@app-agent/workflow': path.resolve(packages, 'workflow/src'),
+      '@app-agent/multi-agent': path.resolve(packages, 'multi-agent/src'),
+      '@app-agent/learning': path.resolve(packages, 'learning/src'),
       '@app-agent/ui': path.resolve(packages, 'ui/src'),
       '@app-agent/app-agent': path.resolve(packages, 'app-agent/src'),
     },

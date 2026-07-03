@@ -13,6 +13,8 @@ import { WorkflowEngine } from '@app-agent/workflow';
 import { SemanticRegistry } from '@app-agent/semantic-registry';
 import { StateManager } from '@app-agent/state-manager';
 import { MemoryManager } from '@app-agent/memory';
+import { MultiAgentCoordinator, createBuiltInAgents } from '@app-agent/multi-agent';
+import { LearningSystem } from '@app-agent/learning';
 import type {
   AgentConfig,
   AgentResult,
@@ -39,6 +41,10 @@ export class AppAgentCore extends EventEmitter {
   private domEnv = createBrowserDOMEnvironment();
   private stateManager?: StateManager;
   private memoryManager?: MemoryManager;
+  private multiAgentCoordinator?: MultiAgentCoordinator;
+  private learningSystem?: LearningSystem;
+  private routingEnabled = true;
+  private taskStartedAt = 0;
   private domCache: {
     tree: FlatDOMTree;
     timestamp: number;
@@ -101,6 +107,37 @@ export class AppAgentCore extends EventEmitter {
         temporaryState: {},
       });
     }
+
+    if (config.enableMultiAgent) {
+      this.multiAgentCoordinator = new MultiAgentCoordinator();
+      const delegate = {
+        execute: async (specializedTask: string) => {
+          this.routingEnabled = false;
+          try {
+            return await this.runTask(specializedTask);
+          } finally {
+            this.routingEnabled = true;
+          }
+        },
+      };
+
+      for (const agent of createBuiltInAgents(delegate)) {
+        this.multiAgentCoordinator.registerAgent(agent);
+      }
+
+      if (config.customAgents) {
+        for (const agent of Object.values(config.customAgents)) {
+          this.multiAgentCoordinator.registerAgent(agent);
+        }
+      }
+    }
+
+    if (config.enableLearning) {
+      this.learningSystem = new LearningSystem({
+        enabled: true,
+        ...config.learningConfig,
+      });
+    }
   }
 
   get status(): AgentStatus {
@@ -113,6 +150,22 @@ export class AppAgentCore extends EventEmitter {
   }
 
   async execute(task: string): Promise<AgentResult> {
+    if (this.config.enableMultiAgent && this.multiAgentCoordinator && this.routingEnabled) {
+      const route = this.multiAgentCoordinator.selectAgent(task);
+      if (route) {
+        const appState = await this.config.getAppState();
+        return route.agent.execute(task, {
+          appState,
+          sharedContext: new Map(),
+        });
+      }
+    }
+
+    return this.runTask(task);
+  }
+
+  private async runTask(task: string): Promise<AgentResult> {
+    this.taskStartedAt = Date.now();
     this.task = task;
     this.taskId = this.generateId();
     this.history = [];
@@ -191,6 +244,16 @@ export class AppAgentCore extends EventEmitter {
           if (this.config.onAfterTask) {
             await this.config.onAfterTask(this, result);
           }
+
+          if (this.learningSystem) {
+            await this.learningSystem.recordPattern({
+              task: this.task,
+              steps: this.learningSystem.extractStepsFromHistory(this.history),
+              result,
+              durationMs: Date.now() - this.taskStartedAt,
+            });
+          }
+
           return result;
         }
 
@@ -295,6 +358,13 @@ export class AppAgentCore extends EventEmitter {
           relevantContext
             .map((ctx) => `- ${ctx.content} (relevance: ${ctx.relevance.toFixed(2)})`)
             .join('\n');
+      }
+    }
+
+    if (this.learningSystem) {
+      const pattern = await this.learningSystem.findPattern(this.task);
+      if (pattern) {
+        memoryContext += `\n\n${this.learningSystem.getPatternHint(pattern)}`;
       }
     }
 

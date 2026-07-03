@@ -5,7 +5,7 @@
  */
 
 import type { PanelConfig, PanelState } from './types';
-import type { AgentStatus, HistoricalEvent } from '@app-agent/core';
+import type { AgentStatus, HistoricalEvent } from '@app-agent/entities';
 
 /**
  * AppAgentPanel Class

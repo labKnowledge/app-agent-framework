@@ -19,7 +19,7 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@app-agent/core": "workspace:*"
+    "@app-agent/entities": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^20.10.0",

@@ -19,6 +19,14 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
+    "@app-agent/entities": "workspace:*",
+    "@app-agent/llm": "workspace:*",
+    "@app-agent/tools": "workspace:*",
+    "@app-agent/planner": "workspace:*",
+    "@app-agent/workflow": "workspace:*",
+    "@app-agent/semantic-registry": "workspace:*",
+    "@app-agent/state-manager": "workspace:*",
+    "@app-agent/memory": "workspace:*",
     "eventemitter3": "^5.0.1",
     "zod": "^3.22.4"
   },

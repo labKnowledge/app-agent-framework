@@ -61,38 +61,39 @@ await agent.execute('Find the best laptop under $1000 and add it to my cart')
 
 ## 📦 Packages
 
+- **@app-agent/app-agent** - Public facade (recommended import)
+- **@app-agent/entities** - Shared domain types
 - **@app-agent/core** - Core agent logic and ReAct loop
 - **@app-agent/state-manager** - App state integration and tracking
-- **@app-agent/semantic-registry** - Entity and operation definitions
-- **@app-agent/workflow-engine** - Workflow execution and orchestration
-- **@app-agent/multi-agent** - Specialized agent coordination
-- **@app-agent/learning** - Pattern learning and optimization
+- **@app-agent/semantic-registry** - Runtime entity registry
+- **@app-agent/workflow** - Workflow execution and orchestration
+- **@app-agent/planner** - Task planning and decomposition
+- **@app-agent/tools** - Tool registry and built-in actions
+- **@app-agent/llm** - LLM client with prompt optimization
+- **@app-agent/memory** - Working, episodic, and semantic memory
 - **@app-agent/ui** - Panel components and visual feedback
-- **@app-agent/integrations/react** - React integration
-- **@app-agent/integrations/vue** - Vue integration
-- **@app-agent/integrations/svelte** - Svelte integration
-- **@app-agent/app-agent** - Main package
 
 ## 📖 Documentation
 
-- [Getting Started](./docs/getting-started.md)
-- [API Reference](./docs/api-reference.md)
 - [Architecture](./docs/architecture.md)
-- [Guides](./docs/guides/)
+- [ADRs](./docs/adr/README.md)
+- [Agent Guide](./AGENTS.md)
 
 ## 🏗️ Architecture
 
 ```
 packages/
-├── core/                  # Core agent logic
+├── entities/              # Shared domain types (zero deps)
+├── semantic-registry/     # Runtime entity registry
 ├── state-manager/         # App state integration
-├── semantic-registry/     # Entity/operation definitions
-├── workflow-engine/       # Workflow execution
-├── multi-agent/          # Agent coordination
-├── learning/             # Pattern learning
-├── ui/                   # Panel components
-├── integrations/         # Framework integrations
-└── app-agent/           # Main package
+├── memory/                # Memory system
+├── llm/                   # LLM client
+├── tools/                 # Tool registry
+├── planner/               # Task planning
+├── workflow/              # Workflow engine
+├── core/                  # ReAct orchestrator
+├── ui/                    # Panel components
+└── app-agent/             # Public facade
 ```
 
 ## 🤝 Contributing

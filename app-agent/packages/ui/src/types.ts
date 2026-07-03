@@ -2,7 +2,7 @@
  * UI Types
  */
 
-import type { AgentStatus, HistoricalEvent } from '@app-agent/core';
+import type { AgentStatus, HistoricalEvent } from '@app-agent/entities';
 
 /**
  * Panel configuration

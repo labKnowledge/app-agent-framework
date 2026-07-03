@@ -2,7 +2,8 @@
  * State Difference Calculation
  */
 
-import type { AppState, StateDiff, FieldChange } from './types';
+import type { AppState } from '@app-agent/entities';
+import type { StateDiff, FieldChange } from './types';
 
 /**
  * Calculate difference between two states

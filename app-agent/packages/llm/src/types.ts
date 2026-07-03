@@ -90,9 +90,9 @@ export interface PromptTemplate {
   description: string;
   /** Template content */
   content: string;
-  ** Template variables */
+  /** Template variables */
   variables: PromptVariable[];
-  ** Template examples */
+  /** Template examples */
   examples?: PromptExample[];
 }
 
@@ -104,9 +104,9 @@ export interface PromptVariable {
   name: string;
   /** Variable description */
   description?: string;
-  ** Default value */
+  /** Default value */
   defaultValue?: string;
-  ** Required flag */
+  /** Required flag */
   required: boolean;
 }
 
@@ -148,9 +148,9 @@ export interface ChainOfThoughtConfig {
   enabled: boolean;
   /** CoT style */
   style: 'structured' | 'natural' | 'minimal';
-  ** Show intermediate steps */
+  /** Show intermediate steps */
   showSteps: boolean;
-  ** Max reasoning steps */
+  /** Max reasoning steps */
   maxSteps?: number;
 }
 
@@ -160,11 +160,11 @@ export interface ChainOfThoughtConfig {
 export interface FewShotConfig {
   /** Enable few-shot */
   enabled: boolean;
-  ** Number of examples */
+  /** Number of examples */
   numExamples: number;
-  ** Example selection strategy */
+  /** Example selection strategy */
   selectionStrategy: 'similarity' | 'random' | 'curated';
-  ** Example source */
+  /** Example source */
   examples: PromptExample[];
 }
 
@@ -191,7 +191,7 @@ export interface CostTracking {
     completionTokens: number;
     totalTokens: number;
   };
-  ** Request count */
+  /** Request count */
   requestCount: number;
 }
 
@@ -203,9 +203,9 @@ export interface ContextManagement {
   maxTokens: number;
   /** Context window strategy */
   strategy: 'truncate' | 'compress' | 'summarize';
-  ** Priority system */
+  /** Priority system */
   priorities: Record<string, number>;
-  ** Summarization threshold */
+  /** Summarization threshold */
   summarizeThreshold: number;
 }
 

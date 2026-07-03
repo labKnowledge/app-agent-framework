@@ -364,10 +364,12 @@ export interface WorkflowEngineConfig {
   maxConcurrentWorkflows?: number;
   /** Default timeout (ms) */
   defaultTimeout?: number;
-  ** Enable persistence */
+  /** Enable persistence */
   enablePersistence?: boolean;
   /** Persistence key */
   persistenceKey?: string;
+  /** Injectable storage port */
+  storage?: import('@app-agent/entities').StoragePort;
   /** Checkpoint interval (ms) */
   checkpointInterval?: number;
   /** Enable metrics */

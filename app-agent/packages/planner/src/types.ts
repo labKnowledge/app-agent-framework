@@ -189,20 +189,13 @@ export type ExecutionPhase =
  * Planner configuration
  */
 export interface PlannerConfig {
-  /** Maximum planning depth */
-  maxDepth: number;
-  /** Maximum sub-tasks per task */
-  maxSubTasks: number;
-  /** Planning timeout (ms) */
-  planningTimeout: number;
-  /** Enable adaptive replanning */
-  enableReplanning: boolean;
-  /** Maximum replanning attempts */
-  maxReplanningAttempts: number;
-  /** Use few-shot examples */
-  useFewShot: boolean;
-  /** Planning strategy */
-  strategy: 'hierarchical' | 'linear' | 'adaptive';
+  maxDepth?: number;
+  maxSubTasks?: number;
+  planningTimeout?: number;
+  enableReplanning?: boolean;
+  maxReplanningAttempts?: number;
+  useFewShot?: boolean;
+  strategy?: 'hierarchical' | 'linear' | 'adaptive';
 }
 
 /**

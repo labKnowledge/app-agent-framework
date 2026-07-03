@@ -1,0 +1,50 @@
+{
+  "moduleBoundaries": [
+    {
+      "name": "entities",
+      "path": "packages/entities",
+      "allowedImports": ["packages/entities"],
+      "forbiddenPatterns": ["@app-agent/"]
+    },
+    {
+      "name": "infrastructure",
+      "path": "packages/(state-manager|memory|llm|tools|planner|workflow|semantic-registry)",
+      "allowedImports": ["packages/entities"],
+      "forbiddenPatterns": ["@app-agent/core", "@app-agent/ui", "@app-agent/app-agent"]
+    },
+    {
+      "name": "core",
+      "path": "packages/core",
+      "allowedImports": [
+        "packages/entities",
+        "packages/state-manager",
+        "packages/memory",
+        "packages/llm",
+        "packages/tools",
+        "packages/planner",
+        "packages/workflow",
+        "packages/semantic-registry",
+        "packages/core"
+      ],
+      "forbiddenPatterns": ["@app-agent/ui", "@app-agent/app-agent"]
+    },
+    {
+      "name": "ui",
+      "path": "packages/ui",
+      "allowedImports": ["packages/entities", "packages/core"],
+      "forbiddenPatterns": ["@app-agent/planner", "@app-agent/workflow", "@app-agent/memory"]
+    },
+    {
+      "name": "facade",
+      "path": "packages/app-agent",
+      "allowedImports": ["packages/*"],
+      "forbiddenPatterns": []
+    }
+  ],
+  "maxMetrics": {
+    "circularDependencies": 0,
+    "maxEfferentCoupling": 12,
+    "maxFileLength": 400,
+    "maxFunctionLength": 80
+  }
+}

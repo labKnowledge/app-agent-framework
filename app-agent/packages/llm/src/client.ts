@@ -6,6 +6,7 @@
  */
 
 import EventEmitter from 'eventemitter3';
+import type { AgentReasoning, CoreLLMResponse, LLMMessage as CoreLLMMessage } from '@app-agent/entities';
 import type {
   LLMMessage,
   LLMResponse,
@@ -17,13 +18,12 @@ import type {
   StreamingCallback,
   CostTracking,
   ContextManagement,
-  EnhancedLLMClient,
 } from './types';
 
 /**
  * Enhanced LLM Client Class
  */
-export class EnhancedLLMClient extends EventEmitter implements EnhancedLLMClient {
+export class EnhancedLLMClient extends EventEmitter {
   private config: Required<LLMClientConfig>;
   private templates: Map<string, PromptTemplate> = new Map();
   private costTracking: CostTracking;
@@ -40,7 +40,7 @@ export class EnhancedLLMClient extends EventEmitter implements EnhancedLLMClient
       timeout: config.timeout ?? 60000,
       maxRetries: config.maxRetries ?? 3,
       retryDelay: config.retryDelay ?? 1000,
-      organizationId: config.organizationId,
+      organizationId: config.organizationId ?? '',
     };
 
     this.costTracking = {
@@ -65,6 +65,27 @@ export class EnhancedLLMClient extends EventEmitter implements EnhancedLLMClient
       },
       summarizeThreshold: 0.8,
     };
+  }
+
+  /**
+   * Invoke LLM for ReAct loop (returns reasoning + action)
+   */
+  async invokeReAct(messages: CoreLLMMessage[]): Promise<CoreLLMResponse> {
+    const maxRetries = this.config.maxRetries;
+    let lastError: Error | null = null;
+
+    for (let attempt = 0; attempt < maxRetries; attempt++) {
+      try {
+        return await this.fetchReAct(messages);
+      } catch (error) {
+        lastError = error as Error;
+        if (attempt < maxRetries - 1) {
+          await this.delay(Math.pow(2, attempt) * this.config.retryDelay);
+        }
+      }
+    }
+
+    throw new Error(`LLM request failed after ${maxRetries} attempts: ${lastError?.message}`);
   }
 
   /**
@@ -308,7 +329,7 @@ export class EnhancedLLMClient extends EventEmitter implements EnhancedLLMClient
   }
 
   private getSystemPrompt(options?: PromptOptimization): string {
-    const basePrompt = `You are an intelligent AI assistant that helps users complete tasks in web applications.
+    let prompt = `You are an intelligent AI assistant that helps users complete tasks in web applications.
 
 Your capabilities include:
 - Understanding application state and context
@@ -325,10 +346,10 @@ When responding:
 5. Ask for clarification when needed`;
 
     if (options?.temperature !== undefined) {
-      basePrompt += `\n\nResponse temperature: ${options.temperature}`;
+      prompt += `\n\nResponse temperature: ${options.temperature}`;
     }
 
-    return basePrompt;
+    return prompt;
   }
 
   private buildPromptFromTemplate(
@@ -388,6 +409,79 @@ When responding:
     // Rough estimation: ~4 characters per token
     const totalChars = messages.reduce((sum, m) => sum + m.content.length, 0);
     return Math.ceil(totalChars / 4);
+  }
+
+  private async fetchReAct(messages: CoreLLMMessage[]): Promise<CoreLLMResponse> {
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    };
+
+    if (this.config.apiKey) {
+      headers['Authorization'] = `Bearer ${this.config.apiKey}`;
+    }
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), this.config.timeout);
+
+    try {
+      const response = await fetch(`${this.config.baseURL}/chat/completions`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ model: this.config.model, messages }),
+        signal: controller.signal,
+      });
+
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        const error = await response.text();
+        throw new Error(`LLM API error: ${response.status} - ${error}`);
+      }
+
+      const data = await response.json();
+      const content = data.choices?.[0]?.message?.content;
+      if (!content) {
+        throw new Error('Invalid LLM response: missing content');
+      }
+
+      return {
+        reasoning: this.parseReasoning(content),
+        raw: data,
+      };
+    } catch (error) {
+      if (error instanceof Error && error.name === 'AbortError') {
+        throw new Error(`LLM request timeout after ${this.config.timeout}ms`);
+      }
+      throw error;
+    }
+  }
+
+  private parseReasoning(content: string): AgentReasoning {
+    try {
+      const parsed = JSON.parse(content);
+      if (
+        typeof parsed.evaluation_previous_goal !== 'string' ||
+        typeof parsed.memory !== 'string' ||
+        typeof parsed.next_goal !== 'string' ||
+        typeof parsed.action !== 'object'
+      ) {
+        throw new Error('Invalid reasoning structure');
+      }
+
+      return {
+        evaluationPreviousGoal: parsed.evaluation_previous_goal,
+        memory: parsed.memory,
+        nextGoal: parsed.next_goal,
+        action: parsed.action,
+      };
+    } catch {
+      return {
+        evaluationPreviousGoal: 'Unable to parse evaluation',
+        memory: content,
+        nextGoal: 'Continue with task',
+        action: {},
+      } as import('@app-agent/entities').AgentReasoning['action'];
+    }
   }
 
   private async makeRequest(

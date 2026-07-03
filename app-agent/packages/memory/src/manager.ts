@@ -20,12 +20,22 @@ import type {
   Action,
   MemoryConsolidationConfig,
 } from './types';
+import { LocalStorageAdapter, type StoragePort } from '@app-agent/entities';
 
 /**
  * Memory Manager Class
  */
 export class MemoryManager {
-  private config: Required<MemoryManagerConfig>;
+  private config: {
+    maxWorkingMemory: number;
+    maxEpisodicMemory: number;
+    maxSemanticMemory: number;
+    consolidation: MemoryConsolidationConfig;
+    embeddingModel?: string;
+    enablePersistence: boolean;
+    persistenceKey: string;
+    storage: StoragePort;
+  };
   private memories: Map<string, MemoryEntry> = new Map();
   private workingMemories: MemoryEntry[] = [];
   private episodicMemories: MemoryEntry[] = [];
@@ -47,6 +57,7 @@ export class MemoryManager {
       },
       enablePersistence: config.enablePersistence ?? false,
       persistenceKey: config.persistenceKey ?? 'app-agent-memory',
+      storage: config.storage ?? new LocalStorageAdapter(),
     };
 
     // Load from persistence if enabled
@@ -632,35 +643,32 @@ export class MemoryManager {
     return `mem-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
   }
 
-  private saveToPersistence(): void {
-    if (typeof window === 'undefined') {
-      return;
-    }
+  private async saveToPersistence(): Promise<void> {
+    if (!this.config.enablePersistence) return;
 
     try {
       const data = {
         memories: Array.from(this.memories.entries()),
         timestamp: Date.now(),
       };
-
-      localStorage.setItem(this.config.persistenceKey, JSON.stringify(data));
+      await this.config.storage.set(
+        this.config.persistenceKey,
+        JSON.stringify(data),
+      );
     } catch (error) {
       console.error('Failed to save memories to persistence:', error);
     }
   }
 
-  private loadFromPersistence(): void {
-    if (typeof window === 'undefined') {
-      return;
-    }
+  private async loadFromPersistence(): Promise<void> {
+    if (!this.config.enablePersistence) return;
 
     try {
-      const data = localStorage.getItem(this.config.persistenceKey);
+      const data = await this.config.storage.get(this.config.persistenceKey);
       if (data) {
         const parsed = JSON.parse(data);
         this.memories = new Map(parsed.memories);
 
-        // Rebuild type indices
         for (const memory of this.memories.values()) {
           this.addToTypeIndex(memory);
         }

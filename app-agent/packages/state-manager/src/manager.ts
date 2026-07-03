@@ -4,7 +4,7 @@
  * Manages application state tracking, change detection, and history
  */
 
-import type { AppState } from '@app-agent/core';
+import type { AppState } from '@app-agent/entities';
 import type {
   StateManagerConfig,
   StateDiff,

@@ -333,7 +333,7 @@ export interface ToolMetrics {
   totalCalls: number;
   /** Successful calls */
   successfulCalls: number;
-  ** Failed calls */
+  /** Failed calls */
   failedCalls: number;
   /** Average duration */
   avgDuration: number;

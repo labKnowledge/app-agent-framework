@@ -6,6 +6,7 @@
  */
 
 import EventEmitter from 'eventemitter3';
+import { LocalStorageAdapter, type StoragePort } from '@app-agent/entities';
 import type {
   Workflow,
   WorkflowExecution,
@@ -26,7 +27,7 @@ import type {
  * Workflow Engine Class
  */
 export class WorkflowEngine extends EventEmitter {
-  private config: Required<WorkflowEngineConfig>;
+  private config: Required<WorkflowEngineConfig> & { storage: StoragePort };
   private workflows: Map<string, Workflow> = new Map();
   private executions: Map<string, WorkflowExecution> = new Map();
   private executionQueue: string[] = [];
@@ -43,6 +44,7 @@ export class WorkflowEngine extends EventEmitter {
       persistenceKey: config.persistenceKey ?? 'workflow-engine',
       checkpointInterval: config.checkpointInterval ?? 10000, // 10 seconds
       enableMetrics: config.enableMetrics ?? true,
+      storage: config.storage ?? new LocalStorageAdapter(),
     };
 
     // Load from persistence if enabled
@@ -699,10 +701,8 @@ export class WorkflowEngine extends EventEmitter {
     return `wf-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
   }
 
-  private saveToPersistence(): void {
-    if (typeof window === 'undefined') {
-      return;
-    }
+  private async saveToPersistence(): Promise<void> {
+    if (!this.config.enablePersistence) return;
 
     try {
       const data = {
@@ -710,27 +710,32 @@ export class WorkflowEngine extends EventEmitter {
         executions: Array.from(this.executions.entries()),
         timestamp: Date.now(),
       };
-
-      localStorage.setItem(this.config.persistenceKey, JSON.stringify(data));
+      await this.config.storage.set(
+        this.config.persistenceKey,
+        JSON.stringify(data),
+      );
     } catch (error) {
       console.error('Failed to save workflows to persistence:', error);
     }
   }
 
-  private loadFromPersistence(): void {
-    if (typeof window === 'undefined') {
-      return;
-    }
+  private async loadFromPersistence(): Promise<void> {
+    if (!this.config.enablePersistence) return;
 
     try {
-      const data = localStorage.getItem(this.config.persistenceKey);
+      const data = await this.config.storage.get(this.config.persistenceKey);
       if (data) {
         const parsed = JSON.parse(data);
         this.workflows = new Map(parsed.workflows);
-        this.executions = new Map(parsed.executions.map(([id, exec]: [string, any]) => [
-          id,
-          { ...exec, stepResults: new Map(Object.entries(exec.stepResults || {})) },
-        ]));
+        this.executions = new Map(
+          parsed.executions.map(([id, exec]: [string, WorkflowExecution]) => [
+            id,
+            {
+              ...exec,
+              stepResults: new Map(Object.entries(exec.stepResults || {})),
+            },
+          ]),
+        );
       }
     } catch (error) {
       console.error('Failed to load workflows from persistence:', error);

@@ -174,20 +174,14 @@ export interface MemoryConsolidationConfig {
  * Memory manager config
  */
 export interface MemoryManagerConfig {
-  /** Maximum working memory entries */
-  maxWorkingMemory: number;
-  /** Maximum episodic memory entries */
-  maxEpisodicMemory: number;
-  /** Maximum semantic memory entries */
-  maxSemanticMemory: number;
-  /** Consolidation settings */
-  consolidation: MemoryConsolidationConfig;
-  /** Embedding model for semantic search */
+  maxWorkingMemory?: number;
+  maxEpisodicMemory?: number;
+  maxSemanticMemory?: number;
+  consolidation?: Partial<MemoryConsolidationConfig>;
   embeddingModel?: string;
-  /** Persistence enabled */
-  enablePersistence: boolean;
-  /** Persistence key for localStorage */
+  enablePersistence?: boolean;
   persistenceKey?: string;
+  storage?: import('@app-agent/entities').StoragePort;
 }
 
 /**

@@ -2,7 +2,7 @@
  * State Manager Types
  */
 
-import type { AppState } from '@app-agent/core';
+import type { AppState } from '@app-agent/entities';
 
 /**
  * State difference between two states

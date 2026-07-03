@@ -16,19 +16,19 @@
     "declarationMap": true,
     "sourceMap": true,
     "outDir": "./dist",
-    "rootDir": "./src",
     "baseUrl": ".",
     "paths": {
+      "@app-agent/entities": ["./packages/entities/src"],
+      "@app-agent/semantic-registry": ["./packages/semantic-registry/src"],
       "@app-agent/core": ["./packages/core/src"],
       "@app-agent/state-manager": ["./packages/state-manager/src"],
-      "@app-agent/semantic-registry": ["./packages/semantic-registry/src"],
-      "@app-agent/workflow-engine": ["./packages/workflow-engine/src"],
-      "@app-agent/multi-agent": ["./packages/multi-agent/src"],
-      "@app-agent/learning": ["./packages/learning/src"],
+      "@app-agent/memory": ["./packages/memory/src"],
+      "@app-agent/llm": ["./packages/llm/src"],
+      "@app-agent/tools": ["./packages/tools/src"],
+      "@app-agent/planner": ["./packages/planner/src"],
+      "@app-agent/workflow": ["./packages/workflow/src"],
       "@app-agent/ui": ["./packages/ui/src"],
-      "@app-agent/integrations/react": ["./packages/integrations/react/src"],
-      "@app-agent/integrations/vue": ["./packages/integrations/vue/src"],
-      "@app-agent/integrations/svelte": ["./packages/integrations/svelte/src"]
+      "@app-agent/app-agent": ["./packages/app-agent/src"]
     }
   },
   "exclude": ["node_modules", "dist", "**/*.test.ts"]

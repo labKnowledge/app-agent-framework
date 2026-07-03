@@ -47,6 +47,32 @@ export class ToolRegistry extends EventEmitter {
   }
 
   /**
+   * Get tool by name
+   */
+  getToolByName(name: string): Tool | undefined {
+    return this.getAllTools().find((tool) => tool.name === name);
+  }
+
+  /**
+   * Execute a tool by name, returning string result for ReAct loop
+   */
+  async executeByName(
+    name: string,
+    params: unknown,
+    context: ToolContext,
+  ): Promise<string> {
+    const tool = this.getToolByName(name);
+    if (!tool) {
+      throw new Error(`Tool not found: ${name}`);
+    }
+    const result = await this.executeTool(tool.id, params, context);
+    if (!result.success) {
+      throw new Error(result.error?.message ?? `Tool execution failed: ${name}`);
+    }
+    return typeof result.data === 'string' ? result.data : JSON.stringify(result.data);
+  }
+
+  /**
    * Register a tool
    */
   registerTool<TParams, TResult>(tool: Tool<TParams, TResult>): void {

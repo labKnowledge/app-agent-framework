@@ -1,0 +1,1 @@
+export { SemanticRegistry } from './registry';

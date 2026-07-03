@@ -8,6 +8,8 @@
 export { AppAgentCore } from './agent';
 export { LLMClient } from './llm/client';
 export { DOMProcessor, DOMActions } from './dom';
+export { buildMessages, buildSystemPrompt, buildUserPrompt } from './prompt-builder';
+export type * from './ports';
 
 export type * from './types';
 export type * from './dom/types';

@@ -1,12 +1,11 @@
 /**
  * Basic App-Agent Example
  *
- * Demonstrates the core agent with app state awareness
+ * Demonstrates the public facade with app state awareness
  */
 
-import { AppAgentCore } from '@app-agent/core';
+import { AppAgent } from '@app-agent/app-agent';
 
-// Mock application state
 async function getAppState() {
   return {
     currentView: 'shop',
@@ -28,77 +27,56 @@ async function getAppState() {
   };
 }
 
-// Create agent
-const agent = new AppAgentCore({
+const agent = new AppAgent({
   baseURL: 'https://api.openai.com/v1',
   model: 'gpt-4',
   apiKey: process.env.OPENAI_API_KEY,
-
   getAppState,
-
   maxSteps: 40,
   stepDelay: 400,
+  trackState: true,
+  enableMemory: true,
 
-  // Lifecycle hooks
-  onBeforeTask: async (agent) => {
-    console.log('🚀 Starting task:', agent.task);
+  onBeforeTask: async (a) => {
+    console.log('Starting task:', a.task);
   },
 
-  onAfterTask: async (agent, result) => {
-    console.log('✅ Task completed:', result.success);
-    console.log('📊 Steps taken:', result.steps);
-    console.log('📝 Result:', result.result);
+  onAfterTask: async (_a, result) => {
+    console.log('Task completed:', result.success);
+    console.log('Steps taken:', result.steps);
+    console.log('Result:', result.result);
   },
 
-  onBeforeStep: async (agent, step) => {
-    console.log(`\n📍 Step ${step}:`);
+  onBeforeStep: async (_a, step) => {
+    console.log(`Step ${step}:`);
   },
 
-  onAfterStep: async (agent, history) => {
-    const lastEvent = history[history.length - 1];
-    console.log('  Last action:', lastEvent.type, lastEvent.data);
-  },
-
-  onDispose: (agent) => {
-    console.log('🧹 Agent disposed');
+  onDispose: () => {
+    console.log('Agent disposed');
   },
 });
 
-// Listen to events
 agent.on('statuschange', ({ status }) => {
-  console.log('📊 Status:', status);
+  console.log('Status:', status);
 });
 
 agent.on('activity', ({ activity }) => {
-  console.log('  ⚡', activity);
+  console.log('Activity:', activity);
 });
 
-agent.on('historychange', ({ history }) => {
-  console.log('📜 History size:', history.length);
-});
-
-// Execute a task
 async function main() {
   try {
     console.log('=== App-Agent Example ===\n');
 
-    const result = await agent.execute('Find the best laptop under $1000 and tell me about it');
+    const result = await agent.execute(
+      'Find the best laptop under $1000 and tell me about it',
+    );
 
     console.log('\n=== Result ===');
     console.log('Success:', result.success);
     console.log('Steps:', result.steps);
     console.log('Result:', result.result);
 
-    if (result.error) {
-      console.error('Error:', result.error.message);
-    }
-
-    console.log('\n=== History ===');
-    result.history.forEach((event, i) => {
-      console.log(`${i + 1}. [${event.type}]`, JSON.stringify(event.data).substring(0, 100));
-    });
-
-    // Clean up
     agent.dispose();
   } catch (error) {
     console.error('Fatal error:', error);
@@ -107,5 +85,4 @@ async function main() {
   }
 }
 
-// Run example
 main();

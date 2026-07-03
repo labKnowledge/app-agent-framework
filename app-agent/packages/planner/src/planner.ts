@@ -12,7 +12,7 @@ import type {
   ExecutionState,
   ReplanningTrigger,
   TaskType,
-  PlanStatus,
+  ExecutionPhase,
 } from './types';
 
 /**

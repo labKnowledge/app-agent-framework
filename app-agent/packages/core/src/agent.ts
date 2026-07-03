@@ -4,6 +4,15 @@
 
 import EventEmitter from 'eventemitter3';
 import { z } from 'zod';
+import { toolSchemas } from '@app-agent/entities';
+import { EnhancedLLMClient } from '@app-agent/llm';
+import { ToolRegistry, createBuiltinTools, agentToolToTool } from '@app-agent/tools';
+import type { ToolContext } from '@app-agent/tools';
+import { TaskPlanner } from '@app-agent/planner';
+import { WorkflowEngine } from '@app-agent/workflow';
+import { SemanticRegistry } from '@app-agent/semantic-registry';
+import { StateManager } from '@app-agent/state-manager';
+import { MemoryManager } from '@app-agent/memory';
 import type {
   AgentConfig,
   AgentResult,
@@ -11,50 +20,36 @@ import type {
   AgentObservation,
   AgentReasoning,
   HistoricalEvent,
-  ToolContext,
   InternalState,
-  AgentEventPayload,
-  AgentEventListener,
-  AppState,
+  AgentActionResult,
+  AgentTool,
   DOMState,
-  AgentAction,
 } from './types';
-import { toolSchemas } from './types';
-import { LLMClient } from './llm/client';
-import { DOMProcessor, DOMActions } from './dom';
-import { StateManager } from '@app-agent/state-manager';
-import { MemoryManager } from '@app-agent/memory';
+import { buildMessages } from './prompt-builder';
+import { buildDOMState, createBrowserDOMEnvironment } from './ports';
+import type { FlatDOMTree } from './dom/types';
 
-/**
- * Core Agent Class
- *
- * Implements the ReAct (Reasoning + Acting) loop with:
- * - App state awareness
- * - Reflection-before-action mental model
- * - Event-driven state management
- * - Cooperative cancellation via AbortSignal
- */
 export class AppAgentCore extends EventEmitter {
   private config: AgentConfig;
-  private llmClient: LLMClient;
+  private llmClient: EnhancedLLMClient;
   private abortController: AbortController;
-  private tools: Map<string, import('./types').Tool> = new Map();
-  private domProcessor: DOMProcessor;
-  private domActions: DOMActions;
+  private toolRegistry: ToolRegistry;
+  private semanticRegistry: SemanticRegistry;
+  private workflowEngine: WorkflowEngine;
+  private planner: TaskPlanner;
+  private domEnv = createBrowserDOMEnvironment();
   private stateManager?: StateManager;
   private memoryManager?: MemoryManager;
   private domCache: {
-    tree: ReturnType<DOMProcessor['getFlatTree']>;
+    tree: FlatDOMTree;
     timestamp: number;
     checksum: string;
   } | null = null;
 
-  // Persistent state
   public task = '';
   public taskId = '';
   public history: HistoricalEvent[] = [];
 
-  // Transient state
   private _status: AgentStatus = 'idle';
   private _states: InternalState = {
     totalWaitTime: 0,
@@ -66,7 +61,7 @@ export class AppAgentCore extends EventEmitter {
     super();
 
     this.config = config;
-    this.llmClient = new LLMClient({
+    this.llmClient = new EnhancedLLMClient({
       baseURL: config.baseURL,
       model: config.model,
       apiKey: config.apiKey,
@@ -75,13 +70,15 @@ export class AppAgentCore extends EventEmitter {
     });
 
     this.abortController = new AbortController();
-    this.domProcessor = new DOMProcessor();
-    this.domActions = new DOMActions();
+    this.toolRegistry = new ToolRegistry({ enableCaching: false });
+    this.semanticRegistry = new SemanticRegistry();
+    this.workflowEngine = new WorkflowEngine();
+    this.planner = new TaskPlanner();
 
-    // Initialize built-in tools
     this.initializeTools();
+    this.initializeEntities();
+    this.initializeWorkflows();
 
-    // Initialize state manager if state tracking is desired
     if (config.trackState) {
       this.stateManager = new StateManager({
         getAppState: config.getAppState,
@@ -94,11 +91,8 @@ export class AppAgentCore extends EventEmitter {
       this.stateManager.startTracking(1000);
     }
 
-    // Initialize memory manager if enabled
     if (config.enableMemory) {
       this.memoryManager = new MemoryManager(config.memoryConfig);
-
-      // Initialize working memory
       this.memoryManager.updateWorkingMemory({
         currentTask: '',
         currentGoal: '',
@@ -110,38 +104,22 @@ export class AppAgentCore extends EventEmitter {
     }
   }
 
-  /**
-   * Get current agent status
-   */
   get status(): AgentStatus {
     return this._status;
   }
 
-  /**
-   * Set agent status and emit event
-   */
   private setStatus(status: AgentStatus): void {
     this._status = status;
     this.emit('statuschange', { type: 'statuschange', status });
   }
 
-  /**
-   * Execute a task
-   */
   async execute(task: string): Promise<AgentResult> {
     this.task = task;
     this.taskId = this.generateId();
     this.history = [];
-    this._states = {
-      totalWaitTime: 0,
-      lastURL: '',
-      browserState: null,
-    };
-
-    // Clear DOM cache for new task
+    this._states = { totalWaitTime: 0, lastURL: '', browserState: null };
     this.domCache = null;
 
-    // Initialize working memory for new task
     if (this.memoryManager) {
       this.memoryManager.updateWorkingMemory({
         currentTask: task,
@@ -153,10 +131,31 @@ export class AppAgentCore extends EventEmitter {
       });
     }
 
+    if (this.config.enablePlanning) {
+      await this.planner.createPlan(
+        task,
+        {
+          appState: {},
+          availableTools: this.toolRegistry.getAllTools().map((t) => t.name),
+          constraints: [],
+          preferences: {
+            speed: 'normal',
+            riskTolerance: 'medium',
+            verification: 'normal',
+          },
+        },
+        async (prompt) => {
+          const response = await this.llmClient.invokeReAct([
+            { role: 'user', content: prompt },
+          ]);
+          return response.reasoning.memory;
+        },
+      );
+    }
+
     this.setStatus('running');
 
     try {
-      // Call before task hook
       if (this.config.onBeforeTask) {
         await this.config.onBeforeTask(this);
       }
@@ -164,38 +163,23 @@ export class AppAgentCore extends EventEmitter {
       const maxSteps = this.config.maxSteps ?? 40;
 
       for (let step = 1; step <= maxSteps; step++) {
-        // Check for cancellation
         if (this.abortController.signal.aborted) {
           throw new Error('Task aborted by user');
         }
 
-        // Call before step hook
         if (this.config.onBeforeStep) {
           await this.config.onBeforeStep(this, step);
         }
 
-        // OBSERVE phase
         const observation = await this.observe();
-        this.addHistoryEvent({
-          type: 'observation',
-          timestamp: Date.now(),
-          data: observation,
-        });
+        this.addHistoryEvent({ type: 'observation', timestamp: Date.now(), data: observation });
 
-        // THINK phase
         this.showActivity('Thinking...');
         const reasoning = await this.think(observation);
-        this.addHistoryEvent({
-          type: 'reasoning',
-          timestamp: Date.now(),
-          data: reasoning,
-        });
+        this.addHistoryEvent({ type: 'reasoning', timestamp: Date.now(), data: reasoning });
 
-        // Check if done
         if (this.isDone(reasoning)) {
           this.setStatus('completed');
-
-          // Consolidate episode to memory if enabled
           if (this.memoryManager) {
             this.memoryManager.consolidateEpisode(this.task, 'success');
           }
@@ -207,34 +191,24 @@ export class AppAgentCore extends EventEmitter {
             history: this.history,
           };
 
-          // Call after task hook
           if (this.config.onAfterTask) {
             await this.config.onAfterTask(this, result);
           }
-
           return result;
         }
 
-        // ACT phase
         const actionResult = await this.act(reasoning);
-        this.addHistoryEvent({
-          type: 'action',
-          timestamp: Date.now(),
-          data: actionResult,
-        });
+        this.addHistoryEvent({ type: 'action', timestamp: Date.now(), data: actionResult });
 
-        // Call after step hook
         if (this.config.onAfterStep) {
           await this.config.onAfterStep(this, this.history);
         }
 
-        // Step delay
         if (this.config.stepDelay && this.config.stepDelay > 0) {
           await this.delay(this.config.stepDelay);
         }
       }
 
-      // Max steps reached
       this.setStatus('error');
       return {
         success: false,
@@ -245,16 +219,11 @@ export class AppAgentCore extends EventEmitter {
       };
     } catch (error) {
       this.setStatus('error');
-
-      // Proper error handling with logging
       const agentError = error instanceof Error ? error : new Error(String(error));
-
-      // Log error for debugging
       console.error('[AppAgent] Task execution failed:', {
         task: this.task,
         error: agentError,
         steps: this.history.length,
-        history: this.history.slice(-5),
       });
 
       return {
@@ -267,64 +236,44 @@ export class AppAgentCore extends EventEmitter {
     }
   }
 
-  /**
-   * OBSERVE phase: Gather current environment state
-   */
   private async observe(): Promise<AgentObservation> {
     this.showActivity('Observing...');
 
-    // Get app state
     const appState = await this.config.getAppState();
 
-    // Track state changes if manager exists
     if (this.stateManager) {
       await this.stateManager.checkStateChanges();
     }
 
-    // Rebuild DOM tree only if needed
     if (this.shouldRebuildDOM()) {
       this.domCache = {
-        tree: this.domProcessor.getFlatTree(),
+        tree: this.domEnv.processor.getFlatTree(),
         timestamp: Date.now(),
-        checksum: this.getDOMChecksum(),
+        checksum: this.domEnv.port.getChecksum(),
       };
     }
 
-    const domTree = this.domCache.tree;
-    const scrollPos = this.domActions.getScrollPosition();
+    const domTree = this.domCache!.tree;
+    const domState = buildDOMState(this.domEnv, domTree);
 
-    const domState: DOMState = {
-      url: window.location.href,
-      title: document.title,
-      content: this.domProcessor.dehydrateTree(domTree),
-      header: `Page: ${document.title} | Scroll: ${scrollPos.atTop ? 'top' : scrollPos.atBottom ? 'bottom' : 'middle'}`,
-      footer: `Interactive elements: ${domTree.interactiveElements.size} | ${scrollPos.atBottom ? 'At bottom' : 'Can scroll down'}`,
-    };
-
-    // Store in internal state
     this._states.browserState = domState;
     this._states.lastURL = domState.url;
 
-    // Generate observations
     const observations: string[] = [];
-
     if (this._states.totalWaitTime > 5000) {
       observations.push(`Warning: Total wait time is ${this._states.totalWaitTime}ms`);
     }
-
     if (this.history.length >= 35) {
       observations.push('Approaching maximum step limit');
     }
-
     if (domTree.interactiveElements.size === 0) {
       observations.push('Warning: No interactive elements found on page');
     }
 
-    // Add observation to memory if enabled
     if (this.memoryManager) {
       this.memoryManager.addObservation({
         timestamp: Date.now(),
-        type: 'observation',
+        type: 'state',
         data: { appState, domState, observations },
         importance: 0.6,
       });
@@ -339,47 +288,38 @@ export class AppAgentCore extends EventEmitter {
     };
   }
 
-  /**
-   * THINK phase: LLM reasoning with reflection-before-action
-   */
   private async think(observation: AgentObservation): Promise<AgentReasoning> {
-    this.showActivity('Reasoning...');
-
-    const messages = this.buildMessages(observation);
-
-    // Add relevant context from memory if available
     let memoryContext = '';
     if (this.memoryManager) {
       const relevantContext = this.memoryManager.getRelevantContext(this.task, 3);
       if (relevantContext.length > 0) {
-        memoryContext = '\n\nRelevant Memory Context:\n' +
-          relevantContext.map(ctx => `- ${ctx.content} (relevance: ${ctx.relevance.toFixed(2)})`).join('\n');
+        memoryContext =
+          '\n\nRelevant Memory Context:\n' +
+          relevantContext
+            .map((ctx) => `- ${ctx.content} (relevance: ${ctx.relevance.toFixed(2)})`)
+            .join('\n');
       }
     }
 
-    // Add memory context to user message
-    if (memoryContext) {
-      messages[messages.length - 1].content += memoryContext;
-    }
+    const messages = buildMessages(
+      this.task,
+      observation,
+      this.history,
+      this.semanticRegistry.getContextSummary(),
+      memoryContext,
+    );
 
-    const response = await this.llmClient.invoke(messages, {
-      // Tools will be added here
-    });
-
+    const response = await this.llmClient.invokeReAct(messages);
     return response.reasoning;
   }
 
-  /**
-   * ACT phase: Execute the decided action
-   */
-  private async act(reasoning: AgentReasoning): Promise<import('./types').AgentActionResult> {
+  private async act(reasoning: AgentReasoning): Promise<AgentActionResult> {
     const actionName = Object.keys(reasoning.action)[0];
-    const actionParams = reasoning.action[actionName];
+    const actionParams = (reasoning.action as Record<string, unknown>)[actionName];
 
     this.showActivity(`Executing: ${actionName}`);
 
-    const tool = this.tools.get(actionName);
-    if (!tool) {
+    if (!this.toolRegistry.getToolByName(actionName)) {
       return {
         success: false,
         result: `Unknown action: ${actionName}`,
@@ -388,7 +328,6 @@ export class AppAgentCore extends EventEmitter {
     }
 
     try {
-      // Validate parameters against Zod schema
       const schema = toolSchemas[actionName as keyof typeof toolSchemas];
       if (!schema) {
         return {
@@ -399,16 +338,26 @@ export class AppAgentCore extends EventEmitter {
       }
 
       const validatedParams = schema.parse(actionParams);
+      const appState = await this.config.getAppState();
 
       const context: ToolContext = {
-        appState: await this.config.getAppState(),
+        appState: appState as unknown as Record<string, unknown>,
+        domState: this._states.browserState as unknown as Record<string, unknown>,
         agent: this,
+        execution: {
+          executionId: this.taskId,
+          toolCallId: this.generateId(),
+          timestamp: Date.now(),
+        },
         signal: this.abortController.signal,
       };
 
-      const result = await tool.execute(validatedParams, context);
+      const result = await this.toolRegistry.executeByName(
+        actionName,
+        validatedParams,
+        context,
+      );
 
-      // Record action in memory if enabled
       if (this.memoryManager) {
         this.memoryManager.addAction({
           timestamp: Date.now(),
@@ -419,15 +368,12 @@ export class AppAgentCore extends EventEmitter {
         });
       }
 
-      return {
-        success: true,
-        result,
-      };
+      return { success: true, result };
     } catch (error) {
       if (error instanceof z.ZodError) {
         return {
           success: false,
-          result: `Invalid parameters for ${actionName}: ${error.errors.map(e => `${e.path.join('.')}: ${e.message}`).join(', ')}`,
+          result: `Invalid parameters for ${actionName}: ${error.errors.map((e) => `${e.path.join('.')}: ${e.message}`).join(', ')}`,
           error,
         };
       }
@@ -440,323 +386,182 @@ export class AppAgentCore extends EventEmitter {
     }
   }
 
-  /**
-   * Build messages for LLM
-   */
-  private buildMessages(observation: AgentObservation): import('./types').LLMMessage[] {
-    const systemPrompt = this.buildSystemPrompt();
-    const userPrompt = this.buildUserPrompt(observation);
-
-    return [
-      { role: 'system', content: systemPrompt },
-      { role: 'user', content: userPrompt },
-    ];
-  }
-
-  /**
-   * Build system prompt
-   */
-  private buildSystemPrompt(): string {
-    return `You are an intelligent application agent that can understand and navigate web applications.
-
-You have access to:
-- Application state (user data, context, preferences)
-- DOM structure (UI elements and interactions)
-- Semantic entities (domain concepts like Products, Orders)
-- Workflows (multi-step processes)
-
-Your goal is to help users complete tasks by understanding what they want and executing the right actions.
-
-Think step by step:
-1. Evaluate what happened in the previous step
-2. Remember important information for future steps
-3. Plan the next goal
-4. Choose the right action to achieve it
-
-Always respond with a JSON object containing:
-- evaluation_previous_goal: What happened in the last step?
-- memory: What should you remember?
-- next_goal: What do you want to achieve next?
-- action: { action_name: parameters }
-
-Available actions will be provided in the user message.`;
-  }
-
-  /**
-   * Build user prompt
-   */
-  private buildUserPrompt(observation: AgentObservation): string {
-    const { appState, domState, observations, stepNumber, totalWaitTime } = observation;
-
-    return `Task: ${this.task}
-
-Step: ${stepNumber}
-Total Wait Time: ${totalWaitTime}ms
-
-Application State:
-- Current View: ${appState.currentView}
-- User: ${appState.user.id} (${appState.user.role})
-- Authenticated: ${appState.user.isAuthenticated}
-
-DOM State:
-- URL: ${domState.url}
-- Title: ${domState.title}
-
-${observations.length > 0 ? `Observations:\n${observations.map(o => `- ${o}`).join('\n')}\n` : ''}
-${this.history.length > 0 ? `History:\n${this.formatHistory()}\n` : ''}
-`;
-  }
-
-  /**
-   * Format history for prompt
-   */
-  private formatHistory(): string {
-    return this.history
-      .slice(-3) // Only last 3 events
-      .map(event => {
-        const type = event.type.toUpperCase();
-        const data = typeof event.data === 'string' ? event.data : JSON.stringify(event.data);
-        return `[${type}] ${data}`;
-      })
-      .join('\n');
-  }
-
-  /**
-   * Check if reasoning indicates task is done
-   */
   private isDone(reasoning: AgentReasoning): boolean {
-    return reasoning.action['done'] === true || reasoning.action['done'] === 'true';
+    const action = reasoning.action as Record<string, unknown>;
+    return action['done'] === true || action['done'] === 'true';
   }
 
-  /**
-   * Initialize built-in tools
-   */
   private initializeTools(): void {
-    // done tool
-    this.tools.set('done', {
-      name: 'done',
-      description: 'Mark the task as complete',
-      inputSchema: toolSchemas.done,
-      execute: async () => 'Task completed',
-    });
-
-    // wait tool
-    this.tools.set('wait', {
-      name: 'wait',
-      description: 'Wait for a specified amount of time',
-      inputSchema: toolSchemas.wait,
-      execute: async (params: z.infer<typeof toolSchemas.wait>) => {
-        const duration = params.duration;
-        await this.delay(duration);
+    const builtins = createBuiltinTools({
+      getFlatTree: () => this.domEnv.processor.getFlatTree(),
+      getElementByIndex: (index, tree) =>
+        this.domEnv.processor.getElementByIndex(index, tree),
+      clickElement: (el) => this.domEnv.actions.clickElement(el as HTMLElement),
+      inputText: (el, text) => this.domEnv.actions.inputText(el as HTMLElement, text),
+      selectDropdown: (el, value) =>
+        this.domEnv.actions.selectDropdown(el as HTMLElement, value),
+      scroll: (dir, amount) => this.domEnv.actions.scroll(dir, amount),
+      delay: (ms) => this.delay(ms),
+      onWait: (duration) => {
         this._states.totalWaitTime += duration;
-        return `Waited ${duration}ms`;
       },
-    });
+    }) as import('@app-agent/tools').Tool[];
 
-    // click tool
-    this.tools.set('click', {
-      name: 'click',
-      description: 'Click an interactive element by its index',
-      inputSchema: toolSchemas.click,
-      execute: async (params: z.infer<typeof toolSchemas.click>, context: ToolContext) => {
-        const { index } = params;
-        const domTree = this.domProcessor.getFlatTree();
-        const elementInfo = domTree.interactiveElements.get(index);
-        if (!elementInfo) {
-          throw new Error(`Element not found at index ${index}`);
+    for (const tool of builtins) {
+      this.toolRegistry.registerTool(tool);
+    }
+
+    if (this.config.customTools) {
+      for (const tool of Object.values(this.config.customTools)) {
+        if (tool) {
+          this.toolRegistry.registerTool(agentToolToTool(tool));
         }
-
-        const element = this.domProcessor.getElementByIndex(index, domTree);
-        if (!element) {
-          throw new Error(`Element not found in DOM: ${elementInfo.selector}`);
-        }
-
-        const result = await this.domActions.clickElement(element);
-        return result.result;
-      },
-    });
-
-    // input tool
-    this.tools.set('input', {
-      name: 'input',
-      description: 'Enter text into an input field',
-      inputSchema: toolSchemas.input,
-      execute: async (params: z.infer<typeof toolSchemas.input>, context: ToolContext) => {
-        const { index, text } = params;
-        const domTree = this.domProcessor.getFlatTree();
-        const element = this.domProcessor.getElementByIndex(index, domTree);
-        if (!element) {
-          throw new Error(`Element not found at index ${index}`);
-        }
-
-        const result = await this.domActions.inputText(element, text);
-        return result.result;
-      },
-    });
-
-    // select tool
-    this.tools.set('select', {
-      name: 'select',
-      description: 'Select an option from a dropdown',
-      inputSchema: toolSchemas.select,
-      execute: async (params: z.infer<typeof toolSchemas.select>, context: ToolContext) => {
-        const { index, value } = params;
-        const domTree = this.domProcessor.getFlatTree();
-        const element = this.domProcessor.getElementByIndex(index, domTree);
-        if (!element) {
-          throw new Error(`Element not found at index ${index}`);
-        }
-
-        const result = await this.domActions.selectDropdown(element, value);
-        return result.result;
-      },
-    });
-
-    // scroll tool
-    this.tools.set('scroll', {
-      name: 'scroll',
-      description: 'Scroll the page in a direction',
-      inputSchema: toolSchemas.scroll,
-      execute: async (params: z.infer<typeof toolSchemas.scroll>, context: ToolContext) => {
-        const { direction, amount } = params;
-        const result = await this.domActions.scroll(direction, amount);
-        return result.result;
-      },
-    });
+      }
+    }
   }
 
-  /**
-   * Add event to history
-   */
+  private initializeEntities(): void {
+    if (this.config.entitySchemas) {
+      for (const schema of Object.values(this.config.entitySchemas)) {
+        this.semanticRegistry.registerSchema(schema);
+      }
+    }
+  }
+
+  private initializeWorkflows(): void {
+    if (!this.config.customWorkflows) return;
+
+    for (const [id, def] of Object.entries(this.config.customWorkflows)) {
+      if (def && typeof def === 'object' && 'name' in def) {
+        const workflowDef = def as import('@app-agent/entities').WorkflowDefinition;
+        const steps = Array.isArray(workflowDef.steps)
+          ? workflowDef.steps.map((step, i) =>
+              typeof step === 'string'
+                ? {
+                    id: `step-${i}`,
+                    name: step,
+                    type: 'action' as const,
+                    action: { type: 'tool' as const, toolName: step, parameters: {} },
+                  }
+                : {
+                    id: step.id,
+                    name: step.name,
+                    type: 'action' as const,
+                    action: {
+                      type: 'tool' as const,
+                      toolName: step.toolName ?? step.action ?? step.name,
+                      parameters: step.parameters ?? {},
+                    },
+                  },
+            )
+          : [];
+
+        this.workflowEngine.registerWorkflow({
+          id: workflowDef.id ?? id,
+          name: workflowDef.name,
+          description: workflowDef.description ?? '',
+          version: '1.0.0',
+          steps,
+          variables: [],
+          errorStrategy: 'stop',
+          options: { enablePersistence: false },
+          metadata: { tags: workflowDef.preconditions },
+        });
+      }
+    }
+  }
+
+  private shouldRebuildDOM(): boolean {
+    if (!this.domCache) return true;
+    if (this.domCache.timestamp < Date.now() - 5000) return true;
+    return this.domEnv.port.getChecksum() !== this.domCache.checksum;
+  }
+
   private addHistoryEvent(event: HistoricalEvent): void {
     this.history.push(event);
     this.emit('historychange', { type: 'historychange', history: this.history });
   }
 
-  /**
-   * Show transient activity
-   */
   private showActivity(activity: string): void {
     this.emit('activity', { type: 'activity', activity });
   }
 
-  /**
-   * Generate unique ID
-   */
   private generateId(): string {
     return `task-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
   }
 
-  /**
-   * Delay helper
-   */
   private delay(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
-  /**
-   * Get error message from unknown error
-   */
   private getErrorMessage(error: unknown): string {
-    if (error instanceof Error) {
-      return error.message;
-    }
+    if (error instanceof Error) return error.message;
     return String(error);
   }
 
-  /**
-   * Check if DOM tree needs to be rebuilt
-   */
-  private shouldRebuildDOM(): boolean {
-    if (!this.domCache) return true;
-
-    // Rebuild if URL changed
-    if (this.domCache.timestamp < Date.now() - 5000) return true;
-
-    // Check if DOM structure changed (simple checksum)
-    const currentChecksum = this.getDOMChecksum();
-    return currentChecksum !== this.domCache.checksum;
-  }
-
-  /**
-   * Get simple checksum of DOM structure
-   */
-  private getDOMChecksum(): string {
-    // Simple checksum based on interactive element count
-    const elements = document.querySelectorAll('button, input, a, select, textarea');
-    return `${elements.length}-${document.documentElement.innerHTML.length}`;
-  }
-
-  /**
-   * Dispose of agent resources
-   */
   dispose(): void {
-    // Clean up memory manager
-    if (this.memoryManager) {
-      this.memoryManager.dispose();
-    }
-
-    // Clean up state manager
-    if (this.stateManager) {
-      this.stateManager.dispose();
-    }
-
-    // Clear DOM cache
+    if (this.memoryManager) this.memoryManager.dispose();
+    if (this.stateManager) this.stateManager.dispose();
     this.domCache = null;
-
     this.abortController.abort();
     this.setStatus('disposed');
     this.removeAllListeners();
-
-    if (this.config.onDispose) {
-      this.config.onDispose(this);
-    }
+    if (this.config.onDispose) this.config.onDispose(this);
   }
 
-  /**
-   * Register a custom tool
-   */
-  registerTool(tool: import('./types').Tool): void {
-    this.tools.set(tool.name, tool);
+  registerTool(tool: AgentTool): void {
+    this.toolRegistry.registerTool(agentToolToTool(tool));
   }
 
-  /**
-   * Unregister a tool
-   */
   unregisterTool(name: string): void {
-    this.tools.delete(name);
+    const tool = this.toolRegistry.getToolByName(name);
+    if (tool) this.toolRegistry.unregisterTool(tool.id);
   }
 
-  /**
-   * Get registered tools
-   */
-  getTools(): Map<string, import('./types').Tool> {
-    return new Map(this.tools);
+  getTools(): Map<string, AgentTool> {
+    const map = new Map<string, AgentTool>();
+    for (const tool of this.toolRegistry.getAllTools()) {
+      map.set(tool.name, {
+        name: tool.name,
+        description: tool.description,
+        inputSchema: tool.inputSchema,
+        execute: async (params, context) =>
+          String(
+            await tool.execute(params, {
+              appState: context.appState as unknown as import('@app-agent/entities').AppState,
+              domState: context.domState as unknown as import('@app-agent/entities').DOMState,
+              agent: context.agent as import('@app-agent/entities').IAgent,
+              signal: context.signal,
+            }),
+          ),
+      });
+    }
+    return map;
   }
 
-  /**
-   * Get memory manager instance
-   */
   getMemoryManager(): MemoryManager | undefined {
     return this.memoryManager;
   }
 
-  /**
-   * Get memory statistics
-   */
   getMemoryStats(): import('@app-agent/memory').MemoryStats | undefined {
     return this.memoryManager?.getStats();
   }
 
-  /**
-   * Add semantic memory
-   */
-  addSemanticMemory(fact: string, confidence: number, source: import('@app-agent/memory').SemanticMemory['source']): void {
-    if (this.memoryManager) {
-      this.memoryManager.addSemanticMemory(fact, confidence, source);
-    }
+  getSemanticRegistry(): SemanticRegistry {
+    return this.semanticRegistry;
+  }
+
+  getWorkflowEngine(): WorkflowEngine {
+    return this.workflowEngine;
+  }
+
+  addSemanticMemory(
+    fact: string,
+    confidence: number,
+    source: import('@app-agent/memory').SemanticMemory['source'],
+  ): void {
+    this.memoryManager?.addSemanticMemory(fact, confidence, source);
   }
 }
 
-// Export types
 export type * from './types';

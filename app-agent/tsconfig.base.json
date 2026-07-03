@@ -7,6 +7,7 @@
     "resolveJsonModule": true,
     "allowJs": true,
     "strict": true,
+    "jsx": "react-jsx",
     "noEmit": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
@@ -28,7 +29,11 @@
       "@app-agent/planner": ["./packages/planner/src"],
       "@app-agent/workflow": ["./packages/workflow/src"],
       "@app-agent/ui": ["./packages/ui/src"],
-      "@app-agent/app-agent": ["./packages/app-agent/src"]
+      "@app-agent/app-agent": ["./packages/app-agent/src"],
+      "@app-agent/integrations-shared": ["./packages/integrations/shared/src"],
+      "@app-agent/integrations-react": ["./packages/integrations/react/src"],
+      "@app-agent/integrations-vue": ["./packages/integrations/vue/src"],
+      "@app-agent/integrations-svelte": ["./packages/integrations/svelte/src"]
     }
   },
   "exclude": ["node_modules", "dist", "**/*.test.ts"]

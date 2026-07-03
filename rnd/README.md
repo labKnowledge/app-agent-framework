@@ -156,7 +156,7 @@ App-Agent is like a kernel for your application:
 
 **Status**: Complete ✅
 
-All research, architecture, and planning documents have been finalized. The project is ready to move into implementation.
+Research and planning are finalized. **Implementation is in progress** in [`../app-agent/`](../app-agent/).
 
 ### Completed
 - ✅ Comprehensive research of page-agent
@@ -166,11 +166,16 @@ All research, architecture, and planning documents have been finalized. The proj
 - ✅ Success metrics and criteria
 - ✅ Risk assessment and mitigation
 
+### Implementation Progress (app-agent/)
+- ✅ Phase 1: Monorepo, core ReAct loop, state, LLM, tools, UI
+- ✅ Phase 2 (partial): Semantic registry, workflow, planner, memory
+- ✅ Phase 3 (started): React, Vue, Svelte integration packages + demos
+- ⏳ Phase 4: Performance polish, launch prep
+
 ### Next Steps
-- ⏳ Set up project infrastructure
-- ⏳ Begin Phase 1 implementation
-- ⏳ Create example applications
-- ⏳ Test with real-world use cases
+- ⏳ Expand integration test coverage
+- ⏳ Production bundle optimization
+- ⏳ Example applications hardening
 
 ## 🤝 Contributing
 
@@ -183,5 +188,5 @@ TBD - Will be determined before public launch.
 ---
 
 **Last Updated**: 2026-07-03
-**Status**: Research Complete ✅ → Ready for Implementation 🚀
-**Estimated Timeline**: 16 weeks to public launch
+**Status**: Research Complete ✅ → Implementation In Progress 🚀
+**Implementation**: See [`../app-agent/`](../app-agent/) and [`../app-agent/docs/getting-started.md`](../app-agent/docs/getting-started.md)

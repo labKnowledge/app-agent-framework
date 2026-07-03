@@ -17,6 +17,10 @@ Application Intelligence Framework monorepo. AI agents that understand entire we
 | `@app-agent/core`              | Orchestration  | ReAct loop — composes all infrastructure  |
 | `@app-agent/ui`                | Presentation   | Panel and visual feedback                 |
 | `@app-agent/app-agent`         | Public API     | Facade — **only consumer-facing import**  |
+| `@app-agent/integrations-shared` | Integration  | Shared agent context for frameworks     |
+| `@app-agent/integrations-react` | Integration | React Provider + hooks                  |
+| `@app-agent/integrations-vue`  | Integration  | Vue Provider + composable                 |
+| `@app-agent/integrations-svelte` | Integration | Svelte store + context                  |
 
 ## Layer Rules
 

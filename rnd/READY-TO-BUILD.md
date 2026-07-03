@@ -230,18 +230,16 @@
 - Visual diagrams provided
 - Examples included
 
-### Ready for Implementation: YES ✅
+### Ready for Implementation: IN PROGRESS ✅
 
-**The app-agent project is ready to move from research to implementation.**
+**The app-agent implementation has started in `../app-agent/`.**
 
-All necessary research, planning, and documentation has been completed. The project has:
-- Clear vision and mission
-- Comprehensive research of competitors
-- Detailed technical architecture
-- Step-by-step implementation plan
-- Defined success criteria
-- Risk mitigation strategies
-- Complete documentation
+Research and planning remain complete. The monorepo now includes:
+- ✅ Core agent stack (11+ packages)
+- ✅ Architecture enforcement (dependency-cruiser)
+- ✅ Unit tests across infrastructure packages
+- ✅ Framework integrations (React, Vue, Svelte)
+- ✅ E-commerce demo apps per framework
 
 ## 🚀 Next Steps
 
@@ -266,16 +264,13 @@ All necessary research, planning, and documentation has been completed. The proj
 
 ---
 
-**Status**: READY TO BUILD ✅
+**Status**: IMPLEMENTATION IN PROGRESS ✅
 **Confidence Level**: HIGH
-**Estimated Timeline**: 16 weeks to production
-**Recommended Start Date**: As soon as possible
-
-All research, planning, and preparation is complete. The project is ready to move into the implementation phase.
+**Canonical codebase**: [`../app-agent/`](../app-agent/)
 
 ---
 
 **Last Updated**: 2026-07-03
 **Research Status**: Complete ✅
 **Planning Status**: Complete ✅
-**Implementation Status**: Ready to Start 🚀
+**Implementation Status**: In Progress — Phase 2–3 🚀

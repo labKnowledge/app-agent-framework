@@ -183,7 +183,14 @@ export class ToolRegistry extends EventEmitter {
         const cached = this.getCachedResult(toolId, params);
         if (cached) {
           this.updateMetrics(toolId, true, Date.now() - startTime, true);
-          return cached;
+          return {
+            ...cached,
+            metadata: {
+              ...cached.metadata!,
+              cached: true,
+              status: 'cached' as const,
+            },
+          };
         }
       }
 

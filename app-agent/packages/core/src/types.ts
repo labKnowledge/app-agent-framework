@@ -60,6 +60,8 @@ export interface AgentConfig {
   trackState?: boolean;
   enableMemory?: boolean;
   enablePlanning?: boolean;
+  /** Enable tool result caching in the tool registry (default: true) */
+  enableToolCaching?: boolean;
   memoryConfig?: import('@app-agent/memory').MemoryManagerConfig;
   customTools?: Record<string, AgentTool | null>;
   customWorkflows?: Record<string, import('@app-agent/entities').WorkflowDefinition>;

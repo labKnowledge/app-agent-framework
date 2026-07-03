@@ -25,6 +25,15 @@ module.exports = {
       to: { path: '^packages/core' },
     },
     {
+      name: 'integrations-no-internals',
+      severity: 'error',
+      comment: 'Integration packages must use the public facade, not orchestration internals',
+      from: { path: '^packages/integrations' },
+      to: {
+        path: '^packages/(core|tools|llm|memory|planner|workflow|semantic-registry|state-manager)',
+      },
+    },
+    {
       name: 'no-circular',
       severity: 'error',
       comment: 'No circular dependencies',

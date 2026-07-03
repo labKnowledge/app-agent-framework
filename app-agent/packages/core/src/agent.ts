@@ -69,7 +69,7 @@ export class AppAgentCore extends EventEmitter {
     });
 
     this.abortController = new AbortController();
-    this.toolRegistry = new ToolRegistry({ enableCaching: false });
+    this.toolRegistry = new ToolRegistry({ enableCaching: config.enableToolCaching ?? true });
     this.semanticRegistry = new SemanticRegistry();
     this.workflowEngine = new WorkflowEngine();
     this.planner = new TaskPlanner();

@@ -31,3 +31,6 @@ jobs:
 
       - name: Validate
         run: pnpm validate
+
+      - name: Coverage
+        run: pnpm test:coverage

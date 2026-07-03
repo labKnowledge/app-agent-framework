@@ -7,12 +7,15 @@
     "dev": "pnpm --filter './packages/**' dev",
     "build": "pnpm --filter './packages/**' build",
     "test": "pnpm --filter './packages/**' test && vitest run scripts/architecture.test.ts",
+    "test:coverage": "vitest run --coverage --coverage.provider=v8 --coverage.thresholds.lines=50 --coverage.thresholds.functions=50 --coverage.thresholds.branches=40 --coverage.thresholds.statements=50",
     "lint": "eslint . --ext .ts,.tsx",
     "format": "prettier --write \"**/*.{ts,tsx,json,md}\"",
     "clean": "pnpm --filter './packages/**' clean && rm -rf node_modules",
     "typecheck": "tsc --noEmit",
     "arch:check": "dependency-cruiser packages --config .dependency-cruiser.cjs",
-    "validate": "pnpm typecheck && pnpm lint && pnpm test && pnpm arch:check",
+    "bundle:check": "tsx scripts/bundle-size-check.ts",
+    "bench": "vitest bench --run",
+    "validate": "pnpm typecheck && pnpm lint && pnpm test && pnpm arch:check && pnpm bundle:check",
     "prepare": "husky install || true"
   },
   "keywords": [
@@ -36,7 +39,10 @@
     "prettier": "^3.1.0",
     "typescript": "^5.3.0",
     "vitest": "^1.0.0",
-    "dependency-cruiser": "^16.4.0"
+    "dependency-cruiser": "^16.4.0",
+    "tsx": "^4.7.0",
+    "@types/node": "^20.10.0",
+    "@vitest/coverage-v8": "^1.0.0"
   },
   "engines": {
     "node": ">=18.0.0",

@@ -1,0 +1,9 @@
+{
+  "extends": "@tsconfig/svelte/tsconfig.json",
+  "compilerOptions": {
+    "moduleResolution": "bundler",
+    "target": "ES2022",
+    "strict": true
+  },
+  "include": ["src/**/*"]
+}

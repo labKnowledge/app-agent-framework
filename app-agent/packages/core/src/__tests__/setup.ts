@@ -4,6 +4,20 @@
  */
 
 // Mock DOM environment for Node.js testing
+global.window = {
+  location: {
+    href: 'http://localhost:3000',
+  },
+  scrollY: 0,
+  scrollX: 0,
+  matchMedia: () => ({
+    matches: false,
+  }),
+  dispatchEvent: () => {},
+  addEventListener: () => {},
+  removeEventListener: () => {},
+} as any;
+
 global.document = {
   createElement: () => ({
     addEventListener: () => {},
@@ -23,20 +37,14 @@ global.document = {
   },
   documentElement: {
     innerHTML: '',
+    scrollHeight: 1000,
+    scrollWidth: 1000,
+    clientHeight: 800,
+    clientWidth: 1200,
+    scrollTop: 0,
+    scrollLeft: 0,
   },
   title: 'Test Page',
-} as any;
-
-global.window = {
-  location: {
-    href: 'http://localhost:3000',
-  },
-  matchMedia: () => ({
-    matches: false,
-  }),
-  dispatchEvent: () => {},
-  addEventListener: () => {},
-  removeEventListener: () => {},
 } as any;
 
 console.log('[Test Setup] Environment initialized');

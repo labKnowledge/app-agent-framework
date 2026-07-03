@@ -1,0 +1,35 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "allowJs": true,
+    "strict": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "allowSyntheticDefaultImports": true,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "baseUrl": ".",
+    "paths": {
+      "@app-agent/core": ["./packages/core/src"],
+      "@app-agent/state-manager": ["./packages/state-manager/src"],
+      "@app-agent/semantic-registry": ["./packages/semantic-registry/src"],
+      "@app-agent/workflow-engine": ["./packages/workflow-engine/src"],
+      "@app-agent/multi-agent": ["./packages/multi-agent/src"],
+      "@app-agent/learning": ["./packages/learning/src"],
+      "@app-agent/ui": ["./packages/ui/src"],
+      "@app-agent/integrations/react": ["./packages/integrations/react/src"],
+      "@app-agent/integrations/vue": ["./packages/integrations/vue/src"],
+      "@app-agent/integrations/svelte": ["./packages/integrations/svelte/src"]
+    }
+  },
+  "exclude": ["node_modules", "dist", "**/*.test.ts"]
+}

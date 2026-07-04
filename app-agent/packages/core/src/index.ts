@@ -18,6 +18,7 @@ export {
 } from './prompt-builder';
 export type { ToolPromptDescriptor } from './prompt-builder';
 export type * from './ports';
+export * from './observation-system';
 
 export type * from './types';
 export type * from './dom/types';

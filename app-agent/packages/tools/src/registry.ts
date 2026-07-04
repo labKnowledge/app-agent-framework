@@ -234,6 +234,35 @@ export class ToolRegistry extends EventEmitter {
         this.updateMetrics(toolId, false, Date.now() - startTime, false);
       }
 
+      // Handle Zod validation errors with clear messages
+      if (error instanceof import('zod').ZodError) {
+        const errorDetails = error.errors.map((e) => ({
+          path: e.path.join('.'),
+          message: e.message,
+          code: e.code,
+        }));
+
+        return {
+          success: false,
+          error: {
+            code: 'VALIDATION_ERROR',
+            message: `Tool parameter validation failed: ${error.errors.map((e) => `${e.path.join('.')}: ${e.message}`).join(', ')}`,
+            details: errorDetails,
+            cause: error,
+          },
+          metadata: {
+            toolId,
+            startTime,
+            endTime: Date.now(),
+            duration: Date.now() - startTime,
+            attempt: 1,
+            cached: false,
+            status: 'failed',
+          },
+        };
+      }
+
+      // Handle other errors
       return {
         success: false,
         error: {

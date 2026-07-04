@@ -339,11 +339,28 @@ export class AppAgentCore extends EventEmitter {
         }
 
         const observation = await this.observe();
-        this.addHistoryEvent({ type: 'observation', timestamp: Date.now(), data: observation });
+        this.addHistoryEvent({ type: 'observation', timestamp: Date.now(), content: 'Environment observation captured' });
 
-        this.showActivity('Thinking...');
+        // Emit structured thinking activity
+        this.emitActivity({ type: 'thinking' });
         const reasoning = await this.think(observation);
-        this.addHistoryEvent({ type: 'reasoning', timestamp: Date.now(), data: reasoning });
+
+        // Create structured step event for history
+        this.addHistoryEvent({
+          type: 'step',
+          stepIndex: step,
+          timestamp: Date.now(),
+          reflection: {
+            evaluationPreviousGoal: reasoning.evaluationPreviousGoal,
+            memory: reasoning.memory,
+            nextGoal: reasoning.nextGoal,
+          },
+          action: {
+            name: Object.keys(reasoning.action)[0],
+            input: Object.values(reasoning.action)[0],
+            output: '(pending execution)',
+          },
+        });
 
         if (this.isDone(reasoning)) {
           this.setStatus('completed');
@@ -418,6 +435,16 @@ export class AppAgentCore extends EventEmitter {
     } catch (error) {
       this.setStatus('error');
       const agentError = error instanceof Error ? error : new Error(String(error));
+
+      // Call error hook
+      if (this.config.onError) {
+        try {
+          await this.config.onError(this, agentError);
+        } catch (hookError) {
+          console.error('[AppAgent] Error in onError hook:', hookError);
+        }
+      }
+
       console.error('[AppAgent] Task execution failed:', {
         task: this.task,
         error: agentError,
@@ -527,7 +554,10 @@ export class AppAgentCore extends EventEmitter {
       }
     );
 
-    const response = await this.llmClient.invokeReAct(messages);
+    // Check for cancellation before LLM call
+    this.abortController.signal.throwIfAborted();
+
+    const response = await this.llmClient.invokeReAct(messages, this.abortController.signal);
     return response.reasoning;
   }
 
@@ -535,7 +565,9 @@ export class AppAgentCore extends EventEmitter {
     const actionName = Object.keys(reasoning.action)[0];
     const actionParams = (reasoning.action as Record<string, unknown>)[actionName];
 
-    this.showActivity(`Executing: ${actionName}`);
+    // Emit structured executing activity
+    this.emitActivity({ type: 'executing', tool: actionName, input: actionParams });
+    const startTime = Date.now();
 
     if (!this.toolRegistry.getToolByName(actionName)) {
       return {
@@ -571,6 +603,16 @@ export class AppAgentCore extends EventEmitter {
       };
 
       const result = await this.toolRegistry.executeByName(actionName, validatedParams, context);
+      const duration = Date.now() - startTime;
+
+      // Emit executed activity with result
+      this.emitActivity({
+        type: 'executed',
+        tool: actionName,
+        input: actionParams,
+        output: result,
+        duration
+      });
 
       if (['click', 'input', 'select', 'scroll', 'navigate'].includes(actionName)) {
         this.domCache = null;
@@ -1109,6 +1151,37 @@ export class AppAgentCore extends EventEmitter {
     this.emit('historychange', { type: 'historychange', history: this.history });
   }
 
+  /**
+   * Emit activity event - transient UI feedback only (NOT sent to LLM)
+   */
+  private emitActivity(activity: import('@gakwaya/app-agent-entities').AgentActivity): void {
+    if (this.quietModeActive) {
+      // Map activity types to progress updates
+      const activityStr =
+        activity.type === 'thinking'
+          ? 'Thinking…'
+          : activity.type === 'executing'
+            ? `Executing ${activity.tool}…`
+            : activity.type === 'retrying'
+              ? `Retrying ${activity.attempt}/${activity.maxAttempts}…`
+              : activity.type === 'error'
+                ? `Error: ${activity.message}`
+                : 'Working…';
+
+      this.config.onTaskProgress?.({
+        step: this.history.length,
+        activity: activityStr,
+        phase: 'step',
+      });
+      return;
+    }
+    this.emit('activity', { type: 'activity', activity });
+  }
+
+  /**
+   * Show activity as simple string (backward compatibility)
+   * @deprecated Use emitActivity with structured AgentActivity instead
+   */
   private showActivity(activity: string): void {
     if (this.quietModeActive) {
       this.config.onTaskProgress?.({
@@ -1132,6 +1205,21 @@ export class AppAgentCore extends EventEmitter {
   private getErrorMessage(error: unknown): string {
     if (error instanceof Error) return error.message;
     return String(error);
+  }
+
+  /**
+   * Stop the current task execution (cooperative cancellation)
+   */
+  stop(): void {
+    if (this._status === 'idle' || this._status === 'disposed') {
+      return;
+    }
+
+    console.debug('[AppAgent] Stopping task execution');
+    this.abortController.abort();
+
+    // Wait for current operations to clean up
+    this.setStatus('idle');
   }
 
   dispose(): void {

@@ -86,23 +86,55 @@ You have access to:
 ${entitySection}${appToolsHint}${contextHint}${assistantHint}
 ${goal}
 
-Think step by step:
-1. Evaluate what happened in the previous step
-2. Remember important information for future steps
-3. Plan the next goal
-4. Choose the right action to achieve it
+<reflection_rules>
+Exhibit the following reasoning patterns to successfully achieve the task:
 
+- Reason about history to track progress and context toward the task.
+- Analyze the most recent "Next Goal" and "Action Result" in history and clearly state what you previously tried to achieve.
+- Analyze all relevant items in history and current state to understand your situation.
+- Explicitly judge success/failure/uncertainty of the last action. Never assume an action succeeded just because it appears to be executed in your last step in history. If the expected change is missing, mark the last action as failed (or uncertain) and plan a recovery.
+- Analyze whether you are stuck, e.g. when you repeat the same actions multiple times without any progress. Then consider alternative approaches.
+- Ask user for help if you have any difficulty. Keep user in the loop.
+- If you see information relevant to the task, plan saving the information to memory.
+- Always reason about the task. Make sure to carefully analyze the specific steps and information required.
+</reflection_rules>
+
+<reflection_examples>
+Here are examples of good reflection patterns:
+
+Evaluation Examples:
+- "Successfully navigated to the product page and found the target information. Verdict: Success"
+- "Clicked the button but expected form did not appear. Verdict: Failure"
+- "Attempted to submit form but unclear if validation passed. Verdict: Uncertain"
+
+Memory Examples:
+- "Found 5 pending reports that need analysis. Successfully processed first 2 reports on sales data."
+- "User is on checkout page, cart contains 3 items, shipping method not yet selected."
+
+Next Goal Examples:
+- "Click the 'Submit' button to proceed with form submission."
+- "Scroll down to find more product options."
+</reflection_examples>
+
+<output_format>
 Always respond with a JSON object containing:
-- evaluation_previous_goal: What happened in the last step?
-- memory: What should you remember?
-- next_goal: What do you want to achieve next?
-- action: an object with exactly ONE key — the tool name — and tool parameters as the value
+{
+  "evaluation_previous_goal": "Concise one-sentence analysis of your last action. Clearly state success, failure, or uncertain.",
+  "memory": "1-3 concise sentences of specific memory of this step and overall progress. Put everything that helps track progress in future steps.",
+  "next_goal": "State the next immediate goal and action to achieve it, in one clear sentence.",
+  "action": {
+    "tool_name": { // parameters }
+  }
+}
 
 Action format examples:
 - { "click": { "index": 0 } }
 - { "wait": { "duration": 2000 } }
 - { "navigate": { "path": "/attendance" } }
 - { "done": true }
+
+Important: Use only ONE tool name as the key in "action", not "action_name", "parameters", etc.
+</output_format>
 
 Do NOT use "action_name", "parameters", "click_element", or "navigate_to_url". Use only the tool names listed in the user message.`;
 }

@@ -10,4 +10,6 @@ export {
   normalizeActionShape,
   stripMarkdownFences,
 } from './parse-reasoning';
+export * from './response-normalizer';
+export * from './error-classification';
 export type * from './types';

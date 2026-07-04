@@ -7,6 +7,8 @@
 
 import EventEmitter from 'eventemitter3';
 import { parseReasoningContent } from './parse-reasoning';
+import { normalizeLLMResponse } from './response-normalizer';
+import { withRetry, classifyLLMError, type RetryConfig } from './error-classification';
 import type { CoreLLMResponse, LLMMessage as CoreLLMMessage } from '@gakwaya/app-agent-entities';
 import type {
   LLMMessage,
@@ -68,23 +70,21 @@ export class EnhancedLLMClient extends EventEmitter {
 
   /**
    * Invoke LLM for ReAct loop (returns reasoning + action)
+   * Uses automatic retry for retryable errors
+   * @param messages - Messages to send to LLM
+   * @param signal - Optional abort signal for cancellation
    */
-  async invokeReAct(messages: CoreLLMMessage[]): Promise<CoreLLMResponse> {
-    const maxRetries = this.config.maxRetries;
-    let lastError: Error | null = null;
+  async invokeReAct(messages: CoreLLMMessage[], signal?: AbortSignal): Promise<CoreLLMResponse> {
+    const retryConfig: RetryConfig = {
+      maxAttempts: this.config.maxRetries,
+      baseDelay: this.config.retryDelay,
+      onRetry: (attempt, error) => {
+        console.debug(`[LLM] Retry attempt ${attempt}/${this.config.maxRetries} for error: ${error.type}`);
+        this.emit('retry', { attempt, maxAttempts: this.config.maxRetries, error });
+      },
+    };
 
-    for (let attempt = 0; attempt < maxRetries; attempt++) {
-      try {
-        return await this.fetchReAct(messages);
-      } catch (error) {
-        lastError = error as Error;
-        if (attempt < maxRetries - 1) {
-          await this.delay(Math.pow(2, attempt) * this.config.retryDelay);
-        }
-      }
-    }
-
-    throw new Error(`LLM request failed after ${maxRetries} attempts: ${lastError?.message}`);
+    return withRetry(async () => this.fetchReAct(messages, signal), retryConfig);
   }
 
   /**
@@ -394,7 +394,7 @@ When responding:
     return Math.ceil(totalChars / 4);
   }
 
-  private async fetchReAct(messages: CoreLLMMessage[]): Promise<CoreLLMResponse> {
+  private async fetchReAct(messages: CoreLLMMessage[], externalSignal?: AbortSignal): Promise<CoreLLMResponse> {
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
     };
@@ -403,8 +403,23 @@ When responding:
       headers['Authorization'] = `Bearer ${this.config.apiKey}`;
     }
 
+    // Combine external signal with timeout signal
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), this.config.timeout);
+
+    // Handle external abort signal
+    if (externalSignal) {
+      if (externalSignal.aborted) {
+        controller.abort();
+      } else {
+        const onExternalAbort = () => controller.abort();
+        externalSignal.addEventListener('abort', onExternalAbort, { once: true });
+        // Clean up listener when request completes
+        setTimeout(() => {
+          externalSignal.removeEventListener('abort', onExternalAbort);
+        }, this.config.timeout + 100);
+      }
+    }
 
     try {
       const response = await fetch(`${this.config.baseURL}/chat/completions`, {
@@ -417,8 +432,11 @@ When responding:
       clearTimeout(timeoutId);
 
       if (!response.ok) {
-        const error = await response.text();
-        throw new Error(`LLM API error: ${response.status} - ${error}`);
+        const errorText = await response.text();
+        throw classifyLLMError(
+          new Error(`LLM API error: ${response.status} - ${errorText}`),
+          { status: response.status, body: errorText }
+        );
       }
 
       const data = await response.json();
@@ -432,16 +450,34 @@ When responding:
         raw: data,
       };
     } catch (error) {
+      // Classify all errors
       if (error instanceof Error && error.name === 'AbortError') {
-        throw new Error(`LLM request timeout after ${this.config.timeout}ms`);
+        throw classifyLLMError(new Error(`LLM request timeout after ${this.config.timeout}ms`));
       }
-      throw error;
+      throw classifyLLMError(error);
     }
   }
 
   private parseReasoning(content: string): import('@gakwaya/app-agent-entities').AgentReasoning {
     try {
+      // Try standard parsing first
       return parseReasoningContent(content);
+    } catch (firstError) {
+      // Fall back to response normalizer with auto-fixing
+      console.debug('[LLM] Standard parsing failed, trying response normalizer:', firstError);
+
+      const result = normalizeLLMResponse(content);
+      if (!result.success || !result.reasoning) {
+        throw new Error(`Failed to parse LLM response: ${result.error || firstError.message}`);
+      }
+
+      // Log any fixes applied
+      if (result.fixes && result.fixes.length > 0) {
+        console.debug('[LLM] Response normalizer applied fixes:', result.fixes.join(', '));
+      }
+
+      return result.reasoning;
+    }
     } catch {
       return {
         evaluationPreviousGoal: 'Unable to parse evaluation',

@@ -34,6 +34,12 @@ export type {
   InputAction,
   SelectAction,
   ScrollAction,
+  AgentActivity,
+  AgentStepEvent,
+  ObservationEvent,
+  UserTakeoverEvent,
+  RetryEvent,
+  AgentErrorEvent,
 } from '@gakwaya/app-agent-entities';
 
 export { toolSchemas } from '@gakwaya/app-agent-entities';
@@ -75,10 +81,48 @@ export interface AgentConfig {
   customTools?: Record<string, AgentTool | null>;
   customWorkflows?: Record<string, import('@gakwaya/app-agent-entities').WorkflowDefinition>;
   entitySchemas?: Record<string, import('@gakwaya/app-agent-entities').EntitySchema>;
-  onBeforeStep?: (agent: IAgent, step: number) => Promise<void>;
-  onAfterStep?: (agent: IAgent, history: HistoricalEvent[]) => Promise<void>;
-  onBeforeTask?: (agent: IAgent) => Promise<void>;
-  onAfterTask?: (agent: IAgent, result: AgentResult) => Promise<void>;
+
+  /**
+   * Lifecycle hooks for task execution.
+   *
+   * All hooks receive the agent instance as first parameter.
+   * All hooks are optional - only implement the ones you need.
+   */
+
+  /**
+   * Called before each step execution.
+   * Useful for: logging, state checks, step-level setup
+   */
+  onBeforeStep?: (agent: IAgent, step: number) => Promise<void> | void;
+
+  /**
+   * Called after each step execution.
+   * Useful for: progress tracking, step-level cleanup
+   */
+  onAfterStep?: (agent: IAgent, history: HistoricalEvent[]) => Promise<void> | void;
+
+  /**
+   * Called before task execution starts.
+   * Useful for: task-level setup, validation, resource allocation
+   */
+  onBeforeTask?: (agent: IAgent) => Promise<void> | void;
+
+  /**
+   * Called after task execution completes (success or failure).
+   * Useful for: cleanup, result processing, notifications
+   */
+  onAfterTask?: (agent: IAgent, result: AgentResult) => Promise<void> | void;
+
+  /**
+   * Called when an error occurs during execution.
+   * Useful for: error logging, custom error handling, recovery attempts
+   */
+  onError?: (agent: IAgent, error: Error) => Promise<void> | void;
+
+  /**
+   * Called when the agent is disposed.
+   * Useful for: cleanup, resource release, saving state
+   */
   onDispose?: (agent: IAgent) => void;
   /** SPA navigation callback — prefer over window.location.assign */
   onNavigate?: (path: string) => Promise<void> | void;
@@ -152,3 +196,35 @@ export type AgentEventPayload =
   | { type: 'dispose' };
 
 export type AgentEventListener = (payload: AgentEventPayload) => void;
+
+/**
+ * Agent reflection state - the reflection-before-action model
+ *
+ * Every tool call must first reflect on:
+ * - evaluation_previous_goal: How well did the previous action achieve its goal?
+ * - memory: Key information to remember for future steps
+ * - next_goal: What should be accomplished in the next action?
+ */
+export interface AgentReflection {
+  evaluation_previous_goal: string;
+  memory: string;
+  next_goal: string;
+}
+
+/**
+ * MacroTool input structure
+ *
+ * This is the core abstraction that enforces the "reflection-before-action" mental model.
+ * Before executing any action, the LLM must output its reasoning state.
+ */
+export interface MacroToolInput extends Partial<AgentReflection> {
+  action: Record<string, unknown>;
+}
+
+/**
+ * MacroTool output structure
+ */
+export interface MacroToolResult {
+  input: MacroToolInput;
+  output: string;
+}

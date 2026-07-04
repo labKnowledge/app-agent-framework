@@ -39,17 +39,97 @@ export type AgentStatus = 'idle' | 'running' | 'waiting' | 'error' | 'completed'
 
 /**
  * Historical event in agent execution
+ *
+ * These events are PERSISTENT and included in LLM context across steps.
+ * They form the agent's memory and decision-making history.
  */
-export interface HistoricalEvent {
-  /** Event type */
-  type: 'step' | 'observation' | 'reasoning' | 'action' | 'result';
-  /** Event timestamp */
+export type HistoricalEvent =
+  | AgentStepEvent
+  | ObservationEvent
+  | UserTakeoverEvent
+  | RetryEvent
+  | AgentErrorEvent;
+
+/**
+ * A single agent step with reflection and action
+ */
+export interface AgentStepEvent {
+  type: 'step';
+  stepIndex: number;
   timestamp: number;
-  /** Event data */
-  data: unknown;
-  /** Additional metadata */
-  metadata?: Record<string, unknown>;
+  reflection: {
+    evaluationPreviousGoal: string;
+    memory: string;
+    nextGoal: string;
+  };
+  action: {
+    name: string;
+    input: unknown;
+    output: string;
+  };
+  usage?: {
+    promptTokens: number;
+    completionTokens: number;
+    totalTokens: number;
+  };
 }
+
+/**
+ * Persistent observation event (stays in memory)
+ */
+export interface ObservationEvent {
+  type: 'observation';
+  timestamp: number;
+  content: string;
+  severity?: 'info' | 'warning' | 'error';
+}
+
+/**
+ * User takeover event
+ */
+export interface UserTakeoverEvent {
+  type: 'user_takeover';
+  timestamp: number;
+  reason: string;
+}
+
+/**
+ * Retry event - LLM call is being retried
+ */
+export interface RetryEvent {
+  type: 'retry';
+  timestamp: number;
+  message: string;
+  attempt: number;
+  maxAttempts: number;
+}
+
+/**
+ * Error event - fatal error from LLM or execution
+ */
+export interface AgentErrorEvent {
+  type: 'error';
+  timestamp: number;
+  message: string;
+  errorType?: 'llm' | 'tool' | 'system';
+  recoverable?: boolean;
+}
+
+/**
+ * Agent activity - transient state for immediate UI feedback
+ *
+ * Unlike historical events (which are persisted), activities are ephemeral
+ * and represent "what the agent is doing right now". UI components should
+ * listen to 'activity' events to show real-time feedback.
+ *
+ * Note: There is no 'idle' activity - absence of activity events means idle.
+ */
+export type AgentActivity =
+  | { type: 'thinking' }
+  | { type: 'executing'; tool: string; input: unknown }
+  | { type: 'executed'; tool: string; input: unknown; output: string; duration: number }
+  | { type: 'retrying'; attempt: number; maxAttempts: number }
+  | { type: 'error'; message: string };
 
 /**
  * Final agent result

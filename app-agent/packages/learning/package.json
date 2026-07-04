@@ -1,6 +1,6 @@
 {
   "name": "@gakwaya/app-agent-learning",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "type": "module",
   "description": "Pattern learning system for App-Agent",
   "main": "./dist/index.js",

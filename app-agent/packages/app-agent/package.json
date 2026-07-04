@@ -1,6 +1,6 @@
 {
   "name": "@gakwaya/app-agent",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "type": "module",
   "description": "Public facade for App-Agent — single consumer-facing import",
   "main": "./dist/index.js",

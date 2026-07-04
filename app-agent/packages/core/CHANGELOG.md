@@ -1,5 +1,25 @@
 # @gakwaya/core
 
+## 1.1.0
+
+### Minor Changes
+
+- Session-first React integration and Rich App Context Model: navigation/capability registries, validated routing, task classifier, context-first prompts, quiet execution mode, AppAgentSessionProvider, RemoteStorageAdapter, and React Router helpers (`routesToNavigation`, `useAppAgentLiveContext`).
+
+### Patch Changes
+
+- Updated dependencies
+  - @gakwaya/app-agent-entities@1.1.0
+  - @gakwaya/app-agent-semantic-registry@1.1.0
+  - @gakwaya/app-agent-state-manager@1.1.0
+  - @gakwaya/app-agent-memory@1.1.0
+  - @gakwaya/app-agent-llm@1.1.0
+  - @gakwaya/app-agent-tools@1.1.0
+  - @gakwaya/app-agent-planner@1.1.0
+  - @gakwaya/app-agent-workflow@1.1.0
+  - @gakwaya/app-agent-multi-agent@1.1.0
+  - @gakwaya/app-agent-learning@1.1.0
+
 ## 1.0.0
 
 ### Major Changes

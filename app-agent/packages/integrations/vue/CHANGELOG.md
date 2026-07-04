@@ -1,5 +1,19 @@
 # @gakwaya/integrations-vue
 
+## 1.1.0
+
+### Minor Changes
+
+- Session-first React integration and Rich App Context Model: navigation/capability registries, validated routing, task classifier, context-first prompts, quiet execution mode, AppAgentSessionProvider, RemoteStorageAdapter, and React Router helpers (`routesToNavigation`, `useAppAgentLiveContext`).
+
+### Patch Changes
+
+- Updated dependencies
+  - @gakwaya/app-agent@1.1.0
+  - @gakwaya/app-agent-entities@1.1.0
+  - @gakwaya/app-agent-ui@1.1.0
+  - @gakwaya/app-agent-integrations-shared@1.1.0
+
 ## 1.0.0
 
 ### Major Changes

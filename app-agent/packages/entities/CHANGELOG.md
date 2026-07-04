@@ -1,5 +1,11 @@
 # @gakwaya/entities
 
+## 1.1.0
+
+### Minor Changes
+
+- Session-first React integration and Rich App Context Model: navigation/capability registries, validated routing, task classifier, context-first prompts, quiet execution mode, AppAgentSessionProvider, RemoteStorageAdapter, and React Router helpers (`routesToNavigation`, `useAppAgentLiveContext`).
+
 ## 1.0.0
 
 ### Major Changes

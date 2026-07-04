@@ -1,5 +1,11 @@
 # @gakwaya/entities
 
+## 1.3.0
+
+### Minor Changes
+
+- Add `informational` to `TaskIntentKind` for assistant-first routing.
+
 ## 1.2.0
 
 ### Minor Changes

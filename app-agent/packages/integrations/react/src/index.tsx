@@ -199,5 +199,9 @@ export function AppAgentPanel(_props: PanelConfig) {
 }
 
 export type { AppAgentConfig, PanelConfig };
-export { routesToNavigation, useAppAgentLiveContext } from './navigation';
+export {
+  routesToNavigation,
+  useAppAgentLiveContext,
+  discoverPageNavigationFromDOM,
+} from './navigation';
 export type { RouteNavigationInput, UseAppAgentLiveContextOptions } from './navigation';

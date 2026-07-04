@@ -1,5 +1,25 @@
 # @gakwaya/core
 
+## 1.2.0
+
+### Minor Changes
+
+- Add page navigation discovery: extractPageNavigation scans DOM landmarks (header, sidebar, hamburger, footer) for hidden nav links, injects compact Page Navigation context into prompts, and exposes discoverPageNavigationFromDOM React helper.
+
+### Patch Changes
+
+- Updated dependencies
+  - @gakwaya/app-agent-entities@1.2.0
+  - @gakwaya/app-agent-semantic-registry@1.2.0
+  - @gakwaya/app-agent-state-manager@1.2.0
+  - @gakwaya/app-agent-memory@1.2.0
+  - @gakwaya/app-agent-llm@1.2.0
+  - @gakwaya/app-agent-tools@1.2.0
+  - @gakwaya/app-agent-planner@1.2.0
+  - @gakwaya/app-agent-workflow@1.2.0
+  - @gakwaya/app-agent-multi-agent@1.2.0
+  - @gakwaya/app-agent-learning@1.2.0
+
 ## 1.1.0
 
 ### Minor Changes

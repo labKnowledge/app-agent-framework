@@ -9,6 +9,7 @@ import {
   buildAppStateSection,
   buildCapabilitiesSection,
   buildContextFirstGuidance,
+  buildPageNavigationSection,
 } from './app-context/prompt-sections';
 
 export interface ToolPromptDescriptor {
@@ -122,6 +123,7 @@ export function buildUserPrompt(
 
   const appMapSection = buildAppMapSection(snapshot);
   const capabilitiesSection = buildCapabilitiesSection(snapshot);
+  const pageNavSection = buildPageNavigationSection(snapshot);
   const appStateSection = buildAppStateSection(appState, snapshot);
 
   const domContent = truncateDomContent(domState.content, maxDomElements);
@@ -137,7 +139,7 @@ export function buildUserPrompt(
 
 Step: ${stepNumber}
 Total Wait Time: ${totalWaitTime}ms
-${appMapSection}${capabilitiesSection}${appStateSection}${toolsSection}${interactiveSection}${observations.length > 0 ? `Observations:\n${observations.map((o) => `- ${o}`).join('\n')}\n` : ''}${historyText}`;
+${appMapSection}${capabilitiesSection}${pageNavSection}${appStateSection}${toolsSection}${interactiveSection}${observations.length > 0 ? `Observations:\n${observations.map((o) => `- ${o}`).join('\n')}\n` : ''}${historyText}`;
 }
 
 export function buildMessages(

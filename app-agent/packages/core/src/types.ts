@@ -104,6 +104,13 @@ export interface AgentConfig {
     activity: string;
     phase: 'start' | 'step' | 'complete' | 'error';
   }) => void;
+  /**
+   * Scan DOM landmarks for nav links (header, sidebar, hamburger, footer).
+   * Default true in browser — surfaces hidden menu links without expanding them.
+   */
+  discoverPageNavigation?: boolean;
+  /** Max discovered nav links in prompt (default 32) */
+  maxPageNavLinks?: number;
 }
 
 /**

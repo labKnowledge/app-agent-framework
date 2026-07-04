@@ -1,5 +1,11 @@
 # @gakwaya/entities
 
+## 1.2.0
+
+### Minor Changes
+
+- Add page navigation discovery: extractPageNavigation scans DOM landmarks (header, sidebar, hamburger, footer) for hidden nav links, injects compact Page Navigation context into prompts, and exposes discoverPageNavigationFromDOM React helper.
+
 ## 1.1.0
 
 ### Minor Changes

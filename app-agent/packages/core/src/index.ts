@@ -7,7 +7,8 @@
 
 export { AppAgentCore } from './agent';
 export { LLMClient } from './llm/client';
-export { DOMProcessor, DOMActions } from './dom';
+export { DOMProcessor, DOMActions, extractPageNavigation, serializePageNavigation } from './dom';
+export type { PageNavigationConfig } from './dom/page-navigation';
 export {
   buildMessages,
   buildSystemPrompt,

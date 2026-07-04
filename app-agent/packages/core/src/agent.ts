@@ -29,6 +29,7 @@ import type {
 import { buildMessages, toolDescriptorsFromNames } from './prompt-builder';
 import { buildDOMState, createBrowserDOMEnvironment } from './ports';
 import type { FlatDOMTree } from './dom/types';
+import { extractPageNavigation } from './dom/page-navigation';
 import { matchWorkflow, matchCustomTool, type WorkflowCandidate } from './intent-router';
 import {
   NavigationRegistry,
@@ -831,11 +832,29 @@ export class AppAgentCore extends EventEmitter {
 
   private async getAppContextSnapshot() {
     const appState = await this.config.getAppState();
-    return buildAppContextSnapshot(
+    const snapshot = buildAppContextSnapshot(
       this.navigationRegistry.list(),
       this.capabilityRegistry.list(),
       appState
     );
+
+    if (this.config.discoverPageNavigation === false || typeof document === 'undefined') {
+      return snapshot;
+    }
+
+    const pageNavigation = extractPageNavigation({
+      currentPath: snapshot.currentPath,
+      maxLinks: this.config.maxPageNavLinks ?? 32,
+    });
+
+    if (!pageNavigation.summary && !snapshot.pageNavigation) {
+      return snapshot;
+    }
+
+    return {
+      ...snapshot,
+      pageNavigation: pageNavigation.summary ? pageNavigation : snapshot.pageNavigation,
+    };
   }
 
   private beginTaskExecution(): void {

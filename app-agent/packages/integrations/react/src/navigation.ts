@@ -4,12 +4,14 @@
 
 import { useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
+import { extractPageNavigation } from '@gakwaya/app-agent';
 import type { AppAgentConfig } from '@gakwaya/app-agent';
 import type {
   AppCapability,
   AppState,
   NavigationCategory,
   NavigationDestination,
+  PageNavigationSnapshot,
 } from '@gakwaya/app-agent-entities';
 
 export interface RouteNavigationInput {
@@ -38,6 +40,23 @@ export interface UseAppAgentLiveContextOptions {
   capabilities: AppCapability[];
   getAppState: () => Promise<AppState>;
   baseConfig: Omit<AppAgentConfig, 'getAppState' | 'navigation' | 'capabilities'>;
+  /** Merge live DOM nav scan into getAppState (default false — agent scans each step) */
+  prefetchPageNavigation?: boolean;
+}
+
+/**
+ * Scan current page for nav links (header, sidebar, hamburger, footer).
+ * Safe to call from getAppState or route-change effects.
+ */
+export function discoverPageNavigationFromDOM(
+  currentPath?: string
+): PageNavigationSnapshot | undefined {
+  if (typeof document === 'undefined') {
+    return undefined;
+  }
+
+  const snapshot = extractPageNavigation({ currentPath });
+  return snapshot.summary ? snapshot : undefined;
 }
 
 /**
@@ -54,15 +73,22 @@ export function useAppAgentLiveContext(options: UseAppAgentLiveContextOptions): 
       strictNavigation: options.baseConfig.strictNavigation ?? options.navigation.length > 0,
       getAppState: async () => {
         const state = await options.getAppState();
+        const currentPath = location.pathname;
+        const pageNavigation = options.prefetchPageNavigation
+          ? discoverPageNavigationFromDOM(currentPath)
+          : undefined;
+
         return {
           ...state,
-          currentView: location.pathname,
+          currentView: currentPath,
           context: {
             ...state.context,
-            currentPath: location.pathname,
+            currentPath,
+            ...(pageNavigation ? { pageNavigation } : {}),
             appContext: {
-              currentPath: location.pathname,
+              currentPath,
               locale: state.context.locale,
+              ...(pageNavigation ? { pageNavigation } : {}),
             },
           },
         };

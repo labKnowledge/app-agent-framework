@@ -42,10 +42,13 @@ export function classifyTask(
 export function buildAppContextSnapshot(
   navigation: NavigationDestination[],
   capabilities: AppCapability[],
-  appState?: { currentView?: string; context?: Record<string, unknown> }
+  appState?: { currentView?: string; context?: Record<string, unknown> },
+  pageNavigation?: import('@gakwaya/app-agent-entities').PageNavigationSnapshot
 ): import('@gakwaya/app-agent-entities').AppContextSnapshot {
   const ctx = appState?.context ?? {};
   const appContext = ctx.appContext as Record<string, unknown> | undefined;
+  const fromContext = ctx.pageNavigation as
+    import('@gakwaya/app-agent-entities').PageNavigationSnapshot | undefined;
 
   return {
     navigation,
@@ -57,6 +60,7 @@ export function buildAppContextSnapshot(
     locale:
       (typeof ctx.locale === 'string' ? ctx.locale : undefined) ??
       (typeof appContext?.locale === 'string' ? (appContext.locale as string) : undefined),
+    pageNavigation: pageNavigation ?? fromContext,
     extras:
       typeof appContext?.extras === 'object'
         ? (appContext.extras as Record<string, unknown>)

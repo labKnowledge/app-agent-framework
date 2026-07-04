@@ -1,5 +1,19 @@
 # @gakwaya/integrations-vue
 
+## 1.2.0
+
+### Minor Changes
+
+- Add page navigation discovery: extractPageNavigation scans DOM landmarks (header, sidebar, hamburger, footer) for hidden nav links, injects compact Page Navigation context into prompts, and exposes discoverPageNavigationFromDOM React helper.
+
+### Patch Changes
+
+- Updated dependencies
+  - @gakwaya/app-agent@1.2.0
+  - @gakwaya/app-agent-entities@1.2.0
+  - @gakwaya/app-agent-ui@1.2.0
+  - @gakwaya/app-agent-integrations-shared@1.2.0
+
 ## 1.1.0
 
 ### Minor Changes

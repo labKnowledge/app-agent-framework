@@ -94,4 +94,40 @@ describe('prompt-builder', () => {
     expect(domIndex).toBeGreaterThan(mapIndex);
     expect(user).toContain('changeLanguage');
   });
+
+  it('includes page navigation section before DOM fallback', () => {
+    const messages = buildMessages('go to settings', observation, [], undefined, undefined, tools, {
+      appContext: {
+        navigation: [],
+        capabilities: [],
+        pageNavigation: {
+          links: [
+            {
+              label: 'Settings',
+              href: '/settings',
+              region: 'sidebar',
+              visible: false,
+            },
+          ],
+          toggles: [
+            {
+              label: 'Open menu',
+              region: 'header',
+              ariaExpanded: false,
+              controlsHiddenLinks: true,
+            },
+          ],
+          scannedRegions: ['header', 'sidebar'],
+          summary: '• [toggle|header] "Open menu" (closed)\n• [sidebar|hidden] Settings → /settings',
+        },
+      },
+    });
+
+    const user = messages[1].content;
+    const pageNavIndex = user.indexOf('Page Navigation');
+    const domIndex = user.indexOf('DOM Fallback');
+    expect(pageNavIndex).toBeGreaterThan(-1);
+    expect(domIndex).toBeGreaterThan(pageNavIndex);
+    expect(user).toContain('Settings → /settings');
+  });
 });

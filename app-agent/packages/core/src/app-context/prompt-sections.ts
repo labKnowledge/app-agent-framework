@@ -54,11 +54,24 @@ export function buildAppStateSection(appState: AppState, snapshot: AppContextSna
   return `${section}\n`;
 }
 
+export function buildPageNavigationSection(snapshot: AppContextSnapshot): string {
+  const pageNav = snapshot.pageNavigation;
+  if (!pageNav?.summary?.trim()) {
+    return '';
+  }
+
+  const regions =
+    pageNav.scannedRegions.length > 0 ? ` regions: ${pageNav.scannedRegions.join(', ')}` : '';
+
+  return `\nPage Navigation (from DOM landmarks — includes hidden sidebar/hamburger/footer links; click toggles to reveal before DOM hunting):${regions}\n${pageNav.summary}\n`;
+}
+
 export function buildContextFirstGuidance(): string {
   return `
 Navigation and settings rules:
 - "change language" / locale → use changeLanguage capability (setLanguage tool), NOT navigate to /profile
-- "go to attendance" / open a page → use navigate with a path from the Application Map
+- "go to attendance" / open a page → use navigate with a path from the Application Map or Page Navigation
+- Hidden menu links (marked |hidden) exist in DOM but need hamburger/sidebar toggle opened first
 - Do not guess routes or click profile/settings links for preference changes
 - Use DOM interaction only when no capability or registered navigation applies
 `;

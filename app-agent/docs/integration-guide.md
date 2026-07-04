@@ -77,6 +77,51 @@ function AppShell() {
 }
 ```
 
+## Page navigation discovery (DOM landmarks)
+
+Registered `navigation[]` is the source of truth for routing. Many apps also hide links in **hamburger menus, sidebars, and footers** — the agent may miss them if it only sees visible DOM indices.
+
+**Automatic (default):** each agent step runs `extractPageNavigation()` — a lightweight landmark scan (~32 links, ~1.8k chars) that includes **hidden** menu links marked `|hidden` plus toggle hints (`aria-expanded`).
+
+```tsx
+// Enabled by default — disable if you only use registered navigation:
+baseConfig: {
+  discoverPageNavigation: false,
+  maxPageNavLinks: 32,
+}
+```
+
+**Optional prefetch on route change** (React):
+
+```tsx
+import { discoverPageNavigationFromDOM } from '@gakwaya/app-agent-react';
+
+const config = useAppAgentLiveContext({
+  prefetchPageNavigation: true, // merge into getAppState on each route
+  // ...
+});
+```
+
+Or call directly:
+
+```tsx
+import { extractPageNavigation } from '@gakwaya/app-agent';
+
+const snapshot = extractPageNavigation({ currentPath: location.pathname });
+// snapshot.summary → compact prompt text
+// snapshot.links → { label, href, region, visible }
+```
+
+### Prompt order (token budget)
+
+1. Application Map (registered routes)
+2. Capabilities
+3. **Page Navigation** (discovered links + toggles)
+4. Application State
+5. DOM Fallback (indexed interactives, capped at 30)
+
+This follows accessibility-tree patterns used by browser-use and page-agent: landmarks first, full interactive tree last. Hidden menus are **not** auto-expanded (avoids side effects); the agent sees what exists and can click the toggle first.
+
 ## Kidsync as validation only
 
 Use the [field report](./integration-reports/kidsync-react-plug-and-play-gaps.md) as feedback — implement navigation/capabilities **in the host app**, not in this framework repo.

@@ -11,5 +11,10 @@ export type {
   AppCapabilityKind,
   TaskClassification,
   TaskIntentKind,
+  PageNavigationSnapshot,
+  PageNavigationLink,
+  PageNavToggle,
+  PageNavRegion,
 } from '@gakwaya/app-agent-entities';
+export { extractPageNavigation } from '@gakwaya/app-agent-core';
 export { AppAgentPanel } from '@gakwaya/app-agent-ui';

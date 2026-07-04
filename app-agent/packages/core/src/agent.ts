@@ -29,6 +29,14 @@ import type {
 import { buildMessages, toolDescriptorsFromNames } from './prompt-builder';
 import { buildDOMState, createBrowserDOMEnvironment } from './ports';
 import type { FlatDOMTree } from './dom/types';
+import { matchWorkflow, matchCustomTool, type WorkflowCandidate } from './intent-router';
+import {
+  NavigationRegistry,
+  CapabilityRegistry,
+  classifyTask,
+  buildAppContextSnapshot,
+} from './app-context';
+import type { TaskClassification } from '@gakwaya/app-agent-entities';
 
 export class AppAgentCore extends EventEmitter {
   private config: AgentConfig;
@@ -52,6 +60,11 @@ export class AppAgentCore extends EventEmitter {
   } | null = null;
 
   private _disposed = false;
+  private workflowCatalog: WorkflowCandidate[] = [];
+  private navigationRegistry: NavigationRegistry;
+  private capabilityRegistry: CapabilityRegistry;
+  private taskClassification: TaskClassification | null = null;
+  private quietModeActive = false;
 
   public task = '';
   public taskId = '';
@@ -81,6 +94,8 @@ export class AppAgentCore extends EventEmitter {
     this.semanticRegistry = new SemanticRegistry();
     this.workflowEngine = new WorkflowEngine();
     this.planner = new TaskPlanner();
+    this.navigationRegistry = new NavigationRegistry(config.navigation ?? []);
+    this.capabilityRegistry = new CapabilityRegistry(config.capabilities ?? []);
 
     this.initializeTools();
     this.initializeEntities();
@@ -173,7 +188,63 @@ export class AppAgentCore extends EventEmitter {
       }
     }
 
+    const routed = await this.routeTask(task);
+    if (routed) {
+      return routed;
+    }
+
     return this.runTask(task);
+  }
+
+  private async routeTask(task: string): Promise<AgentResult | null> {
+    this.taskClassification = classifyTask(task, this.navigationRegistry, this.capabilityRegistry);
+
+    if (
+      this.taskClassification.intent === 'setting' ||
+      (this.taskClassification.intent === 'domain' && this.taskClassification.toolName)
+    ) {
+      const toolName = this.taskClassification.toolName;
+      if (toolName && this.toolRegistry.getToolByName(toolName)) {
+        return this.runDirectToolTask(task, toolName);
+      }
+    }
+
+    if (this.taskClassification.intent === 'navigation' && this.taskClassification.path) {
+      return this.runNavigationTask(task, this.taskClassification.path);
+    }
+
+    const capMatch = this.capabilityRegistry.match(task, 0.5);
+    if (capMatch && this.toolRegistry.getToolByName(capMatch.capability.toolName)) {
+      return this.runDirectToolTask(task, capMatch.capability.toolName);
+    }
+
+    const navMatch = this.navigationRegistry.resolve(task, 0.5);
+    if (navMatch) {
+      return this.runNavigationTask(task, navMatch.path);
+    }
+
+    if (this.learningSystem) {
+      const pattern = await this.learningSystem.findPattern(task);
+      const threshold = this.config.learningReplayThreshold ?? 0.8;
+      if (pattern && pattern.successRate >= threshold) {
+        const replay = await this.replayPattern(task, pattern);
+        if (replay.success) {
+          return replay;
+        }
+      }
+    }
+
+    const workflowMatch = matchWorkflow(task, this.workflowCatalog);
+    if (workflowMatch) {
+      return this.runWorkflow(workflowMatch.workflowId, task);
+    }
+
+    const customToolMatch = matchCustomTool(task, this.getCustomToolCandidates());
+    if (customToolMatch) {
+      return this.runDirectToolTask(task, customToolMatch);
+    }
+
+    return null;
   }
 
   private async runTask(task: string): Promise<AgentResult> {
@@ -189,6 +260,7 @@ export class AppAgentCore extends EventEmitter {
 
     // Fresh cancellation scope per task (dispose() aborts the in-flight controller only)
     this.abortController = new AbortController();
+    this.beginTaskExecution();
 
     this.taskStartedAt = Date.now();
     this.task = task;
@@ -282,11 +354,31 @@ export class AppAgentCore extends EventEmitter {
             });
           }
 
+          this.endTaskExecution('complete');
           return result;
         }
 
         const actionResult = await this.act(reasoning);
         this.addHistoryEvent({ type: 'action', timestamp: Date.now(), data: actionResult });
+
+        if (this.config.verifyTaskComplete) {
+          const appState = await this.config.getAppState();
+          const verified = await this.config.verifyTaskComplete(appState, this.task);
+          if (verified) {
+            this.setStatus('completed');
+            const result: AgentResult = {
+              success: true,
+              result: reasoning.memory || 'Task verified complete via application state',
+              steps: step,
+              history: this.history,
+            };
+            if (this.config.onAfterTask) {
+              await this.config.onAfterTask(this, result);
+            }
+            this.endTaskExecution('complete');
+            return result;
+          }
+        }
 
         if (this.config.onAfterStep) {
           await this.config.onAfterStep(this, this.history);
@@ -298,6 +390,7 @@ export class AppAgentCore extends EventEmitter {
       }
 
       this.setStatus('error');
+      this.endTaskExecution('error');
       return {
         success: false,
         result: 'Task did not complete within maximum steps',
@@ -314,6 +407,7 @@ export class AppAgentCore extends EventEmitter {
         steps: this.history.length,
       });
 
+      this.endTaskExecution('error');
       return {
         success: false,
         result: this.getErrorMessage(error),
@@ -397,13 +491,22 @@ export class AppAgentCore extends EventEmitter {
       }
     }
 
+    const appContext = await this.getAppContextSnapshot();
+
     const messages = buildMessages(
       this.task,
       observation,
       this.history,
       this.semanticRegistry.getContextSummary(),
       memoryContext,
-      toolDescriptorsFromNames(this.toolRegistry.getAllTools())
+      toolDescriptorsFromNames(this.toolRegistry.getAllTools()),
+      {
+        maxDomElements: this.config.maxDomElementsInPrompt ?? 30,
+        preferApplicationTools:
+          this.config.preferApplicationTools ??
+          (Boolean(this.config.customTools) || this.capabilityRegistry.list().length > 0),
+        appContext,
+      }
     );
 
     const response = await this.llmClient.invokeReAct(messages);
@@ -498,11 +601,33 @@ export class AppAgentCore extends EventEmitter {
       selectDropdown: (el, value) => this.domEnv.actions.selectDropdown(el as HTMLElement, value),
       scroll: (dir, amount) => this.domEnv.actions.scroll(dir, amount),
       delay: (ms) => this.delay(ms),
-      navigate: (path) => {
-        if (typeof window !== 'undefined') {
+      navigate: async (path) => {
+        if (this.taskClassification?.intent === 'setting') {
+          const dest = this.navigationRegistry.findByPath(path);
+          if (!dest || dest.category !== 'settings') {
+            throw new Error(
+              'Setting tasks must use registered capabilities, not navigate to unrelated pages'
+            );
+          }
+        }
+
+        if (this.isStrictNavigation()) {
+          const validation = this.navigationRegistry.validatePath(path);
+          if (!validation.valid) {
+            const hint = validation.suggestion ? ` Did you mean ${validation.suggestion}?` : '';
+            throw new Error(`Navigation not registered: ${path}.${hint}`);
+          }
+        }
+
+        if (this.config.onNavigate) {
+          await this.config.onNavigate(path);
+        } else if (typeof window !== 'undefined') {
           window.location.assign(path);
         }
-        return Promise.resolve({ result: `Navigated to ${path}` });
+        const delayMs = this.config.postNavigateDelayMs ?? 400;
+        await this.delay(delayMs);
+        this.domCache = null;
+        return { result: `Navigated to ${path}` };
       },
       onWait: (duration) => {
         this._states.totalWaitTime += duration;
@@ -569,7 +694,366 @@ export class AppAgentCore extends EventEmitter {
           options: { enablePersistence: false },
           metadata: { tags: workflowDef.preconditions },
         });
+
+        this.workflowCatalog.push({
+          id: workflowDef.id ?? id,
+          name: workflowDef.name,
+          description: workflowDef.description,
+          tags: workflowDef.preconditions,
+        });
       }
+    }
+  }
+
+  private getCustomToolCandidates(): import('./intent-router').CustomToolCandidate[] {
+    if (!this.config.customTools) {
+      return [];
+    }
+
+    const builtinNames = new Set([
+      'done',
+      'wait',
+      'click',
+      'input',
+      'select',
+      'scroll',
+      'navigate',
+    ]);
+
+    return Object.values(this.config.customTools)
+      .filter((tool): tool is AgentTool => tool !== null && !builtinNames.has(tool.name))
+      .map((tool) => ({
+        name: tool.name,
+        description: tool.description,
+      }));
+  }
+
+  private async runDirectToolTask(task: string, toolName: string): Promise<AgentResult> {
+    this.abortController = new AbortController();
+    this.beginTaskExecution();
+    this.task = task;
+    this.taskId = this.generateId();
+    this.history = [];
+    this.setStatus('running');
+
+    try {
+      if (this.config.onBeforeTask) {
+        await this.config.onBeforeTask(this);
+      }
+
+      const actionResult = await this.executeDirectTool(toolName, {});
+      this.addHistoryEvent({ type: 'action', timestamp: Date.now(), data: actionResult });
+
+      const success = actionResult.success;
+      this.setStatus(success ? 'completed' : 'error');
+
+      const result: AgentResult = {
+        success,
+        result: actionResult.result,
+        steps: 1,
+        history: this.history,
+        error: actionResult.error,
+      };
+
+      if (this.config.onAfterTask) {
+        await this.config.onAfterTask(this, result);
+      }
+
+      this.endTaskExecution(success ? 'complete' : 'error');
+      return result;
+    } catch (error) {
+      this.setStatus('error');
+      const agentError = error instanceof Error ? error : new Error(String(error));
+      this.endTaskExecution('error');
+      return {
+        success: false,
+        result: this.getErrorMessage(error),
+        steps: this.history.length,
+        history: this.history,
+        error: agentError,
+      };
+    }
+  }
+
+  private async runNavigationTask(task: string, path: string): Promise<AgentResult> {
+    this.abortController = new AbortController();
+    this.beginTaskExecution();
+    this.task = task;
+    this.taskId = this.generateId();
+    this.history = [];
+    this.setStatus('running');
+
+    try {
+      if (this.config.onBeforeTask) {
+        await this.config.onBeforeTask(this);
+      }
+
+      const actionResult = await this.executeDirectTool('navigate', { path });
+      this.addHistoryEvent({ type: 'action', timestamp: Date.now(), data: actionResult });
+
+      const success = actionResult.success;
+      this.setStatus(success ? 'completed' : 'error');
+
+      const result: AgentResult = {
+        success,
+        result: actionResult.result,
+        steps: 1,
+        history: this.history,
+        error: actionResult.error,
+      };
+
+      if (this.config.onAfterTask) {
+        await this.config.onAfterTask(this, result);
+      }
+
+      this.endTaskExecution(success ? 'complete' : 'error');
+      return result;
+    } catch (error) {
+      this.setStatus('error');
+      const agentError = error instanceof Error ? error : new Error(String(error));
+      this.endTaskExecution('error');
+      return {
+        success: false,
+        result: this.getErrorMessage(error),
+        steps: this.history.length,
+        history: this.history,
+        error: agentError,
+      };
+    }
+  }
+
+  private isStrictNavigation(): boolean {
+    if (this.config.strictNavigation !== undefined) {
+      return this.config.strictNavigation;
+    }
+    return this.navigationRegistry.list().length > 0;
+  }
+
+  private async getAppContextSnapshot() {
+    const appState = await this.config.getAppState();
+    return buildAppContextSnapshot(
+      this.navigationRegistry.list(),
+      this.capabilityRegistry.list(),
+      appState
+    );
+  }
+
+  private beginTaskExecution(): void {
+    if (this.config.executionMode === 'quiet') {
+      this.quietModeActive = true;
+      this.emit('activity', { type: 'activity', activity: 'Working…' });
+      this.config.onTaskProgress?.({ step: 0, activity: 'Working…', phase: 'start' });
+    }
+  }
+
+  private endTaskExecution(phase: 'complete' | 'error'): void {
+    if (this.quietModeActive) {
+      this.quietModeActive = false;
+      this.config.onTaskProgress?.({
+        step: this.history.length,
+        activity: '',
+        phase,
+      });
+    }
+  }
+
+  private async runWorkflow(workflowId: string, task: string): Promise<AgentResult> {
+    const workflow = this.workflowEngine.getWorkflow(workflowId);
+    if (!workflow) {
+      return {
+        success: false,
+        result: `Workflow not found: ${workflowId}`,
+        steps: 0,
+        history: [],
+        error: new Error(`Workflow not found: ${workflowId}`),
+      };
+    }
+
+    this.abortController = new AbortController();
+    this.task = task;
+    this.taskId = this.generateId();
+    this.taskStartedAt = Date.now();
+    this.history = [];
+    this.setStatus('running');
+
+    try {
+      if (this.config.onBeforeTask) {
+        await this.config.onBeforeTask(this);
+      }
+
+      let stepCount = 0;
+      for (const step of workflow.steps) {
+        if (step.action.type !== 'tool') {
+          continue;
+        }
+
+        stepCount += 1;
+        this.showActivity(`Workflow: ${step.name}`);
+        const actionResult = await this.executeDirectTool(
+          step.action.toolName,
+          step.action.parameters ?? {}
+        );
+        this.addHistoryEvent({ type: 'action', timestamp: Date.now(), data: actionResult });
+
+        if (!actionResult.success) {
+          this.setStatus('error');
+          return {
+            success: false,
+            result: actionResult.result,
+            steps: stepCount,
+            history: this.history,
+            error: actionResult.error,
+          };
+        }
+      }
+
+      this.setStatus('completed');
+      const result: AgentResult = {
+        success: true,
+        result: `Completed workflow: ${workflow.name}`,
+        steps: stepCount,
+        history: this.history,
+      };
+
+      if (this.config.onAfterTask) {
+        await this.config.onAfterTask(this, result);
+      }
+
+      if (this.learningSystem) {
+        await this.learningSystem.recordPattern({
+          task,
+          steps: this.learningSystem.extractStepsFromHistory(this.history),
+          result,
+          durationMs: Date.now() - this.taskStartedAt,
+        });
+      }
+
+      return result;
+    } catch (error) {
+      this.setStatus('error');
+      const agentError = error instanceof Error ? error : new Error(String(error));
+      return {
+        success: false,
+        result: this.getErrorMessage(error),
+        steps: this.history.length,
+        history: this.history,
+        error: agentError,
+      };
+    }
+  }
+
+  private async replayPattern(
+    task: string,
+    pattern: import('@gakwaya/app-agent-learning').Pattern
+  ): Promise<AgentResult> {
+    this.abortController = new AbortController();
+    this.task = task;
+    this.taskId = this.generateId();
+    this.taskStartedAt = Date.now();
+    this.history = [];
+    this.setStatus('running');
+
+    try {
+      if (this.config.onBeforeTask) {
+        await this.config.onBeforeTask(this);
+      }
+
+      let stepCount = 0;
+      for (const step of pattern.steps) {
+        stepCount += 1;
+        this.showActivity(`Replay: ${step.action}`);
+        const actionResult = await this.executeDirectTool(step.action, step.parameters);
+        this.addHistoryEvent({ type: 'action', timestamp: Date.now(), data: actionResult });
+
+        if (!actionResult.success) {
+          this.setStatus('error');
+          return {
+            success: false,
+            result: actionResult.result,
+            steps: stepCount,
+            history: this.history,
+            error: actionResult.error,
+          };
+        }
+      }
+
+      this.setStatus('completed');
+      return {
+        success: true,
+        result: `Replayed learned pattern for: ${task}`,
+        steps: stepCount,
+        history: this.history,
+      };
+    } catch {
+      return {
+        success: false,
+        result: 'Pattern replay failed',
+        steps: this.history.length,
+        history: this.history,
+        error: new Error('Pattern replay failed'),
+      };
+    }
+  }
+
+  private async executeDirectTool(
+    actionName: string,
+    actionParams: Record<string, unknown>
+  ): Promise<AgentActionResult> {
+    if (!this.toolRegistry.getToolByName(actionName)) {
+      return {
+        success: false,
+        result: `Unknown action: ${actionName}`,
+        error: new Error(`Tool not found: ${actionName}`),
+      };
+    }
+
+    try {
+      const tool = this.toolRegistry.getToolByName(actionName);
+      const schema = toolSchemas[actionName as keyof typeof toolSchemas] ?? tool?.inputSchema;
+      if (!schema) {
+        return {
+          success: false,
+          result: `No schema defined for action: ${actionName}`,
+          error: new Error(`Schema not found for action: ${actionName}`),
+        };
+      }
+
+      const validatedParams = schema.parse(actionParams);
+      const appState = await this.config.getAppState();
+
+      const context: ToolContext = {
+        appState: appState as unknown as Record<string, unknown>,
+        domState: (this._states.browserState ?? {}) as unknown as Record<string, unknown>,
+        agent: this,
+        execution: {
+          executionId: this.taskId,
+          toolCallId: this.generateId(),
+          timestamp: Date.now(),
+        },
+        signal: this.abortController.signal,
+      };
+
+      const result = await this.toolRegistry.executeByName(actionName, validatedParams, context);
+
+      if (['click', 'input', 'select', 'scroll', 'navigate'].includes(actionName)) {
+        this.domCache = null;
+      }
+
+      return { success: true, result };
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return {
+          success: false,
+          result: `Invalid parameters for ${actionName}: ${error.errors.map((e) => `${e.path.join('.')}: ${e.message}`).join(', ')}`,
+          error,
+        };
+      }
+
+      return {
+        success: false,
+        result: `Action failed: ${this.getErrorMessage(error)}`,
+        error: error instanceof Error ? error : new Error(String(error)),
+      };
     }
   }
 
@@ -590,6 +1074,14 @@ export class AppAgentCore extends EventEmitter {
   }
 
   private showActivity(activity: string): void {
+    if (this.quietModeActive) {
+      this.config.onTaskProgress?.({
+        step: this.history.length,
+        activity,
+        phase: 'step',
+      });
+      return;
+    }
     this.emit('activity', { type: 'activity', activity });
   }
 

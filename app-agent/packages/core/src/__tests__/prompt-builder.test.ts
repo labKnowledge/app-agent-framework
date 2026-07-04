@@ -52,7 +52,7 @@ describe('prompt-builder', () => {
     const prompt = buildUserPrompt('mark attendance', emptyDomObservation, [], tools);
 
     expect(prompt).toContain('no indexed elements found');
-    expect(prompt).toContain('"navigate"');
+    expect(prompt).toContain('registered navigation/capabilities');
   });
 
   it('buildMessages attaches system prompt with correct action examples', () => {
@@ -62,5 +62,36 @@ describe('prompt-builder', () => {
     expect(messages[0].content).toContain('{ "click": { "index": 0 } }');
     expect(messages[0].content).toContain('Do NOT use "action_name"');
     expect(messages[1].content).toContain('Interactive Elements:');
+  });
+
+  it('includes app map before DOM when appContext provided', () => {
+    const messages = buildMessages('task', observation, [], undefined, undefined, tools, {
+      appContext: {
+        navigation: [
+          {
+            id: 'attendance',
+            path: '/attendance',
+            label: 'Attendance',
+            category: 'page',
+          },
+        ],
+        capabilities: [
+          {
+            id: 'changeLanguage',
+            name: 'Change Language',
+            description: 'Set locale',
+            kind: 'setting',
+            toolName: 'setLanguage',
+          },
+        ],
+      },
+    });
+
+    const user = messages[1].content;
+    const mapIndex = user.indexOf('Application Map');
+    const domIndex = user.indexOf('DOM Fallback');
+    expect(mapIndex).toBeGreaterThan(-1);
+    expect(domIndex).toBeGreaterThan(mapIndex);
+    expect(user).toContain('changeLanguage');
   });
 });

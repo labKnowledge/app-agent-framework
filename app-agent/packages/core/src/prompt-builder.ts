@@ -2,8 +2,14 @@
  * Prompt construction for ReAct loop
  */
 
-import type { AgentObservation } from '@gakwaya/app-agent-entities';
+import type { AgentObservation, AppContextSnapshot } from '@gakwaya/app-agent-entities';
 import type { LLMMessage } from '@gakwaya/app-agent-entities';
+import {
+  buildAppMapSection,
+  buildAppStateSection,
+  buildCapabilitiesSection,
+  buildContextFirstGuidance,
+} from './app-context/prompt-sections';
 
 export interface ToolPromptDescriptor {
   name: string;
@@ -43,17 +49,26 @@ export function toolDescriptorsFromNames(
   }));
 }
 
-export function buildSystemPrompt(entityContext?: string): string {
+export function buildSystemPrompt(
+  entityContext?: string,
+  preferApplicationTools?: boolean,
+  hasAppContext?: boolean
+): string {
   const entitySection = entityContext ? `\nRegistered entities:\n${entityContext}\n` : '';
+  const appToolsHint = preferApplicationTools
+    ? `\nPrefer application-specific tools (customTools) and registered capabilities over DOM clicks.\n`
+    : '';
+  const contextHint = hasAppContext ? buildContextFirstGuidance() : '';
 
   return `You are an intelligent application agent that can understand and navigate web applications.
 
 You have access to:
+- Application map and capabilities (primary — use before DOM)
 - Application state (user data, context, preferences)
-- DOM structure (UI elements and interactions)
+- DOM structure (fallback for interactions)
 - Semantic entities (domain concepts like Products, Orders)
 - Workflows (multi-step processes)
-${entitySection}
+${entitySection}${appToolsHint}${contextHint}
 Your goal is to help users complete tasks by understanding what they want and executing the right actions.
 
 Think step by step:
@@ -81,7 +96,9 @@ export function buildUserPrompt(
   task: string,
   observation: AgentObservation,
   history: Array<{ type: string; data: unknown }>,
-  tools?: ToolPromptDescriptor[]
+  tools?: ToolPromptDescriptor[],
+  maxDomElements = 30,
+  appContext?: AppContextSnapshot
 ): string {
   const { appState, domState, observations, stepNumber, totalWaitTime } = observation;
 
@@ -96,10 +113,23 @@ export function buildUserPrompt(
           .join('\n')}\n`
       : '';
 
+  const snapshot: AppContextSnapshot = appContext ?? {
+    navigation: [],
+    capabilities: [],
+    currentPath: appState.currentView,
+    locale: appState.context.locale as string | undefined,
+  };
+
+  const appMapSection = buildAppMapSection(snapshot);
+  const capabilitiesSection = buildCapabilitiesSection(snapshot);
+  const appStateSection = buildAppStateSection(appState, snapshot);
+
+  const domContent = truncateDomContent(domState.content, maxDomElements);
+
   const interactiveSection =
-    domState.content.trim().length > 0
-      ? `Interactive Elements:\n${domState.content}\n${domState.footer ? `${domState.footer}\n` : ''}`
-      : `Interactive Elements:\n(no indexed elements found — use "wait" or "scroll" to allow the page to render, or "navigate" with a path; do not invent tool names)\n`;
+    domContent.trim().length > 0
+      ? `\nDOM Fallback (use only when no capability/navigation applies):\nInteractive Elements:\n${domContent}\n${domState.footer ? `${domState.footer}\n` : ''}`
+      : `\nDOM Fallback:\n(no indexed elements found — use registered navigation/capabilities, "wait", or "scroll")\n`;
 
   const toolsSection = tools ? buildToolsSection(tools) : '';
 
@@ -107,17 +137,7 @@ export function buildUserPrompt(
 
 Step: ${stepNumber}
 Total Wait Time: ${totalWaitTime}ms
-
-Application State:
-- Current View: ${appState.currentView}
-- User: ${appState.user.id} (${appState.user.role})
-- Authenticated: ${appState.user.isAuthenticated}
-
-DOM State:
-- URL: ${domState.url}
-- Title: ${domState.title}
-
-${interactiveSection}${toolsSection}${observations.length > 0 ? `Observations:\n${observations.map((o) => `- ${o}`).join('\n')}\n` : ''}${historyText}`;
+${appMapSection}${capabilitiesSection}${appStateSection}${toolsSection}${interactiveSection}${observations.length > 0 ? `Observations:\n${observations.map((o) => `- ${o}`).join('\n')}\n` : ''}${historyText}`;
 }
 
 export function buildMessages(
@@ -126,15 +146,55 @@ export function buildMessages(
   history: Array<{ type: string; data: unknown }>,
   entityContext?: string,
   memoryContext?: string,
-  tools?: ToolPromptDescriptor[]
+  tools?: ToolPromptDescriptor[],
+  options?: {
+    maxDomElements?: number;
+    preferApplicationTools?: boolean;
+    appContext?: AppContextSnapshot;
+  }
 ): LLMMessage[] {
-  let userContent = buildUserPrompt(task, observation, history, tools);
+  const maxDomElements = options?.maxDomElements ?? 30;
+  const hasAppContext =
+    (options?.appContext?.navigation.length ?? 0) > 0 ||
+    (options?.appContext?.capabilities.length ?? 0) > 0;
+
+  let userContent = buildUserPrompt(
+    task,
+    observation,
+    history,
+    tools,
+    maxDomElements,
+    options?.appContext
+  );
   if (memoryContext) {
     userContent += memoryContext;
   }
 
   return [
-    { role: 'system', content: buildSystemPrompt(entityContext) },
+    {
+      role: 'system',
+      content: buildSystemPrompt(entityContext, options?.preferApplicationTools, hasAppContext),
+    },
     { role: 'user', content: userContent },
   ];
 }
+
+function truncateDomContent(content: string, maxElements: number): string {
+  if (!content.trim()) {
+    return content;
+  }
+
+  const lines = content.split('\n');
+  const indexed = lines.filter((line) => /^\[\d+\]/.test(line.trim()));
+  const other = lines.filter((line) => !/^\[\d+\]/.test(line.trim()));
+
+  if (indexed.length <= maxElements) {
+    return content;
+  }
+
+  const kept = indexed.slice(0, maxElements);
+  const omitted = indexed.length - maxElements;
+  return [...kept, `... (${omitted} more elements omitted)`, ...other].join('\n');
+}
+
+export { buildAppMapSection, buildCapabilitiesSection } from './app-context/prompt-sections';

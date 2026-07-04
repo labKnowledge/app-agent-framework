@@ -1,6 +1,6 @@
 # BUG-0001: React StrictMode + AppAgentProvider → immediate "Task aborted by user" (0 steps)
 
-**Status:** Fixed (core + integrations-react)  
+**Status:** Fixed on main (`AppAgentSessionProvider`, ref-count session, StrictMode tests). Consumers on npm ≤0.1.3 should upgrade to `@gakwaya/app-agent-react@1.0.x`.  
 **Reported from:** Kidsync app-agent pilot integration  
 **Affects:** `@gakwaya/app-agent-react`, `@gakwaya/app-agent-core`  
 **Severity:** High — agent unusable in default React 18+ dev setups
@@ -78,11 +78,32 @@ Consumers embedding the provider in dialogs, conditional routes, or StrictMode t
 
 Same lifecycle pattern (`onUnmounted` / `onDestroy` dispose) — document StrictMode-equivalent dev double-mount if applicable.
 
-## Consumer workaround (Kidsync)
+## Consumer workaround (superseded on main)
 
-Until a fixed `@gakwaya/*` version is published, consumers can use a module-level session singleton. See `kidsync/frontend/src/agent/kidsyncAgentSession.ts`.
+Use `AppAgentSessionProvider` with `persistSession` instead of a custom module singleton:
 
-After upgrading to a release that includes this fix, Kidsync can switch back to `AppAgentProvider` directly.
+```tsx
+<AppAgentSessionProvider sessionKey="kidsync" persistSession config={config}>
+  <AppAgentShell open={open} onOpenChange={setOpen} launcher={...}>
+    <AppAgentConsole />
+  </AppAgentShell>
+  <Routes>...</Routes>
+</AppAgentSessionProvider>
+```
+
+Register SPA navigation:
+
+```tsx
+onNavigate: (path) => navigate(path),
+customTools: {
+  markAttendance: { name: 'markAttendance', ... },
+},
+workflows: {
+  attendance: { name: 'attendance', steps: [{ toolName: 'navigate', parameters: { path: '/attendance' } }] },
+},
+```
+
+Legacy Kidsync `kidsyncAgentSession.ts` can be removed after upgrading to `@gakwaya/app-agent-react@1.0.x`.
 
 ## References
 

@@ -7,6 +7,7 @@ Central index for the `@gakwaya/*` framework monorepo.
 | Document | Audience | Description |
 |----------|----------|-------------|
 | [Getting Started](./getting-started.md) | App developers | Install, configure, framework integrations |
+| [Integration Guide](./integration-guide.md) | App developers | Navigation map, capabilities, quiet mode |
 | [Architecture](./architecture.md) | Contributors | Layers, packages, data flow |
 | [Packages](./packages.md) | Everyone | All published packages and roles |
 | [Publishing](./publishing.md) | Maintainers | npm releases and changesets |
@@ -35,6 +36,12 @@ Point-in-time summaries kept for reference (not maintained as canonical docs):
 - [Project summary](./archive/project-summary.md)
 - [Week 2 complete](./archive/week2-complete.md)
 - [Week 2 summary](./archive/week2-summary.md)
+
+## Integration field reports
+
+| Document | Description |
+|----------|-------------|
+| [Kidsync React pilot — plug-and-play gaps](./integration-reports/kidsync-react-plug-and-play-gaps.md) | Production SPA integration report: StrictMode, disposed status, prompt/DOM/tools gaps, HAR evidence, fix order |
 
 ## Known bugs
 

@@ -77,6 +77,33 @@ export interface AgentConfig {
   onBeforeTask?: (agent: IAgent) => Promise<void>;
   onAfterTask?: (agent: IAgent, result: AgentResult) => Promise<void>;
   onDispose?: (agent: IAgent) => void;
+  /** SPA navigation callback — prefer over window.location.assign */
+  onNavigate?: (path: string) => Promise<void> | void;
+  /** Delay after navigate for client routers to settle (default 400) */
+  postNavigateDelayMs?: number;
+  /** Max indexed DOM elements in LLM prompt (default 30) */
+  maxDomElementsInPrompt?: number;
+  /** When true, prefer registered customTools over DOM clicks in prompts */
+  preferApplicationTools?: boolean;
+  /** Verify task completion from app state instead of LLM done action */
+  verifyTaskComplete?: (appState: AppState, task: string) => boolean | Promise<boolean>;
+  /** Minimum pattern success rate to replay without ReAct (default 0.8) */
+  learningReplayThreshold?: number;
+  /** Registered app routes for validated navigation */
+  navigation?: import('@gakwaya/app-agent-entities').NavigationDestination[];
+  /** Registered app capabilities (settings, mutations, queries) */
+  capabilities?: import('@gakwaya/app-agent-entities').AppCapability[];
+  /** Reject navigate to unregistered paths (default true when navigation is set) */
+  strictNavigation?: boolean;
+  /** interactive = per-step activity; quiet = working… then result only */
+  executionMode?: 'interactive' | 'quiet';
+  /** Optional progress callback (especially for quiet mode) */
+  onTaskProgress?: (summary: {
+    step: number;
+    maxSteps?: number;
+    activity: string;
+    phase: 'start' | 'step' | 'complete' | 'error';
+  }) => void;
 }
 
 /**

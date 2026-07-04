@@ -38,21 +38,61 @@ pnpm add @gakwaya/app-agent
 pnpm add @gakwaya/app-agent-react @gakwaya/app-agent-ui   # React
 ```
 
-## Build notes
+## Production storage
+
+For cross-session chat and memory without exposing LLM keys in the browser:
+
+- Use `RemoteStorageAdapter` from `@gakwaya/app-agent-entities` with a backend API implementing `StoragePort`
+- Proxy LLM calls through your server; pass `baseURL` to your proxy endpoint
+
+```typescript
+import { RemoteStorageAdapter } from '@gakwaya/app-agent-entities';
+
+<AppAgentSessionProvider
+  persistSession
+  storage={new RemoteStorageAdapter({ baseUrl: '/api/agent-storage', authHeader: `Bearer ${token}` })}
+  config={{ ... }}
+/>
+```
 
 - Production builds use **terser minify + light obfuscation**
 - Faster local builds: `SKIP_OBFUSCATE=1 pnpm build`
 
 ## Deprecating legacy package names
 
-After publishing **0.2.0** under `@gakwaya/app-agent-*` names, deprecate the old flat `@gakwaya/*` packages (requires npm auth):
+After publishing under `@gakwaya/app-agent-*` names, legacy flat `@gakwaya/*` packages were deprecated:
 
 ```bash
-pnpm exec tsx scripts/deprecate-legacy-packages.ts --dry-run   # preview
-pnpm exec tsx scripts/deprecate-legacy-packages.ts            # apply
+pnpm exec tsx scripts/deprecate-legacy-packages.ts
 ```
 
-Do **not** unpublish legacy packages — deprecation preserves existing lockfiles while steering users to new names.
+**Deprecation does not remove packages from npmjs.com listings** — they still appear on the `@gakwaya` scope page with a strikethrough/warning.
+
+To **remove legacy names entirely** from npm (recommended after rename):
+
+### Option A — Delete on the website (works with Security Key 2FA)
+
+npm documents this explicitly: [Unpublish using the website](https://docs.npmjs.com/unpublishing-packages-from-the-registry/#using-the-website)
+
+For each legacy package (example `@gakwaya/core`):
+
+1. Open `https://www.npmjs.com/package/@gakwaya/core`
+2. **Settings** tab → **Delete package**
+3. Confirm (browser handles Security Key / biometrics)
+
+Repeat for all 16 flat names. **Do not delete** `@gakwaya/app-agent`.
+
+### Option B — Granular token with Bypass 2FA (CLI)
+
+CLI `npm unpublish` often fails with **E403** and does **not** prompt for OTP when the registry returns 403 instead of EOTP ([npm/cli#4519](https://github.com/npm/cli/issues/4519)). Your debug log shows exactly that pattern. Email login OTP and `--otp=` do not apply to Security Key accounts.
+
+1. [Access Tokens](https://www.npmjs.com/settings/gakwaya/tokens) → **Generate New Token** → Granular
+2. **Read and write** on `@gakwaya/*` packages
+3. Check **Bypass two-factor authentication**
+4. Replace `//registry.npmjs.org/:_authToken=` in `~/.npmrc` with the new token only
+5. `npm unpublish @gakwaya/core --force` (repeat per package, or use `scripts/unpublish-legacy-packages.ts`)
+
+Do **not** unpublish `@gakwaya/app-agent` — that name is kept for the public facade.
 
 ## Scope history
 

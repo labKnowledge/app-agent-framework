@@ -11,5 +11,7 @@
 | [ADR-0007](./ADR-0007-multi-agent-coordinator.md)        | Multi-agent coordinator             | Accepted |
 | [ADR-0008](./ADR-0008-learning-system.md)                | Learning system                     | Accepted |
 | [ADR-0009](./ADR-0009-prefixed-package-names.md)         | Prefixed npm package names          | Accepted |
+| [ADR-0010](./ADR-0010-agent-session-decoupling.md)     | Agent session decoupled from UI     | Accepted |
+| [ADR-0011](./ADR-0011-app-context-model.md)           | App context — nav map + capabilities | Accepted |
 
 See also [Architecture Overview](../architecture.md), [Documentation index](../README.md), and [AGENTS.md](../../AGENTS.md).

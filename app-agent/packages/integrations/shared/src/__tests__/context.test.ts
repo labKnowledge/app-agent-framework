@@ -39,4 +39,10 @@ describe('createAgentContext', () => {
 
     ctx.dispose();
   });
+
+  it('wraps execute with conversation logging when persistSession', async () => {
+    const ctx = createAgentContext(config, { mountPanel: false, persistSession: true, sessionKey: 'conv' });
+    expect(ctx.execute).toBeDefined();
+    ctx.dispose();
+  });
 });

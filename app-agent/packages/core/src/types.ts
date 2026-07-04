@@ -46,6 +46,9 @@ export type ToolContext = import('@gakwaya/app-agent-entities').AgentToolContext
 
 export type LLMResponse = import('@gakwaya/app-agent-entities').CoreLLMResponse;
 
+/** assistant = answer first, navigate only on explicit intent (default); agent = action-first (legacy) */
+export type BehaviorMode = 'assistant' | 'agent';
+
 /**
  * Core agent configuration
  */
@@ -111,6 +114,11 @@ export interface AgentConfig {
   discoverPageNavigation?: boolean;
   /** Max discovered nav links in prompt (default 32) */
   maxPageNavLinks?: number;
+  /**
+   * assistant = answer questions from app state first; navigate only on explicit go/open/navigate intent (default)
+   * agent = action-first routing with fuzzy navigation matching (legacy)
+   */
+  behaviorMode?: BehaviorMode;
 }
 
 /**

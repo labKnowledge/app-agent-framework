@@ -95,6 +95,23 @@ describe('prompt-builder', () => {
     expect(user).toContain('changeLanguage');
   });
 
+  it('includes assistant rules in system prompt by default', () => {
+    const messages = buildMessages('what is in my cart?', observation, [], undefined, undefined, tools);
+
+    expect(messages[0].content).toContain('application assistant');
+    expect(messages[0].content).toContain('Assistant rules:');
+    expect(messages[0].content).toContain('{ "done": true, "memory":');
+  });
+
+  it('uses agent identity when behaviorMode is agent', () => {
+    const messages = buildMessages('task', observation, [], undefined, undefined, tools, {
+      behaviorMode: 'agent',
+    });
+
+    expect(messages[0].content).toContain('application agent');
+    expect(messages[0].content).not.toContain('Assistant rules:');
+  });
+
   it('includes page navigation section before DOM fallback', () => {
     const messages = buildMessages('go to settings', observation, [], undefined, undefined, tools, {
       appContext: {

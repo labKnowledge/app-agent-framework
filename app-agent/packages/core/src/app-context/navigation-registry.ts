@@ -3,6 +3,7 @@
  */
 
 import type { NavigationDestination } from '@gakwaya/app-agent-entities';
+import { isExplicitNavigationTask } from './intent-detection';
 
 const STOP_WORDS = new Set(['the', 'a', 'an', 'to', 'for', 'go', 'open', 'show', 'my', 'please']);
 
@@ -69,7 +70,15 @@ export class NavigationRegistry {
     };
   }
 
-  resolve(task: string, threshold = 0.45): NavigationDestination | null {
+  resolve(
+    task: string,
+    threshold = 0.45,
+    options?: { requireExplicitNav?: boolean }
+  ): NavigationDestination | null {
+    if (options?.requireExplicitNav && !isExplicitNavigationTask(task)) {
+      return null;
+    }
+
     const taskTokens = tokenize(task);
     const normalizedTask = task.toLowerCase();
 

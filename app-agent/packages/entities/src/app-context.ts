@@ -77,7 +77,7 @@ export interface AppContextSnapshot {
   extras?: Record<string, unknown>;
 }
 
-export type TaskIntentKind = 'setting' | 'navigation' | 'domain' | 'unknown';
+export type TaskIntentKind = 'setting' | 'navigation' | 'domain' | 'informational' | 'unknown';
 
 export interface TaskClassification {
   intent: TaskIntentKind;

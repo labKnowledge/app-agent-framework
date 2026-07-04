@@ -23,10 +23,17 @@ Accepted
 
 ### Execution order (before ReAct)
 
-1. Match capability (especially `setting`)
-2. Match navigation intent → validated navigate
-3. Workflow / learning replay
-4. DOM ReAct loop (fallback)
+1. Match capability (especially `setting` or `query`)
+2. Match informational intent → ReAct answer (assistant mode, default)
+3. Match navigation intent → validated navigate (explicit go/open/navigate, or any match in agent mode)
+4. Workflow / learning replay
+5. DOM ReAct loop (fallback)
+
+### Assistant-first behavior (default since ADR-0012)
+
+`behaviorMode: 'assistant'` (default) classifies question-shaped tasks as `informational` and skips navigation fast-path unless the user uses explicit navigation verbs (`go to`, `open`, `navigate`, etc.). Prompts instruct the model to answer from Application State with `{ "done": true, "memory": "..." }` before clicking or navigating.
+
+Use `behaviorMode: 'agent'` to restore legacy fuzzy navigation matching on route aliases.
 
 ### Validated navigation
 

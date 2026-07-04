@@ -35,6 +35,13 @@ describe('NavigationRegistry', () => {
     expect(match?.path).toBe('/dashboard');
   });
 
+  it('returns null when requireExplicitNav and task lacks nav verbs', () => {
+    expect(registry.resolve('profile', 0.45, { requireExplicitNav: true })).toBeNull();
+    expect(registry.resolve('go to profile', 0.45, { requireExplicitNav: true })?.path).toBe(
+      '/profile'
+    );
+  });
+
   it('suggests closest path for unknown routes', () => {
     const result = registry.validatePath('/prof');
     expect(result.valid).toBe(false);

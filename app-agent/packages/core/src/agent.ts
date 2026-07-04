@@ -37,6 +37,7 @@ import {
   classifyTask,
   buildAppContextSnapshot,
 } from './app-context';
+import { isExplicitNavigationTask } from './app-context/intent-detection';
 import type { TaskClassification } from '@gakwaya/app-agent-entities';
 
 export class AppAgentCore extends EventEmitter {
@@ -198,7 +199,12 @@ export class AppAgentCore extends EventEmitter {
   }
 
   private async routeTask(task: string): Promise<AgentResult | null> {
-    this.taskClassification = classifyTask(task, this.navigationRegistry, this.capabilityRegistry);
+    const mode = this.config.behaviorMode ?? 'assistant';
+    const explicitNav = isExplicitNavigationTask(task);
+
+    this.taskClassification = classifyTask(task, this.navigationRegistry, this.capabilityRegistry, {
+      behaviorMode: mode,
+    });
 
     if (
       this.taskClassification.intent === 'setting' ||
@@ -210,7 +216,15 @@ export class AppAgentCore extends EventEmitter {
       }
     }
 
-    if (this.taskClassification.intent === 'navigation' && this.taskClassification.path) {
+    if (this.taskClassification.intent === 'informational') {
+      return null;
+    }
+
+    if (
+      this.taskClassification.intent === 'navigation' &&
+      this.taskClassification.path &&
+      (mode === 'agent' || explicitNav)
+    ) {
       return this.runNavigationTask(task, this.taskClassification.path);
     }
 
@@ -219,8 +233,10 @@ export class AppAgentCore extends EventEmitter {
       return this.runDirectToolTask(task, capMatch.capability.toolName);
     }
 
-    const navMatch = this.navigationRegistry.resolve(task, 0.5);
-    if (navMatch) {
+    const navMatch = this.navigationRegistry.resolve(task, 0.5, {
+      requireExplicitNav: mode === 'assistant' && !explicitNav,
+    });
+    if (navMatch && (mode === 'agent' || explicitNav)) {
       return this.runNavigationTask(task, navMatch.path);
     }
 
@@ -507,6 +523,7 @@ export class AppAgentCore extends EventEmitter {
           this.config.preferApplicationTools ??
           (Boolean(this.config.customTools) || this.capabilityRegistry.list().length > 0),
         appContext,
+        behaviorMode: this.config.behaviorMode ?? 'assistant',
       }
     );
 

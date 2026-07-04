@@ -7,6 +7,40 @@ Embed App-Agent in any React SPA with **navigation map**, **capabilities**, and 
 1. **Context before DOM** — register routes and capabilities at app shell; DOM is fallback.
 2. **Settings are not navigation** — use `AppCapability` with `kind: 'setting'`, not `navigate('/profile')`.
 3. **Validated routes** — enable `strictNavigation` when `navigation` is registered.
+4. **Assistant-first (default)** — answer questions from app state; navigate only when the user explicitly says go/open/navigate. Use `behaviorMode: 'agent'` for legacy action-first routing.
+
+## Assistant vs agent mode
+
+By default, `behaviorMode` is `'assistant'`:
+
+| User message | Assistant mode (default) | Agent mode (`behaviorMode: 'agent'`) |
+|---|---|---|
+| "what's in my cart?" | Answer from `getAppState()` or a `query` capability | May navigate to `/cart` |
+| "go to cart" | Navigate to `/cart` | Same |
+| "change language" | Capability fast-path (`setLanguage`) | Same |
+
+```tsx
+baseConfig: {
+  behaviorMode: 'assistant', // default — answer first
+  // behaviorMode: 'agent',  // legacy fuzzy navigation matching
+  enableMultiAgent: false,   // recommended for assistant UIs
+}
+```
+
+Register `kind: 'query'` capabilities for structured read-only answers:
+
+```tsx
+{
+  id: 'cartSummary',
+  name: 'Cart Summary',
+  description: 'Summarize cart from app state',
+  kind: 'query' as const,
+  toolName: 'getCartSummary',
+  aliases: ['cart summary', 'summarize cart'],
+}
+```
+
+Informational questions (`what`, `how many`, `tell me`, trailing `?`) skip the navigation fast-path and enter the ReAct loop with assistant-first prompts.
 
 ## Minimal setup
 

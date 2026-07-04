@@ -4,9 +4,11 @@
 
 import type { AgentObservation, AppContextSnapshot } from '@gakwaya/app-agent-entities';
 import type { LLMMessage } from '@gakwaya/app-agent-entities';
+import type { BehaviorMode } from './types';
 import {
   buildAppMapSection,
   buildAppStateSection,
+  buildAssistantGuidance,
   buildCapabilitiesSection,
   buildContextFirstGuidance,
   buildPageNavigationSection,
@@ -53,15 +55,27 @@ export function toolDescriptorsFromNames(
 export function buildSystemPrompt(
   entityContext?: string,
   preferApplicationTools?: boolean,
-  hasAppContext?: boolean
+  hasAppContext?: boolean,
+  behaviorMode: BehaviorMode = 'assistant'
 ): string {
   const entitySection = entityContext ? `\nRegistered entities:\n${entityContext}\n` : '';
   const appToolsHint = preferApplicationTools
     ? `\nPrefer application-specific tools (customTools) and registered capabilities over DOM clicks.\n`
     : '';
   const contextHint = hasAppContext ? buildContextFirstGuidance() : '';
+  const assistantHint = behaviorMode === 'assistant' ? buildAssistantGuidance() : '';
 
-  return `You are an intelligent application agent that can understand and navigate web applications.
+  const identity =
+    behaviorMode === 'assistant'
+      ? 'You are an intelligent application assistant that helps users understand and interact with web applications.'
+      : 'You are an intelligent application agent that can understand and navigate web applications.';
+
+  const goal =
+    behaviorMode === 'assistant'
+      ? 'Your goal is to help users by answering questions from application state and executing UI actions only when explicitly requested.'
+      : 'Your goal is to help users complete tasks by understanding what they want and executing the right actions.';
+
+  return `${identity}
 
 You have access to:
 - Application map and capabilities (primary — use before DOM)
@@ -69,8 +83,8 @@ You have access to:
 - DOM structure (fallback for interactions)
 - Semantic entities (domain concepts like Products, Orders)
 - Workflows (multi-step processes)
-${entitySection}${appToolsHint}${contextHint}
-Your goal is to help users complete tasks by understanding what they want and executing the right actions.
+${entitySection}${appToolsHint}${contextHint}${assistantHint}
+${goal}
 
 Think step by step:
 1. Evaluate what happened in the previous step
@@ -153,6 +167,7 @@ export function buildMessages(
     maxDomElements?: number;
     preferApplicationTools?: boolean;
     appContext?: AppContextSnapshot;
+    behaviorMode?: BehaviorMode;
   }
 ): LLMMessage[] {
   const maxDomElements = options?.maxDomElements ?? 30;
@@ -175,7 +190,12 @@ export function buildMessages(
   return [
     {
       role: 'system',
-      content: buildSystemPrompt(entityContext, options?.preferApplicationTools, hasAppContext),
+      content: buildSystemPrompt(
+        entityContext,
+        options?.preferApplicationTools,
+        hasAppContext,
+        options?.behaviorMode ?? 'assistant'
+      ),
     },
     { role: 'user', content: userContent },
   ];

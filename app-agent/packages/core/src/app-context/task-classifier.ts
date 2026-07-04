@@ -1,5 +1,5 @@
 /**
- * Task classifier — setting vs navigation vs domain
+ * Task classifier — setting vs navigation vs domain vs informational
  */
 
 import type {
@@ -7,14 +7,23 @@ import type {
   NavigationDestination,
   TaskClassification,
 } from '@gakwaya/app-agent-entities';
+import type { BehaviorMode } from '../types';
 import { CapabilityRegistry } from './capability-registry';
+import { isExplicitNavigationTask, isInformationalTask } from './intent-detection';
 import { NavigationRegistry } from './navigation-registry';
+
+export interface ClassifyTaskOptions {
+  behaviorMode?: BehaviorMode;
+}
 
 export function classifyTask(
   task: string,
   navigationRegistry: NavigationRegistry,
-  capabilityRegistry: CapabilityRegistry
+  capabilityRegistry: CapabilityRegistry,
+  options?: ClassifyTaskOptions
 ): TaskClassification {
+  const behaviorMode = options?.behaviorMode ?? 'assistant';
+
   const capMatch = capabilityRegistry.match(task, 0.45);
   if (capMatch) {
     const kind = capMatch.capability.kind;
@@ -26,14 +35,24 @@ export function classifyTask(
     };
   }
 
-  const navMatch = navigationRegistry.resolve(task, 0.45);
-  if (navMatch) {
-    return {
-      intent: 'navigation',
-      targetId: navMatch.id,
-      path: navMatch.path,
-      confidence: 0.85,
-    };
+  const explicitNav = isExplicitNavigationTask(task);
+  const informational = isInformationalTask(task);
+
+  if (behaviorMode === 'assistant' && informational && !explicitNav) {
+    return { intent: 'informational', confidence: 0.9 };
+  }
+
+  const allowNavMatch = behaviorMode === 'agent' || explicitNav;
+  if (allowNavMatch) {
+    const navMatch = navigationRegistry.resolve(task, 0.45);
+    if (navMatch) {
+      return {
+        intent: 'navigation',
+        targetId: navMatch.id,
+        path: navMatch.path,
+        confidence: 0.85,
+      };
+    }
   }
 
   return { intent: 'unknown', confidence: 0 };

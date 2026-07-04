@@ -76,3 +76,13 @@ Navigation and settings rules:
 - Use DOM interaction only when no capability or registered navigation applies
 `;
 }
+
+export function buildAssistantGuidance(): string {
+  return `
+Assistant rules:
+- If the user asks a question, answer from Application State and capabilities first.
+- Respond with { "done": true, "memory": "<your answer>" } when you can answer without UI action.
+- Only use navigate/click when the user explicitly asks to open, go to, or change something in the UI.
+- Do not navigate just because a route name appears in the question.
+`;
+}

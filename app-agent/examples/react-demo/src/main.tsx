@@ -35,11 +35,19 @@ const capabilities = [
     toolName: 'setLanguage',
     aliases: ['change language', 'locale', 'switch language'],
   },
+  {
+    id: 'cartSummary',
+    name: 'Cart Summary',
+    description: 'Summarize current cart contents from app state',
+    kind: 'query' as const,
+    toolName: 'getCartSummary',
+    aliases: ['cart summary', 'summarize cart'],
+  },
 ];
 
 function AgentConsole() {
   const { status, activity, messages, execute } = useAppAgent();
-  const [input, setInput] = useState('change language to Spanish');
+  const [input, setInput] = useState("what's in my cart?");
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', padding: 16 }}>
@@ -60,7 +68,7 @@ function AgentConsole() {
       >
         {messages.length === 0 ? (
           <p style={{ color: '#888' }}>
-            Try &quot;change language&quot; — uses capability, not profile navigation.
+            Try &quot;what&apos;s in my cart?&quot; (answers) vs &quot;go to cart&quot; (navigates).
           </p>
         ) : (
           messages.map((msg) => (
@@ -217,6 +225,7 @@ function AppShell() {
     },
     baseConfig: {
       ...demoAgentConfig,
+      enableMultiAgent: false,
       strictNavigation: true,
       executionMode: 'quiet',
       onNavigate: (path) => navigate(path),
@@ -229,6 +238,17 @@ function AppShell() {
             const lang = params.language ?? 'es';
             demoLocale = lang;
             return `Language updated to ${lang}`;
+          },
+        },
+        getCartSummary: {
+          name: 'getCartSummary',
+          description: 'Summarize cart contents from app state',
+          inputSchema: z.object({}),
+          execute: async () => {
+            const items = shop.cart.length;
+            return items === 0
+              ? 'Your cart is empty.'
+              : `Your cart has ${items} item(s): ${shop.cart.join(', ')}`;
           },
         },
       },

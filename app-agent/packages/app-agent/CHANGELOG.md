@@ -1,5 +1,11 @@
 # @gakwaya/app-agent
 
+## 1.3.0
+
+### Minor Changes
+
+- Add assistant-first behavior mode (`behaviorMode: 'assistant' | 'agent'`, default `assistant`). Informational questions answer from app state instead of triggering navigation fast-path; explicit go/open/navigate still routes to registered pages. Includes intent detection, updated prompts, and ADR-0012.
+
 ## 1.2.0
 
 ### Minor Changes

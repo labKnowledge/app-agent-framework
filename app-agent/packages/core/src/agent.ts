@@ -393,7 +393,6 @@ export class AppAgentCore extends EventEmitter {
         }
 
         const actionResult = await this.act(reasoning);
-        this.addHistoryEvent({ type: 'action', timestamp: Date.now(), data: actionResult });
 
         if (this.config.verifyTaskComplete) {
           const appState = await this.config.getAppState();
@@ -802,7 +801,6 @@ export class AppAgentCore extends EventEmitter {
       }
 
       const actionResult = await this.executeDirectTool(toolName, {});
-      this.addHistoryEvent({ type: 'action', timestamp: Date.now(), data: actionResult });
 
       const success = actionResult.success;
       this.setStatus(success ? 'completed' : 'error');
@@ -849,7 +847,6 @@ export class AppAgentCore extends EventEmitter {
       }
 
       const actionResult = await this.executeDirectTool('navigate', { path });
-      this.addHistoryEvent({ type: 'action', timestamp: Date.now(), data: actionResult });
 
       const success = actionResult.success;
       this.setStatus(success ? 'completed' : 'error');
@@ -971,7 +968,6 @@ export class AppAgentCore extends EventEmitter {
           step.action.toolName,
           step.action.parameters ?? {}
         );
-        this.addHistoryEvent({ type: 'action', timestamp: Date.now(), data: actionResult });
 
         if (!actionResult.success) {
           this.setStatus('error');
@@ -1041,7 +1037,6 @@ export class AppAgentCore extends EventEmitter {
         stepCount += 1;
         this.showActivity(`Replay: ${step.action}`);
         const actionResult = await this.executeDirectTool(step.action, step.parameters);
-        this.addHistoryEvent({ type: 'action', timestamp: Date.now(), data: actionResult });
 
         if (!actionResult.success) {
           this.setStatus('error');

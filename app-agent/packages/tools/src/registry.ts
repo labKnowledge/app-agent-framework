@@ -6,6 +6,7 @@
  */
 
 import EventEmitter from 'eventemitter3';
+import { z } from 'zod';
 import type {
   Tool,
   ToolContext,
@@ -235,8 +236,8 @@ export class ToolRegistry extends EventEmitter {
       }
 
       // Handle Zod validation errors with clear messages
-      if (error instanceof import('zod').ZodError) {
-        const errorDetails = error.errors.map((e) => ({
+      if (error instanceof z.ZodError) {
+        const errorDetails = error.errors.map((e: any) => ({
           path: e.path.join('.'),
           message: e.message,
           code: e.code,
@@ -246,7 +247,7 @@ export class ToolRegistry extends EventEmitter {
           success: false,
           error: {
             code: 'VALIDATION_ERROR',
-            message: `Tool parameter validation failed: ${error.errors.map((e) => `${e.path.join('.')}: ${e.message}`).join(', ')}`,
+            message: `Tool parameter validation failed: ${error.errors.map((e: any) => `${e.path.join('.')}: ${e.message}`).join(', ')}`,
             details: errorDetails,
             cause: error,
           },

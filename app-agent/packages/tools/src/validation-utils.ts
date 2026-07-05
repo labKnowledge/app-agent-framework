@@ -4,7 +4,7 @@
  * Helper functions for schema validation and error formatting
  */
 
-import type { z } from 'zod';
+import { z } from 'zod';
 import type { Tool } from './types';
 
 /**
@@ -24,7 +24,7 @@ export function formatZodError(error: z.ZodError): string {
         return `${path}: Value is too small. Minimum: ${issue.minimum} (inclusive: ${issue.inclusive})`;
       case 'too_big':
         return `${path}: Value is too big. Maximum: ${issue.maximum} (inclusive: ${issue.inclusive})`;
-      case 'custom_error':
+      case 'custom':
         return `${path}: ${issue.message}`;
       default:
         return `${path}: ${message}`;
@@ -45,7 +45,7 @@ export function validateToolParams<T>(
     const data = tool.inputSchema.parse(params);
     return { success: true, data };
   } catch (error) {
-    if (error instanceof import('zod').ZodError) {
+    if (error instanceof z.ZodError) {
       return {
         success: false,
         error: formatZodError(error),
@@ -86,7 +86,7 @@ export function describeParams<T>(tool: Tool<T>): string {
     for (const [key, value] of Object.entries(shape)) {
       const zodObj = value as z.ZodTypeAny;
       const description = zodObj.description || key;
-      const isOptional = !(zodObj instanceof z.ZodObject && !zodObj.isOptional());
+      const isOptional = zodObj.isOptional();
 
       descriptions.push(
         `- ${key}${isOptional ? '?' : ''}: ${description}${isOptional ? ' (optional)' : ''}`

@@ -1,6 +1,6 @@
 {
   "name": "@gakwaya/app-agent-multi-agent",
-  "version": "1.3.0",
+  "version": "1.3.1",
   "type": "module",
   "description": "Multi-agent coordination for specialized task routing",
   "main": "./dist/index.js",

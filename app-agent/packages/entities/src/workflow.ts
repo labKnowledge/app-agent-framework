@@ -20,6 +20,7 @@ export interface WorkflowDefinition {
 export interface WorkflowStepDefinition {
   id: string;
   name: string;
+  type?: 'action' | 'tool' | 'observation';
   action?: string;
   toolName?: string;
   parameters?: Record<string, unknown>;

@@ -5,7 +5,15 @@
  */
 
 import type { PanelConfig, PanelState } from './types';
-import type { AgentStatus, HistoricalEvent } from '@gakwaya/app-agent-entities';
+import type {
+  AgentStatus,
+  HistoricalEvent,
+  AgentStepEvent,
+  ObservationEvent,
+  UserTakeoverEvent,
+  RetryEvent,
+  AgentErrorEvent
+} from '@gakwaya/app-agent-entities';
 
 /**
  * AppAgentPanel Class
@@ -208,7 +216,7 @@ export class AppAgentPanel {
                 (item, _i) => `
               <div class="app-agent-history-item app-agent-history-${this.escapeHtml(item.type)}">
                 <span class="app-agent-history-type">${this.escapeHtml(item.type.toUpperCase())}</span>
-                <span class="app-agent-history-data">${this.formatHistoryData(item.data)}</span>
+                <span class="app-agent-history-data">${this.formatHistoryData(item)}</span>
               </div>
             `
               )
@@ -224,14 +232,32 @@ export class AppAgentPanel {
   /**
    * Format history data for display
    */
-  private formatHistoryData(data: unknown): string {
-    if (typeof data === 'string') {
-      return this.escapeHtml(data);
+  private formatHistoryData(item: HistoricalEvent): string {
+    // Handle different event types according to new structure
+    switch (item.type) {
+      case 'step':
+        const stepEvent = item as AgentStepEvent;
+        return `${stepEvent.action.name}: ${JSON.stringify(stepEvent.action.input)}`;
+
+      case 'observation':
+        const obsEvent = item as ObservationEvent;
+        return obsEvent.content;
+
+      case 'user_takeover':
+        return 'User interrupted execution';
+
+      case 'retry':
+        const retryEvent = item as RetryEvent;
+        return `Retry ${retryEvent.attempt}/${retryEvent.maxAttempts}: ${retryEvent.message}`;
+
+      case 'error':
+        const errorEvent = item as AgentErrorEvent;
+        return `Error: ${errorEvent.message}`;
+
+      default:
+        // Fallback for unknown event types
+        return JSON.stringify(item);
     }
-    if (typeof data === 'object' && data !== null) {
-      return this.escapeHtml(JSON.stringify(data).substring(0, 100));
-    }
-    return this.escapeHtml(String(data));
   }
 
   /**

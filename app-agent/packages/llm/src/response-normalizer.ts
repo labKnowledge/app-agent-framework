@@ -51,9 +51,10 @@ export function normalizeLLMResponse(content: string): NormalizationResult {
         parsed = JSON.parse(JSON.parse(jsonContent));
         fixes.push('Fixed double-stringified JSON');
       } catch {
+        const errorMessage = firstError instanceof Error ? firstError.message : String(firstError);
         return {
           success: false,
-          error: `Invalid JSON: ${firstError.message}`,
+          error: `Invalid JSON: ${errorMessage}`,
           fixes
         };
       }

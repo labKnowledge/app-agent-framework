@@ -2,7 +2,7 @@
  * Prompt construction for ReAct loop
  */
 
-import type { AgentObservation, AppContextSnapshot } from '@gakwaya/app-agent-entities';
+import type { AgentObservation, AppContextSnapshot, HistoricalEvent } from '@gakwaya/app-agent-entities';
 import type { LLMMessage } from '@gakwaya/app-agent-entities';
 import type { BehaviorMode } from './types';
 import {
@@ -142,7 +142,7 @@ Do NOT use "action_name", "parameters", "click_element", or "navigate_to_url". U
 export function buildUserPrompt(
   task: string,
   observation: AgentObservation,
-  history: Array<{ type: string; data: unknown }>,
+  history: HistoricalEvent[],
   tools?: ToolPromptDescriptor[],
   maxDomElements = 30,
   appContext?: AppContextSnapshot
@@ -154,7 +154,30 @@ export function buildUserPrompt(
       ? `History:\n${history
           .slice(-3)
           .map((event) => {
-            const data = typeof event.data === 'string' ? event.data : JSON.stringify(event.data);
+            // Handle different event types according to new structure
+            let data: string;
+            switch (event.type) {
+              case 'step':
+                const stepEvent = event as import('@gakwaya/app-agent-entities').AgentStepEvent;
+                data = `${stepEvent.action.name}: ${JSON.stringify(stepEvent.action.input)} -> ${stepEvent.action.output}`;
+                break;
+              case 'observation':
+                data = (event as import('@gakwaya/app-agent-entities').ObservationEvent).content;
+                break;
+              case 'user_takeover':
+                data = 'User interrupted execution';
+                break;
+              case 'retry':
+                const retryEvent = event as import('@gakwaya/app-agent-entities').RetryEvent;
+                data = `Retry ${retryEvent.attempt}/${retryEvent.maxAttempts}: ${retryEvent.message}`;
+                break;
+              case 'error':
+                const errorEvent = event as import('@gakwaya/app-agent-entities').AgentErrorEvent;
+                data = `Error: ${errorEvent.message}`;
+                break;
+              default:
+                data = JSON.stringify(event);
+            }
             return `[${event.type.toUpperCase()}] ${data}`;
           })
           .join('\n')}\n`
@@ -191,7 +214,7 @@ ${appMapSection}${capabilitiesSection}${pageNavSection}${appStateSection}${tools
 export function buildMessages(
   task: string,
   observation: AgentObservation,
-  history: Array<{ type: string; data: unknown }>,
+  history: HistoricalEvent[],
   entityContext?: string,
   memoryContext?: string,
   tools?: ToolPromptDescriptor[],
